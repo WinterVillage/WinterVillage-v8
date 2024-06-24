@@ -41,12 +41,12 @@ public class CMD_Home {
                 .executes((source) -> {
 
                     if (!(source.getSource().getExecutor() instanceof Player player)) {
-                        source.getSource().getExecutor().sendMessage(this.wintervillage.PREFIX + "Fick dich Konsole.");
+                        source.getSource().getExecutor().sendMessage(this.wintervillage.PREFIX + "Dieser Command ist nur durch einen Spieler ausführbar.");
                         return 0;
                     }
 
                     if(this.homeDocument == null){
-                        source.getSource().getExecutor().sendMessage(this.wintervillage.PREFIX + "Ja ne ist halt nicht da nh.");
+                        source.getSource().getExecutor().sendMessage(this.wintervillage.PREFIX + "Du hast noch kein Zuhause gesetzt.");
                         return 0;
                     }
 
@@ -54,7 +54,7 @@ public class CMD_Home {
                     JsonElement element = this.homeDocument.getElement(json_key);
 
                     if(element == null){
-                        player.sendMessage(this.wintervillage.PREFIX + "Schade für dich, aber du hast kein Zuhause, Idiot.");
+                        player.sendMessage(this.wintervillage.PREFIX + "Du hast noch kein Zuhause gesetzt.");
                         return 0;
                     }
 
@@ -67,7 +67,7 @@ public class CMD_Home {
                     int z = json_object.get("z").getAsInt();
 
                     if(Bukkit.getWorld(world) == null){
-                        player.sendMessage(this.wintervillage.PREFIX + "Ein Fehler ist aufgetreten, oh nein!");
+                        player.sendMessage(this.wintervillage.PREFIX + "Es ist ein Fehler aufgetreten, setze dein Zuhause neu.");
                         return 0;
                     }
 
