@@ -5,7 +5,10 @@ import de.wintervillage.main.WinterVillage;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CMD_Freeze {
@@ -31,17 +34,29 @@ public class CMD_Freeze {
                                 .executes((source) -> {
                                     Player player = source.getArgument("player", Player.class);
 
-                                    if(this.winterVillage.frozen_players.contains(player)){
-                                        this.winterVillage.frozen_players.remove(player);
+                                    if(player_frozen(player)){
+                                        freeze_player(player, false);
                                         source.getSource().getExecutor().sendMessage(this.winterVillage.PREFIX + "Der Spieler " + player.getName() + " wurde entfroren.");
                                     } else {
-                                        this.winterVillage.frozen_players.add(player);
+                                        freeze_player(player, true);
                                         source.getSource().getExecutor().sendMessage(this.winterVillage.PREFIX + "Der Spieler " + player.getName() + " wurde eingefroren.");
                                     }
 
                                     return 1;
                                 })
                 );
+    }
+
+    public void freeze_player(Player player, boolean freeze){
+        if(!freeze){
+            player.getPersistentDataContainer().remove(this.winterVillage.key_frozen);
+        } else {
+            player.getPersistentDataContainer().set(this.winterVillage.key_frozen, PersistentDataType.BOOLEAN, true);
+        }
+    }
+
+    public boolean player_frozen(Player player) {
+        return player.getPersistentDataContainer().has(this.winterVillage.key_frozen);
     }
 
 }
