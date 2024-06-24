@@ -18,7 +18,10 @@ repositories {
 }
 
 dependencies {
-    compileOnly "io.papermc.paper:paper-api:1.20.6-R0.1-SNAPSHOT"
+    compileOnly "io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT"
+
+    // async mongodb
+    implementation 'org.mongodb:mongodb-driver-reactivestreams:5.1.0'
 }
 
 def targetJavaVersion = 21
