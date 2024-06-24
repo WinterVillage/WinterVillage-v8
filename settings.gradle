@@ -1,3 +1,3 @@
 rootProject.name = 'wintervillage'
-include ':bastard'
-include ':test'
+include 'bastard'
+include 'test'
