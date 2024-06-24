@@ -1,6 +1,9 @@
 package de.wintervillage.main.config;
 
 import com.google.gson.*;
+import de.wintervillage.main.config.adapter.DocumentTypeAdapter;
+import de.wintervillage.main.config.adapter.LocationTypeAdapter;
+import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,11 +23,12 @@ public class Document {
 
     private final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Document.class, new DocumentTypeAdapter())
+            .registerTypeAdapter(Location.class, new LocationTypeAdapter())
             .serializeNulls()
             .setPrettyPrinting()
             .create();
 
-    protected JsonObject jsonObject;
+    public JsonObject jsonObject;
 
     public Document() {
         this.jsonObject = new JsonObject();
@@ -138,6 +142,11 @@ public class Document {
         return this.jsonObject.get(key).getAsBoolean();
     }
 
+    public Object getObject(@NotNull String key) {
+        if (!this.jsonObject.has(key)) return null;
+        return this.jsonObject.get(key);
+    }
+
     public Document getDocument(@NotNull String key) {
         if (!this.jsonObject.has(key)) return null;
         return new Document(this.jsonObject.getAsJsonObject(key));
@@ -188,5 +197,9 @@ public class Document {
         } catch (IOException exception) {
             throw new RuntimeException("Failed to save document to path: " + path, exception);
         }
+    }
+
+    public Gson getGSON() {
+        return GSON;
     }
 }
