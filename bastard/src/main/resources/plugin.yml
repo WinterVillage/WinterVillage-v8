@@ -1,0 +1,4 @@
+name: bastard
+version: '${version}'
+main: de.wintervillage.bastard.Bastard
+api-version: '1.21'

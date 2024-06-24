@@ -1,0 +1,3 @@
+rootProject.name = 'wintervillage'
+include ':bastard'
+include ':test'

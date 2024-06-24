@@ -1,0 +1,4 @@
+name: test
+version: '${version}'
+main: de.wintervillage.test.Test
+api-version: '1.21'
