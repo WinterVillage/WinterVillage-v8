@@ -1,0 +1,5 @@
+name: WinterVillage-Main
+version: '${version}'
+main: de.wintervillage.main.WinterVillage
+api-version: '1.21'
+authors: [Eagler, Voldechse]
