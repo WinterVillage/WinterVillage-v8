@@ -5,9 +5,10 @@ import de.wintervillage.main.WinterVillage;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
-import org.bukkit.NamespacedKey;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -32,7 +33,7 @@ public class CMD_Freeze {
                 ).then(
                         Commands.argument("player", ArgumentTypes.player())
                                 .executes((source) -> {
-                                    Player player = source.getArgument("player", Player.class);
+                                            Player player = source.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(source.getSource()).get(0);
 
                                     if(player_frozen(player)){
                                         freeze_player(player, false);
