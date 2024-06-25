@@ -1,5 +1,8 @@
 plugins {
     id 'java'
+
+    // shadow
+    id 'io.github.goooler.shadow' version '8.1.7'
 }
 
 group = 'de.wintervillage'
@@ -22,6 +25,11 @@ dependencies {
 
     // async mongodb
     implementation 'org.mongodb:mongodb-driver-reactivestreams:5.1.0'
+}
+
+shadowJar {
+    archiveBaseName.set('wintervillage')
+    archiveClassifier.set('')
 }
 
 def targetJavaVersion = 21
