@@ -12,22 +12,30 @@ import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class CMD_Freeze {
+import java.util.List;
+
+public class FreezeCommand {
 
     private final WinterVillage winterVillage;
 
-    public CMD_Freeze(Commands commands){
+    public FreezeCommand(Commands commands) {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
-        this.register(commands);
-    }
 
-    private void register(Commands commands) {
-        LiteralArgumentBuilder<CommandSourceStack> builder_freeze = Commands.literal("freeze")
+        // TODO: check permission with LuckPerms too
+        final LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("freeze")
                 .then(
-                        Commands.literal("all")
+                        Commands.literal("everyone")
+                                // TODO: add extra permission check
                                 .executes((source) -> {
-                                    this.winterVillage.freeze_all = !this.winterVillage.freeze_all;
-                                    source.getSource().getExecutor().sendMessage(this.winterVillage.PREFIX + "Der Freeze-All-Status wurde " + (this.winterVillage.freeze_all ? "aktiviert" : "deaktiviert") + ".");
+                                    this.winterVillage.PLAYERS_FROZEN = !this.winterVillage.PLAYERS_FROZEN;
+                                    source.getSource().getExecutor().sendMessage(
+                                            this.winterVillage.PREFIX.append(Component.text("Everyone has been ", NamedTextColor.WHITE)
+                                                    .append(
+                                                            this.winterVillage.PLAYERS_FROZEN
+                                                                    ? Component.text("frozen", NamedTextColor.RED)
+                                                                    : Component.text("unfrozen", NamedTextColor.GREEN)
+                                                    ))
+                                    );
                                     return 1;
                                 })
                 ).then(
@@ -35,29 +43,24 @@ public class CMD_Freeze {
                                 .executes((source) -> {
                                             Player player = source.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(source.getSource()).get(0);
 
-                                    if(player_frozen(player)){
-                                        freeze_player(player, false);
-                                        source.getSource().getExecutor().sendMessage(this.winterVillage.PREFIX + "Der Spieler " + player.getName() + " wurde entfroren.");
-                                    } else {
-                                        freeze_player(player, true);
-                                        source.getSource().getExecutor().sendMessage(this.winterVillage.PREFIX + "Der Spieler " + player.getName() + " wurde eingefroren.");
-                                    }
-
-                                    return 1;
-                                })
+                                            boolean isFrozen = player.getPersistentDataContainer().getOrDefault(this.winterVillage.frozenKey, PersistentDataType.BOOLEAN, false);
+                                            if (isFrozen) {
+                                                player.getPersistentDataContainer().remove(this.winterVillage.frozenKey);
+                                                source.getSource().getExecutor().sendMessage(
+                                                        this.winterVillage.PREFIX.append(Component.text(player.getName(), NamedTextColor.AQUA)
+                                                                .append(Component.text(" has been unfrozen", NamedTextColor.GREEN))
+                                                        ));
+                                            } else {
+                                                player.getPersistentDataContainer().set(this.winterVillage.frozenKey, PersistentDataType.BOOLEAN, true);
+                                                source.getSource().getExecutor().sendMessage(
+                                                        this.winterVillage.PREFIX.append(Component.text(player.getName(), NamedTextColor.AQUA)
+                                                                .append(Component.text(" has been frozen", NamedTextColor.RED))
+                                                        ));
+                                            }
+                                            return 1;
+                                        }
+                                )
                 );
+        commands.register(this.winterVillage.getPluginMeta(), builder.build(), "Freeze a specified player or everyone", List.of());
     }
-
-    public void freeze_player(Player player, boolean freeze){
-        if(!freeze){
-            player.getPersistentDataContainer().remove(this.winterVillage.key_frozen);
-        } else {
-            player.getPersistentDataContainer().set(this.winterVillage.key_frozen, PersistentDataType.BOOLEAN, true);
-        }
-    }
-
-    public boolean player_frozen(Player player) {
-        return player.getPersistentDataContainer().has(this.winterVillage.key_frozen);
-    }
-
 }

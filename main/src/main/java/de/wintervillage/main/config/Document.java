@@ -167,6 +167,10 @@ public class Document {
         return this.jsonObject.size();
     }
 
+    public boolean isEmpty() {
+        return this.jsonObject.isEmpty();
+    }
+
     public Document clear() {
         this.keys().forEach(this::remove);
         return this;
