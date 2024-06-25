@@ -147,6 +147,12 @@ public class Document {
         return this.jsonObject.get(key);
     }
 
+    public <T> T getObject(@NotNull String key, @NotNull Class<?> classOf) {
+        if (!this.jsonObject.has(key)) return null;
+        JsonElement element = this.jsonObject.get(key);
+        return (T) this.GSON.fromJson(element, classOf);
+    }
+
     public Document getDocument(@NotNull String key) {
         if (!this.jsonObject.has(key)) return null;
         return new Document(this.jsonObject.getAsJsonObject(key));
