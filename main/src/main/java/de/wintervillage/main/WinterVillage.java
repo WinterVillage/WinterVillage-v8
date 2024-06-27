@@ -6,8 +6,12 @@ import com.mongodb.ServerAddress;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
+import de.wintervillage.main.commands.CMD_Home;
+import de.wintervillage.main.commands.CMD_Invsee;
 import de.wintervillage.main.commands.FreezeCommand;
 import de.wintervillage.main.config.Document;
+import de.wintervillage.main.economy.EconomyManager;
+import de.wintervillage.main.economy.shop.ShopManager;
 import de.wintervillage.main.listener.PlayerMoveListener;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
@@ -31,6 +35,9 @@ public final class WinterVillage extends JavaPlugin {
 
     public MongoClient mongoClient;
     public MongoDatabase mongoDatabase;
+
+    public EconomyManager economyManager;
+    public ShopManager shopManager;
 
     public NamespacedKey frozenKey;
     public boolean PLAYERS_FROZEN;
@@ -71,6 +78,9 @@ public final class WinterVillage extends JavaPlugin {
             this.mongoDatabase = this.mongoClient.getDatabase(this.databaseDocument.getString("database"));
         }
 
+        this.economyManager = new EconomyManager();
+        this.shopManager = new ShopManager();
+
         new PlayerMoveListener(this);
 
         final LifecycleEventManager<Plugin> lifecycleEventManager = this.getLifecycleManager();
@@ -78,6 +88,8 @@ public final class WinterVillage extends JavaPlugin {
             final Commands command = event.registrar();
 
             new FreezeCommand(command);
+            new CMD_Home(command);
+            new CMD_Invsee(command);
         });
     }
 
