@@ -21,11 +21,10 @@ public class FreezeCommand {
     public FreezeCommand(Commands commands) {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
 
-        // TODO: check permission with LuckPerms too
+        // TODO: LuckPerms
         final LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("freeze")
                 .then(
                         Commands.literal("everyone")
-                                // TODO: add extra permission check
                                 .executes((source) -> {
                                     this.winterVillage.PLAYERS_FROZEN = !this.winterVillage.PLAYERS_FROZEN;
                                     source.getSource().getExecutor().sendMessage(

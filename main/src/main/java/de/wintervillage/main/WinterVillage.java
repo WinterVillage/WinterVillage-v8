@@ -7,8 +7,8 @@ import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
 import de.wintervillage.main.commands.CMD_Home;
-import de.wintervillage.main.commands.CMD_Invsee;
 import de.wintervillage.main.commands.FreezeCommand;
+import de.wintervillage.main.commands.InvseeCommand;
 import de.wintervillage.main.config.Document;
 import de.wintervillage.main.economy.EconomyManager;
 import de.wintervillage.main.economy.shop.ShopManager;
@@ -39,8 +39,8 @@ public final class WinterVillage extends JavaPlugin {
     public EconomyManager economyManager;
     public ShopManager shopManager;
 
-    public NamespacedKey frozenKey;
-    public boolean PLAYERS_FROZEN;
+    public NamespacedKey frozenKey = new NamespacedKey(this, "frozen");
+    public boolean PLAYERS_FROZEN = false;
 
     @Override
     public void onLoad() {
@@ -57,9 +57,6 @@ public final class WinterVillage extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        frozenKey = new NamespacedKey(this, "frozen");
-        this.PLAYERS_FROZEN = false;
-
         if (!this.databaseDocument.isEmpty()) {
             MongoCredential credential = MongoCredential.createCredential(
                     this.databaseDocument.getString("user"),
@@ -89,7 +86,7 @@ public final class WinterVillage extends JavaPlugin {
 
             new FreezeCommand(command);
             new CMD_Home(command);
-            new CMD_Invsee(command);
+            new InvseeCommand(command);
         });
     }
 
