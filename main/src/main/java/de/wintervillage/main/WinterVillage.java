@@ -1,5 +1,8 @@
 package de.wintervillage.main;
 
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
@@ -13,11 +16,19 @@ import de.wintervillage.main.config.Document;
 import de.wintervillage.main.economy.EconomyManager;
 import de.wintervillage.main.economy.shop.ShopManager;
 import de.wintervillage.main.listener.PlayerMoveListener;
+import de.wintervillage.main.plot.PlotCommand;
+import de.wintervillage.main.plot.PlotHandler;
+import de.wintervillage.main.plot.database.PlotDatabase;
+import de.wintervillage.main.plot.codec.PlotCodecProvider;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bson.codecs.configuration.CodecProvider;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,6 +38,9 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public final class WinterVillage extends JavaPlugin {
+
+    @Inject public PlotDatabase plotDatabase;
+    @Inject public PlotHandler plotHandler;
 
     public final MiniMessage message = MiniMessage.miniMessage();
     public final Component PREFIX = this.message.deserialize("<gradient:#d48fff:#00f7ff>WinterVillage</gradient> | <reset>");
@@ -64,6 +78,12 @@ public final class WinterVillage extends JavaPlugin {
                     this.databaseDocument.getString("password").toCharArray()
             );
 
+            CodecProvider provider = PojoCodecProvider.builder().automatic(true).build();
+            CodecRegistry registry = CodecRegistries.fromRegistries(
+                    MongoClientSettings.getDefaultCodecRegistry(),
+                    CodecRegistries.fromProviders(new PlotCodecProvider(), provider)
+            );
+
             this.mongoClient = MongoClients.create(
                     MongoClientSettings.builder()
                             .applyToClusterSettings(builder ->
@@ -72,9 +92,14 @@ public final class WinterVillage extends JavaPlugin {
                             .credential(credential)
                             .build()
             );
-            this.mongoDatabase = this.mongoClient.getDatabase(this.databaseDocument.getString("database"));
+            this.mongoDatabase = this.mongoClient.getDatabase(this.databaseDocument.getString("database"))
+                    .withCodecRegistry(registry);
         }
 
+        Injector injector = Guice.createInjector(new WinterVillageModule());
+        injector.injectMembers(this);
+
+        // TODO: Inject into WinterVillageModule
         this.economyManager = new EconomyManager();
         this.shopManager = new ShopManager();
 
@@ -87,11 +112,13 @@ public final class WinterVillage extends JavaPlugin {
             new FreezeCommand(command);
             new CMD_Home(command);
             new InvseeCommand(command);
+            new PlotCommand(command);
         });
     }
 
     @Override
     public void onDisable() {
         if (this.mongoClient != null) this.mongoClient.close();
+        if (this.plotHandler != null) this.plotHandler.terminate();
     }
 }

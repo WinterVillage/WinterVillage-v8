@@ -25,6 +25,9 @@ dependencies {
 
     // async mongodb
     implementation 'org.mongodb:mongodb-driver-reactivestreams:5.1.0'
+
+    // google guice
+    implementation 'com.google.inject:guice:7.0.0'
 }
 
 shadowJar {
