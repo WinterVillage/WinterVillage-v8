@@ -3,6 +3,8 @@ package de.wintervillage.main.plot.listener;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.persistent.BoundingBoxDataType;
 import de.wintervillage.main.util.BoundingBox2D;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -37,6 +39,10 @@ public class PlayerInteractListener implements Listener {
             boundingBox2D.setMaxX(event.getClickedBlock().getX());
             boundingBox2D.setMaxZ(event.getClickedBlock().getZ());
         }
+
+        player.sendMessage(Component.text("Set position "
+                + (event.getAction().isLeftClick() ? "1" : "2")
+                + " to " + event.getClickedBlock().getX() + ", " + event.getClickedBlock().getZ()).color(NamedTextColor.GREEN));
 
         player.getPersistentDataContainer().set(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType(), boundingBox2D);
     }

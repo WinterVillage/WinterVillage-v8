@@ -28,7 +28,7 @@ public class ParticleRectangle implements Runnable {
     }
 
     public int start() {
-        this.taskId = Bukkit.getScheduler().runTaskTimer(this.winterVillage, this, 0L, 20L).getTaskId();
+        this.taskId = Bukkit.getScheduler().runTaskTimer(this.winterVillage, this, 0L, 10L).getTaskId();
         RECTANGLES.put(this.taskId, this);
         return this.taskId;
     }
@@ -62,7 +62,12 @@ public class ParticleRectangle implements Runnable {
             for (int z = minZ; z <= maxZ; z++) {
                 if (x == minX || x == maxX || z == minZ || z == maxZ) {
                     Location location = new Location(player.getLocation().getWorld(), x + .5, this.player.getLocation().getY(), z + .5);
-                    this.player.spawnParticle(Particle.HEART, location, 1);
+
+                    Particle.DustOptions dustOptions;
+                    if (tooLarge) dustOptions = new Particle.DustOptions(Color.RED, 4f);
+                    else dustOptions = new Particle.DustOptions(Color.GREEN, 4f);
+
+                    this.player.spawnParticle(Particle.DUST, location, 1, dustOptions);
                 }
             }
         }
