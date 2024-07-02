@@ -5,7 +5,6 @@ public class BoundingBox2D {
     private double minX, minZ, maxX, maxZ;
 
     public BoundingBox2D() {
-        this(0, 0, 0, 0);
     }
 
     public BoundingBox2D(double minX, double minZ, double maxX, double maxZ) {
@@ -19,16 +18,32 @@ public class BoundingBox2D {
         return this.minX;
     }
 
+    public void setMinX(double minX) {
+        this.minX = minX;
+    }
+
     public double getMinZ() {
         return this.minZ;
+    }
+
+    public void setMinZ(double minZ) {
+        this.minZ = minZ;
     }
 
     public double getMaxX() {
         return this.maxX;
     }
 
+    public void setMaxX(double maxX) {
+        this.maxX = maxX;
+    }
+
     public double getMaxZ() {
         return this.maxZ;
+    }
+
+    public void setMaxZ(double maxZ) {
+        this.maxZ = maxZ;
     }
 
     public boolean contains(double x, double z) {
@@ -50,6 +65,14 @@ public class BoundingBox2D {
 
     public double getCenterZ() {
         return (this.minZ + this.maxZ) / 2;
+    }
+
+    public double getWidthX() {
+        return Math.abs(this.maxX - this.minX);
+    }
+
+    public double getWidthZ() {
+        return Math.abs(this.maxZ - this.minZ);
     }
 
     @Override

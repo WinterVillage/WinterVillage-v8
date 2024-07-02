@@ -1,8 +1,18 @@
 package de.wintervillage.main.plot;
 
 import de.wintervillage.main.WinterVillage;
+import de.wintervillage.main.item.ItemBuilder;
 import de.wintervillage.main.plot.listener.BlockBreakListener;
+import de.wintervillage.main.plot.listener.PlayerInteractListener;
+import de.wintervillage.main.plot.listener.PlayerQuitListener;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -24,18 +34,32 @@ public class PlotHandler {
     private final Random random = new Random();
 
     /**
-     * Area of the plot will be MAX_PLOT_SIZE x MAX_PLOT_SIZE
+     * Area of the plot will be MAX_PLOT_WIDTH x MAX_PLOT_WIDTH
      */
-    public static final int MAX_PLOT_SIZE = 50;
+    public final int MAX_PLOT_WIDTH = 50;
+
+    public final ItemStack SETUP_ITEM;
+
+    public NamespacedKey plotSetupKey, plotRectangleKey;
 
     public PlotHandler() {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.plotCache = new ArrayList<>();
 
+        this.plotSetupKey = new NamespacedKey(this.winterVillage, "plotSetup");
+        this.plotRectangleKey = new NamespacedKey(this.winterVillage, "plotRectangle");
+
+        this.SETUP_ITEM = ItemBuilder.from(Material.WOODEN_AXE)
+                .name(Component.text("Mark your plot corners", NamedTextColor.GREEN))
+                .persistentDataContainer(persistent -> persistent.set(this.plotSetupKey, PersistentDataType.BOOLEAN, true))
+                .build();
+
         this.executorService = Executors.newSingleThreadScheduledExecutor();
         this.executorService.scheduleAtFixedRate(this::forceUpdate, 0, 30, TimeUnit.SECONDS);
 
         new BlockBreakListener();
+        new PlayerInteractListener();
+        new PlayerQuitListener();
     }
 
     public void forceUpdate() {
@@ -54,13 +78,13 @@ public class PlotHandler {
         return this.plotCache.stream().anyMatch(plot -> plot.getUniqueId().equals(uniqueId));
     }
 
-    public List<Plot> getPlotByOwner(UUID owner) {
+    public List<Plot> byOwner(UUID owner) {
         return this.plotCache.stream()
                 .filter(plot -> plot.getOwner().equals(owner))
                 .toList();
     }
 
-    public Plot getPlotById(String uniqueId) {
+    public Plot byUniqueId(String uniqueId) {
         return this.plotCache.stream()
                 .filter(plot -> plot.getUniqueId().equals(uniqueId))
                 .findFirst()
@@ -76,6 +100,19 @@ public class PlotHandler {
 
     public void terminate() {
         if (!this.executorService.isShutdown()) this.executorService.shutdown();
+
+        Bukkit.getOnlinePlayers().stream()
+                .filter(player -> player.getPersistentDataContainer().has(this.plotSetupKey) || player.getPersistentDataContainer().has(this.plotRectangleKey))
+                .forEach(player -> {
+                    if (player.getPersistentDataContainer().has(this.plotSetupKey))
+                        player.getPersistentDataContainer().remove(this.plotSetupKey);
+
+                    if (player.getPersistentDataContainer().has(this.plotRectangleKey)) {
+                        int taskId = player.getPersistentDataContainer().get(this.plotRectangleKey, PersistentDataType.INTEGER);
+                        ParticleRectangle.getRectangle(taskId).stop();
+                        player.getPersistentDataContainer().remove(this.plotRectangleKey);
+                    }
+                });
     }
 
     public String generateId(int length) {

@@ -3,14 +3,17 @@ package de.wintervillage.main.plot;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.wintervillage.main.WinterVillage;
+import de.wintervillage.main.persistent.BoundingBoxDataType;
 import de.wintervillage.main.util.BoundingBox2D;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -37,6 +40,32 @@ public class PlotCommand {
         final LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("gs")
                 .requires((source) -> source.getSender() instanceof Player)
                 .then(
+                        Commands.literal("setup")
+                                .executes((source) -> {
+                                    final Player player = (Player) source.getSource().getSender();
+
+                                    if (player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)
+                                            || player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotRectangleKey)) {
+                                        player.sendMessage(Component.text("You are already setting up a plot", NamedTextColor.RED));
+                                        return 0;
+                                    }
+
+                                    // TODO: LuckPerms
+                                    if (!this.winterVillage.plotHandler.byOwner(player.getUniqueId()).isEmpty()) {
+                                        player.sendMessage(Component.text("You already have a plot", NamedTextColor.RED));
+                                        return 0;
+                                    }
+
+                                    ParticleRectangle rectangle = new ParticleRectangle(player);
+                                    int taskId = rectangle.start();
+
+                                    player.getPersistentDataContainer().set(this.winterVillage.plotHandler.plotRectangleKey, PersistentDataType.INTEGER, taskId);
+                                    player.getPersistentDataContainer().set(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType(), new BoundingBox2D());
+                                    player.getInventory().addItem(this.winterVillage.plotHandler.SETUP_ITEM);
+                                    return 1;
+                                })
+                )
+                .then(
                         Commands.literal("create")
                                 .then(
                                         Commands.argument("name", StringArgumentType.word())
@@ -44,14 +73,29 @@ public class PlotCommand {
                                                     String name = StringArgumentType.getString(source, "name");
                                                     final Player player = (Player) source.getSource().getSender();
 
+                                                    if (!player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)
+                                                            || !player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotRectangleKey)) {
+                                                        player.sendMessage(Component.text("You have not set up a plot", NamedTextColor.RED));
+                                                        return 0;
+                                                    }
+
                                                     // TODO: Check max amount of plots by player
+
+                                                    BoundingBox2D boundingBox = player.getPersistentDataContainer().get(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType());
+                                                    boolean tooLarge = boundingBox.getWidthX() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH
+                                                            || boundingBox.getWidthZ() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH;
+                                                    // TODO: LuckPerms
+                                                    if (tooLarge) {
+                                                        player.sendMessage(Component.text("Plot is too large", NamedTextColor.RED));
+                                                        return 0;
+                                                    }
 
                                                     Plot plot = new Plot(
                                                             name,
                                                             this.winterVillage.plotHandler.generateId(6),
                                                             new Date(),
                                                             player.getUniqueId(),
-                                                            new BoundingBox2D(),
+                                                            boundingBox,
                                                             List.of()
                                                     );
 
@@ -64,6 +108,13 @@ public class PlotCommand {
                                                                 player.sendMessage(Component.text("Could not insert plot", NamedTextColor.RED));
                                                                 return null;
                                                             });
+
+                                                    player.getPersistentDataContainer().remove(this.winterVillage.plotHandler.plotSetupKey);
+                                                    player.getPersistentDataContainer().remove(this.winterVillage.plotHandler.plotRectangleKey);
+
+                                                    Arrays.stream(player.getInventory().getContents())
+                                                            .filter(item -> item != null && item.hasItemMeta() && item.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey))
+                                                            .forEach(item -> player.getInventory().remove(item));
 
                                                     return 1;
                                                 })
@@ -105,7 +156,7 @@ public class PlotCommand {
                                                     String uniqueId = StringArgumentType.getString(source, "uniqueId");
                                                     final Player player = (Player) source.getSource().getSender();
 
-                                                    Plot plot = this.winterVillage.plotHandler.getPlotById(uniqueId);
+                                                    Plot plot = this.winterVillage.plotHandler.byUniqueId(uniqueId);
                                                     if (plot == null) {
                                                         player.sendMessage(Component.text("Could not find plot", NamedTextColor.RED));
                                                         return 0;
@@ -122,28 +173,6 @@ public class PlotCommand {
                                                             });
                                                     return 1;
                                                 })
-                                )
-                )
-                .then(
-                        Commands.literal("test")
-                                .then(
-                                        Commands.argument("uniqueId", StringArgumentType.word())
-                                                .executes((source) -> {
-                                                            String uniqueId = StringArgumentType.getString(source, "uniqueId");
-                                                            final Player player = (Player) source.getSource().getSender();
-
-                                                            Plot plot = this.winterVillage.plotHandler.getPlotById(uniqueId);
-                                                            if (plot == null) {
-                                                                player.sendMessage(Component.text("Could not find plot", NamedTextColor.RED));
-                                                                return 0;
-                                                            }
-
-                                                            ParticleRectangle rectangle = new ParticleRectangle(player);
-                                                            rectangle.setBoundingBox(plot.getBoundingBox());
-                                                            rectangle.start();
-                                                            return 1;
-                                                        }
-                                                )
                                 )
                 );
         commands.register(this.winterVillage.getPluginMeta(), builder.build(), "Manage your plots", List.of());
