@@ -14,12 +14,23 @@ import de.wintervillage.main.commands.FreezeCommand;
 import de.wintervillage.main.commands.InvseeCommand;
 import de.wintervillage.main.config.Document;
 import de.wintervillage.main.economy.EconomyManager;
+import de.wintervillage.main.economy.commands.CMD_Transfer;
 import de.wintervillage.main.economy.shop.ShopManager;
+import de.wintervillage.main.economy.shop.listener.ListenerEC_BlockBreak;
+import de.wintervillage.main.economy.shop.listener.ListenerEC_SignChange;
+import de.wintervillage.main.economy.utils.ItemUtils;
 import de.wintervillage.main.listener.PlayerMoveListener;
 import de.wintervillage.main.plot.PlotCommand;
 import de.wintervillage.main.plot.PlotHandler;
 import de.wintervillage.main.plot.database.PlotDatabase;
 import de.wintervillage.main.plot.codec.PlotCodecProvider;
+import de.wintervillage.main.specialitems.SpecialItems;
+import de.wintervillage.main.specialitems.commands.CMD_Disenchant;
+import de.wintervillage.main.specialitems.commands.CMD_SpecialItem;
+import de.wintervillage.main.specialitems.listener.ListenerSI_BlockBreakPlace;
+import de.wintervillage.main.specialitems.listener.ListenerSI_InventoryClickClose;
+import de.wintervillage.main.specialitems.listener.ListenerSI_PlayerInteract;
+import de.wintervillage.main.specialitems.utils.EnchantmentUtils;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -52,6 +63,10 @@ public final class WinterVillage extends JavaPlugin {
 
     public EconomyManager economyManager;
     public ShopManager shopManager;
+    public ItemUtils itemUtils;
+
+    public SpecialItems specialItems;
+    public EnchantmentUtils enchantmentUtils;
 
     public NamespacedKey frozenKey = new NamespacedKey(this, "frozen");
     public boolean PLAYERS_FROZEN = false;
@@ -102,17 +117,39 @@ public final class WinterVillage extends JavaPlugin {
         // TODO: Inject into WinterVillageModule
         this.economyManager = new EconomyManager();
         this.shopManager = new ShopManager();
+        this.itemUtils = new ItemUtils();
 
+        this.specialItems = new SpecialItems();
+        this.enchantmentUtils = new EnchantmentUtils();
+
+        //General-System
         new PlayerMoveListener(this);
+
+        //Economy-System
+        new ListenerEC_SignChange(this);
+        new ListenerEC_BlockBreak(this);
+
+        //SpecialItems
+        new ListenerSI_InventoryClickClose(this);
+        new ListenerSI_BlockBreakPlace(this);
+        new ListenerSI_PlayerInteract(this);
 
         final LifecycleEventManager<Plugin> lifecycleEventManager = this.getLifecycleManager();
         lifecycleEventManager.registerEventHandler(LifecycleEvents.COMMANDS, event -> {
             final Commands command = event.registrar();
 
+            //General-System
             new FreezeCommand(command);
             new CMD_Home(command);
             new InvseeCommand(command);
             new PlotCommand(command);
+
+            //Economy-System
+            new CMD_Transfer(command);
+
+            //SpecialItems
+            new CMD_Disenchant(command);
+            new CMD_SpecialItem(command);
         });
     }
 

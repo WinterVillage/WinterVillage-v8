@@ -1,6 +1,8 @@
 package de.wintervillage.main.economy;
 
+import com.mongodb.reactivestreams.client.MongoCollection;
 import de.wintervillage.main.WinterVillage;
+import org.bson.Document;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -18,11 +20,30 @@ public class EconomyManager {
 
     public float getBalance(Player player) {
         // Implementieren der Datenbank-Abfrage bzgl. Kontostand
+
+        MongoCollection<Document> collection = this.winterVillage.mongoDatabase.getCollection("players");
+        Document document_player = (Document) collection.find(new Document("uuid", player.getUniqueId().toString())).first();
+
+        if(!document_player.isEmpty()){
+            return document_player.getDouble("balance").floatValue();
+        }
+
         return 0;
     }
 
     public void setBalance(Player player, float amount) {
         // Implementieren des Datenbank-Schreibens bzgl. Kontostand
+        MongoCollection<Document> collection = this.winterVillage.mongoDatabase.getCollection("players");
+        Document document_player = (Document) collection.find(new Document("uuid", player.getUniqueId().toString())).first();
+
+        if(!document_player.isEmpty()){
+            document_player.put("balance", amount);
+            collection.replaceOne(new Document("uuid", player.getUniqueId().toString()), document_player);
+        } else {
+            document_player = new Document("uuid", player.getUniqueId().toString());
+            document_player.put("balance", amount);
+            collection.insertOne(document_player);
+        }
     }
 
     public void addMoney(Player player, float amount) {

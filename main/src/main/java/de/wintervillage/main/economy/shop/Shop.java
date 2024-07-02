@@ -15,17 +15,18 @@ public class Shop {
     private String shop_name;
     private Location shop_location;
     private Player shop_owner;
-    private float item_prize;
+    private float item_price;
 
-    public Shop(String shop_name, float item_prize, Location shop_location, Player shop_owner){
+    public Shop(String shop_name, float item_price, Location shop_location, Player shop_owner){
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
 
         this.shop_name = shop_name;
-        this.item_prize = item_prize;
+        this.item_price = item_price;
         this.shop_location = shop_location;
         this.shop_owner = shop_owner;
 
-        this.shop_inventory = Bukkit.createInventory(null, 45, shop_name);
+        this.shop_inventory = Bukkit.createInventory(null, 45,
+                shop_name + " - " + this.shop_location.getBlockX() + ":" + this.shop_location.getBlockY() + ":" + this.shop_location.getBlockZ());
     }
 
     public void setShopInventory(Inventory inventory){
@@ -44,8 +45,8 @@ public class Shop {
         this.shop_name = name;
     }
 
-    public void setItemPrize(float prize) {
-        this.item_prize = prize;
+    public void setItemPrice(float price) {
+        this.item_price = price;
     }
 
     public Inventory getShopInventory(){
@@ -64,8 +65,20 @@ public class Shop {
         return this.shop_name;
     }
 
-    public float getItemPrize(){
-        return this.item_prize;
+    public float getItemPrice(){
+        return this.item_price;
+    }
+
+    public int getItemAmount(){
+        int item_amount = 0;
+
+        for(int i = 0; i < this.shop_inventory.getSize(); i++){
+            if(this.shop_inventory.getItem(i) != null){
+                item_amount += this.shop_inventory.getItem(i).getAmount();
+            }
+        }
+
+        return item_amount;
     }
 
 }
