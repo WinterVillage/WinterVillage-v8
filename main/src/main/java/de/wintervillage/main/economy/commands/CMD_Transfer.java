@@ -16,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 public class CMD_Transfer {
 
@@ -86,6 +87,8 @@ public class CMD_Transfer {
                                 )
 
                 );
+
+        commands.register(this.winterVillage.getPluginMeta(), transfer_builder.build(), "Überweist Geld an einen Spieler.", List.of());
     }
 
     public void openTransactionList(Player executor, Player player){

@@ -2,6 +2,7 @@ package de.wintervillage.main.specialitems.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.wintervillage.main.WinterVillage;
+import de.wintervillage.main.specialitems.utils.EnchantmentUtils;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Material;
@@ -33,7 +34,7 @@ public class CMD_Disenchant {
                         return 0;
                     }
 
-                    this.winterVillage.enchantmentUtils.openDisenchantmentTable(player, player.getInventory().getItemInMainHand());
+                    EnchantmentUtils.openDisenchantmentTable(player, player.getInventory().getItemInMainHand());
                     player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
 
                     return 1;

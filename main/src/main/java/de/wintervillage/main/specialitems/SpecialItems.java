@@ -1,6 +1,8 @@
 package de.wintervillage.main.specialitems;
 
+import com.google.inject.Inject;
 import de.wintervillage.main.WinterVillage;
+import de.wintervillage.main.specialitems.listener.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -18,8 +20,15 @@ public class SpecialItems {
 
     private WinterVillage winterVillage;
 
+    @Inject
     public SpecialItems(){
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
+
+        new ListenerSI_BlockBreakPlace(this.winterVillage);
+        new ListenerSI_Furnace(this.winterVillage);
+        new ListenerSI_InventoryClickClose(this.winterVillage);
+        new ListenerSI_PlayerInteract(this.winterVillage);
+        new ListenerSI_PlayerUpdate(this.winterVillage);
     }
 
     public ItemStack getSpecialItem(Component name, Material material, int amount, boolean unbreakable){

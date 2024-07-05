@@ -9,6 +9,8 @@ import com.mongodb.ServerAddress;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
+import de.wintervillage.main.adventcalendar.AdventCalendar;
+import de.wintervillage.main.adventcalendar.commands.CMD_AdventsKalender;
 import de.wintervillage.main.commands.CMD_Home;
 import de.wintervillage.main.commands.FreezeCommand;
 import de.wintervillage.main.commands.InvseeCommand;
@@ -16,9 +18,7 @@ import de.wintervillage.main.config.Document;
 import de.wintervillage.main.economy.EconomyManager;
 import de.wintervillage.main.economy.commands.CMD_Transfer;
 import de.wintervillage.main.economy.shop.ShopManager;
-import de.wintervillage.main.economy.shop.listener.ListenerEC_BlockBreak;
-import de.wintervillage.main.economy.shop.listener.ListenerEC_SignChange;
-import de.wintervillage.main.economy.utils.ItemUtils;
+import de.wintervillage.main.event.EventManager;
 import de.wintervillage.main.listener.PlayerMoveListener;
 import de.wintervillage.main.plot.PlotCommand;
 import de.wintervillage.main.plot.PlotHandler;
@@ -27,10 +27,6 @@ import de.wintervillage.main.plot.codec.PlotCodecProvider;
 import de.wintervillage.main.specialitems.SpecialItems;
 import de.wintervillage.main.specialitems.commands.CMD_Disenchant;
 import de.wintervillage.main.specialitems.commands.CMD_SpecialItem;
-import de.wintervillage.main.specialitems.listener.ListenerSI_BlockBreakPlace;
-import de.wintervillage.main.specialitems.listener.ListenerSI_InventoryClickClose;
-import de.wintervillage.main.specialitems.listener.ListenerSI_PlayerInteract;
-import de.wintervillage.main.specialitems.utils.EnchantmentUtils;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -52,6 +48,11 @@ public final class WinterVillage extends JavaPlugin {
 
     @Inject public PlotDatabase plotDatabase;
     @Inject public PlotHandler plotHandler;
+    @Inject public ShopManager shopManager;
+    @Inject public EconomyManager economyManager;
+    @Inject public SpecialItems specialItems;
+    @Inject public EventManager eventManager;
+    @Inject public AdventCalendar adventCalendar;
 
     public final MiniMessage message = MiniMessage.miniMessage();
     public final Component PREFIX = this.message.deserialize("<gradient:#d48fff:#00f7ff>WinterVillage</gradient> | <reset>");
@@ -60,13 +61,6 @@ public final class WinterVillage extends JavaPlugin {
 
     public MongoClient mongoClient;
     public MongoDatabase mongoDatabase;
-
-    public EconomyManager economyManager;
-    public ShopManager shopManager;
-    public ItemUtils itemUtils;
-
-    public SpecialItems specialItems;
-    public EnchantmentUtils enchantmentUtils;
 
     public NamespacedKey frozenKey = new NamespacedKey(this, "frozen");
     public boolean PLAYERS_FROZEN = false;
@@ -115,24 +109,9 @@ public final class WinterVillage extends JavaPlugin {
         injector.injectMembers(this);
 
         // TODO: Inject into WinterVillageModule
-        this.economyManager = new EconomyManager();
-        this.shopManager = new ShopManager();
-        this.itemUtils = new ItemUtils();
-
-        this.specialItems = new SpecialItems();
-        this.enchantmentUtils = new EnchantmentUtils();
 
         //General-System
         new PlayerMoveListener(this);
-
-        //Economy-System
-        new ListenerEC_SignChange(this);
-        new ListenerEC_BlockBreak(this);
-
-        //SpecialItems
-        new ListenerSI_InventoryClickClose(this);
-        new ListenerSI_BlockBreakPlace(this);
-        new ListenerSI_PlayerInteract(this);
 
         final LifecycleEventManager<Plugin> lifecycleEventManager = this.getLifecycleManager();
         lifecycleEventManager.registerEventHandler(LifecycleEvents.COMMANDS, event -> {
@@ -150,6 +129,9 @@ public final class WinterVillage extends JavaPlugin {
             //SpecialItems
             new CMD_Disenchant(command);
             new CMD_SpecialItem(command);
+
+            //AdventCalendar
+            new CMD_AdventsKalender(command);
         });
     }
 
@@ -157,5 +139,7 @@ public final class WinterVillage extends JavaPlugin {
     public void onDisable() {
         if (this.mongoClient != null) this.mongoClient.close();
         if (this.plotHandler != null) this.plotHandler.terminate();
+
+        this.eventManager.stop();
     }
 }

@@ -1,5 +1,6 @@
 package de.wintervillage.main.economy;
 
+import com.google.inject.Inject;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import de.wintervillage.main.WinterVillage;
 import org.bson.Document;
@@ -14,6 +15,7 @@ public class EconomyManager {
 
     private WinterVillage winterVillage;
 
+    @Inject
     public EconomyManager() {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
     }

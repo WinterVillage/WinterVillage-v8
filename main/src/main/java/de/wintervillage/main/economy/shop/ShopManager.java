@@ -1,6 +1,12 @@
 package de.wintervillage.main.economy.shop;
 
+import com.google.inject.Inject;
 import de.wintervillage.main.WinterVillage;
+import de.wintervillage.main.economy.shop.listener.ListenerEC_BlockBreak;
+import de.wintervillage.main.economy.shop.listener.ListenerEC_InventoryClickClose;
+import de.wintervillage.main.economy.shop.listener.ListenerEC_PlayerInteract;
+import de.wintervillage.main.economy.shop.listener.ListenerEC_SignChange;
+import de.wintervillage.main.economy.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -15,8 +21,14 @@ public class ShopManager {
 
     private WinterVillage winterVillage;
 
+    @Inject
     public ShopManager(){
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
+
+        new ListenerEC_BlockBreak(this.winterVillage);
+        new ListenerEC_InventoryClickClose(this.winterVillage);
+        new ListenerEC_PlayerInteract(this.winterVillage);
+        new ListenerEC_SignChange(this.winterVillage);
     }
 
     public boolean shopExists(Location loc){
@@ -48,13 +60,13 @@ public class ShopManager {
         Inventory inventory = Bukkit.createInventory(null, 45,
                 shop.getShopName() + " - " + shop.getShopLocation().getBlockX() + ":" + shop.getShopLocation().getBlockY() + ":" + shop.getShopLocation().getBlockZ());
 
-        ItemStack item_space = this.winterVillage.itemUtils.createItemStack(Material.BLACK_STAINED_GLASS_PANE, 1, "<color:black>");
-        ItemStack item_plus_one = this.winterVillage.itemUtils.createItemStack(Material.GREEN_STAINED_GLASS_PANE, 1, "<color:green><bold>+1</bold>");
-        ItemStack item_minus_one = this.winterVillage.itemUtils.createItemStack(Material.RED_STAINED_GLASS_PANE, 1, "<color:red><bold>-1</bold>");
-        ItemStack item_plus_ten = this.winterVillage.itemUtils.createItemStack(Material.GREEN_STAINED_GLASS_PANE, 1, "<color:green><bold>+10</bold>");
-        ItemStack item_minus_ten = this.winterVillage.itemUtils.createItemStack(Material.RED_STAINED_GLASS_PANE, 1, "<color:red><bold>-10</bold>");
-        ItemStack item_buy = this.winterVillage.itemUtils.createItemStack(Material.GREEN_STAINED_GLASS_PANE, 1, "<color:green>Kaufen <color:gray>[<color:green><bold>" + shop.getItemPrice() + "</bold><color:gray>]");
-        ItemStack item_cancel = this.winterVillage.itemUtils.createItemStack(Material.RED_STAINED_GLASS_PANE, 1, "<color:red>Abbrechen");
+        ItemStack item_space = ItemUtils.createItemStack(Material.BLACK_STAINED_GLASS_PANE, 1, "<color:black>");
+        ItemStack item_plus_one = ItemUtils.createItemStack(Material.GREEN_STAINED_GLASS_PANE, 1, "<color:green><bold>+1</bold>");
+        ItemStack item_minus_one = ItemUtils.createItemStack(Material.RED_STAINED_GLASS_PANE, 1, "<color:red><bold>-1</bold>");
+        ItemStack item_plus_ten = ItemUtils.createItemStack(Material.GREEN_STAINED_GLASS_PANE, 1, "<color:green><bold>+10</bold>");
+        ItemStack item_minus_ten = ItemUtils.createItemStack(Material.RED_STAINED_GLASS_PANE, 1, "<color:red><bold>-10</bold>");
+        ItemStack item_buy = ItemUtils.createItemStack(Material.GREEN_STAINED_GLASS_PANE, 1, "<color:green>Kaufen <color:gray>[<color:green><bold>" + shop.getItemPrice() + "</bold><color:gray>]");
+        ItemStack item_cancel = ItemUtils.createItemStack(Material.RED_STAINED_GLASS_PANE, 1, "<color:red>Abbrechen");
 
         ItemStack item_showcase = new ItemStack(Material.BARRIER);
 
