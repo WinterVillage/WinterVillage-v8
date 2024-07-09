@@ -6,6 +6,7 @@ import de.wintervillage.main.util.BoundingBox2D;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -28,6 +29,8 @@ public class PlayerInteractListener implements Listener {
         if (!event.getItem().getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)) return;
 
         if (!player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)) return;
+        event.setUseInteractedBlock(Event.Result.DENY);
+
         BoundingBox2D boundingBox2D = player.getPersistentDataContainer().get(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType());
 
         if (event.getAction().isLeftClick()) {
