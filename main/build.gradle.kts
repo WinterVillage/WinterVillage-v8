@@ -32,6 +32,7 @@ dependencies {
 tasks {
     compileJava {
         options.release = 21
+        options.encoding = Charsets.UTF_8.name()
     }
 
     javadoc {
@@ -42,6 +43,10 @@ tasks {
         archiveBaseName.set("wintervillage")
         archiveClassifier.set("")
     }
+}
+
+tasks.withType<JavaExec> {
+    jvmArgs = listOf("-Dfile.encoding=UTF-8")
 }
 
 bukkitPluginYaml{
