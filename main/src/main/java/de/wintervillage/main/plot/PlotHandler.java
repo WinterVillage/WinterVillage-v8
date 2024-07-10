@@ -46,8 +46,8 @@ public class PlotHandler {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.plotCache = new ArrayList<>();
 
-        this.plotSetupKey = new NamespacedKey(this.winterVillage, "plotSetup");
-        this.plotRectangleKey = new NamespacedKey(this.winterVillage, "plotRectangle");
+        this.plotSetupKey = new NamespacedKey("wintervillage", "plot_setup");
+        this.plotRectangleKey = new NamespacedKey("wintervillage", "plot_rectangle");
 
         this.SETUP_ITEM = ItemBuilder.from(Material.WOODEN_AXE)
                 .name(Component.text("Mark your plot corners", NamedTextColor.GREEN))

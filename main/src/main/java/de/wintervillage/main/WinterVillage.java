@@ -54,15 +54,15 @@ public final class WinterVillage extends JavaPlugin {
     @Inject public EventManager eventManager;
     @Inject public AdventCalendar adventCalendar;
 
-    public final MiniMessage message = MiniMessage.miniMessage();
-    public final Component PREFIX = this.message.deserialize("<gradient:#d48fff:#00f7ff>WinterVillage</gradient> | <reset>");
+    public final Component PREFIX = MiniMessage.miniMessage().deserialize("<gradient:#d48fff:#00f7ff>WinterVillage</gradient> | <reset>");
 
     public Document databaseDocument;
 
     public MongoClient mongoClient;
     public MongoDatabase mongoDatabase;
 
-    public NamespacedKey frozenKey = new NamespacedKey(this, "frozen");
+    public NamespacedKey frozenKey = new NamespacedKey("wintervillage", "frozen");
+    public NamespacedKey calendarKey = new NamespacedKey("wintervillage", "calendar");
     public boolean PLAYERS_FROZEN = false;
 
     @Override
