@@ -7,7 +7,10 @@ import com.mongodb.client.result.UpdateResult;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.database.SubscriberHelpers;
+import de.wintervillage.main.database.exception.EntryNotFoundException;
 import de.wintervillage.main.plot.Plot;
+import de.wintervillage.main.util.BoundingBox2D;
+import org.bson.Document;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -28,27 +31,6 @@ public class PlotDatabase implements IPlotDatabase {
     }
 
     @Override
-    public void insertSync(Plot plot) {
-        try {
-            CompletableFuture<Void> future = new CompletableFuture<>();
-            this.collection.insertOne(plot).subscribe(new SubscriberHelpers.OperationSubscriber<>() {
-                @Override
-                public void onComplete() {
-                    future.complete(null);
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                    future.completeExceptionally(t);
-                }
-            });
-            future.join();
-        } catch (Exception exception) {
-            throw new RuntimeException(exception);
-        }
-    }
-
-    @Override
     public CompletableFuture<Void> insertAsync(Plot plot) {
         CompletableFuture<Void> future = new CompletableFuture<>();
         this.collection.insertOne(plot).subscribe(new SubscriberHelpers.OperationSubscriber<>() {
@@ -63,33 +45,6 @@ public class PlotDatabase implements IPlotDatabase {
             }
         });
         return future;
-    }
-
-    @Override
-    public void deleteSync(String uniqueId) {
-        try {
-            CompletableFuture<Void> future = new CompletableFuture<>();
-            this.collection.deleteOne(Filters.eq("_id", uniqueId))
-                    .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
-                        @Override
-                        public void onComplete() {
-                            future.complete(null);
-                        }
-
-                        @Override
-                        public void onError(Throwable t) {
-                            future.completeExceptionally(t);
-                        }
-
-                        @Override
-                        public void onNext(DeleteResult deleteResult) {
-                            if (deleteResult.getDeletedCount() == 0) future.completeExceptionally(new RuntimeException("No result found for uniqueId: " + uniqueId));
-                        }
-                    });
-            future.join();
-        } catch (Exception exception) {
-            throw new RuntimeException(exception);
-        }
     }
 
     @Override
@@ -109,38 +64,15 @@ public class PlotDatabase implements IPlotDatabase {
 
                     @Override
                     public void onNext(DeleteResult deleteResult) {
-                        if (deleteResult.getDeletedCount() == 0) future.completeExceptionally(new RuntimeException("No result found for uniqueId: " + uniqueId));
+                        if (deleteResult.getDeletedCount() == 0)
+                            future.completeExceptionally(new EntryNotFoundException("No result found"));
                     }
                 });
         return future;
     }
 
     @Override
-    public void updateSync(String uniqueId, Plot plot) {
-        try {
-            CompletableFuture<Void> future = new CompletableFuture<>();
-            this.collection.replaceOne(Filters.eq("_id", uniqueId), plot)
-                    .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
-                        @Override
-                        public void onError(Throwable t) {
-                            future.completeExceptionally(t);
-                        }
-
-                        @Override
-                        public void onNext(UpdateResult updateResult) {
-                            if (updateResult.getModifiedCount() == 0)
-                                future.completeExceptionally(new RuntimeException("No result found for uniqueId: " + uniqueId));
-                            else future.complete(null);
-                        }
-                    });
-            future.join();
-        } catch (Exception exception) {
-            throw new RuntimeException(exception);
-        }
-    }
-
-    @Override
-    public CompletableFuture<Void> updateAsync(String uniqueId, Plot plot) {
+    public CompletableFuture<Void> replaceAsync(String uniqueId, Plot plot) {
         CompletableFuture<Void> future = new CompletableFuture<>();
         this.collection.replaceOne(Filters.eq("_id", uniqueId), plot)
                 .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
@@ -152,40 +84,81 @@ public class PlotDatabase implements IPlotDatabase {
                     @Override
                     public void onNext(UpdateResult updateResult) {
                         if (updateResult.getModifiedCount() == 0)
-                            future.completeExceptionally(new RuntimeException("No result found for uniqueId: " + uniqueId));
+                            future.completeExceptionally(new EntryNotFoundException("No result found"));
                         else future.complete(null);
                     }
                 });
         return future;
     }
 
-    @Override
-    public Plot findSync(String uniqueId) {
-        try {
-            CompletableFuture<Plot> future = new CompletableFuture<>();
-            this.collection.find(Filters.eq("_id", uniqueId))
-                    .first()
-                    .subscribe(new SubscriberHelpers.OperationSubscriber<Plot>() {
-                        @Override
-                        public void onNext(Plot plot) {
-                            future.complete(plot);
-                        }
+    public CompletableFuture<Void> updateOwner(String uniqueId, UUID owner) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        this.collection.updateOne(Filters.eq("_id", uniqueId),
+                        new Document("$set", new Document("owner", owner.toString())))
+                .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
+                    @Override
+                    public void onError(Throwable t) {
+                        future.completeExceptionally(t);
+                    }
 
-                        @Override
-                        public void onComplete() {
-                            if (!future.isDone())
-                                future.completeExceptionally(new RuntimeException("No result found for uniqueId: " + uniqueId));
-                        }
+                    @Override
+                    public void onNext(UpdateResult updateResult) {
+                        if (updateResult.getModifiedCount() == 0)
+                            future.completeExceptionally(new EntryNotFoundException("No result found"));
+                        else future.complete(null);
+                    }
+                });
+        return future;
+    }
 
-                        @Override
-                        public void onError(Throwable t) {
-                            future.completeExceptionally(t);
-                        }
-                    });
-            return future.join();
-        } catch (Exception exception) {
-            throw new RuntimeException(exception);
-        }
+    public CompletableFuture<Void> updateBoundingBox(String uniqueId, BoundingBox2D boundingBox) {
+        Document boundingBoxDocument = new Document();
+        boundingBoxDocument.append("minX", boundingBox.getMinX());
+        boundingBoxDocument.append("minZ", boundingBox.getMinZ());
+        boundingBoxDocument.append("maxX", boundingBox.getMaxX());
+        boundingBoxDocument.append("maxZ", boundingBox.getMaxZ());
+
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        this.collection.updateOne(Filters.eq("_id", uniqueId),
+                        new Document("$set", new Document("boundingBox", boundingBoxDocument)))
+                .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
+                    @Override
+                    public void onError(Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+
+                    @Override
+                    public void onNext(UpdateResult updateResult) {
+                        if (updateResult.getModifiedCount() == 0)
+                            future.completeExceptionally(new EntryNotFoundException("No result found"));
+                        else future.complete(null);
+                    }
+                });
+        return future;
+    }
+
+    public CompletableFuture<Void> updateMembers(String uniqueId, List<UUID> members) {
+        List<String> memberStrings = members.stream()
+                .map(UUID::toString)
+                .toList();
+
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        this.collection.updateOne(Filters.eq("_id", uniqueId),
+                        new Document("$set", new Document("members", memberStrings)))
+                .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
+                    @Override
+                    public void onError(Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+
+                    @Override
+                    public void onNext(UpdateResult updateResult) {
+                        if (updateResult.getModifiedCount() == 0)
+                            future.completeExceptionally(new EntryNotFoundException("No result found"));
+                        else future.complete(null);
+                    }
+                });
+        return future;
     }
 
     @Override
@@ -202,7 +175,7 @@ public class PlotDatabase implements IPlotDatabase {
                     @Override
                     public void onComplete() {
                         if (!future.isDone())
-                            future.completeExceptionally(new RuntimeException("No result found for uniqueId: " + uniqueId));
+                            future.completeExceptionally(new EntryNotFoundException("No result found"));
                     }
 
                     @Override
@@ -211,37 +184,6 @@ public class PlotDatabase implements IPlotDatabase {
                     }
                 });
         return future;
-    }
-
-    @Override
-    public List<Plot> findByOwnerSync(UUID owner) {
-        try {
-            List<Plot> plots = new ArrayList<>();
-
-            CompletableFuture<List<Plot>> future = new CompletableFuture<>();
-            this.collection.find(Filters.eq("owner", owner.toString()))
-                    .subscribe(new SubscriberHelpers.OperationSubscriber<Plot>() {
-                        @Override
-                        public void onNext(Plot plot) {
-                            plots.add(plot);
-                        }
-
-                        @Override
-                        public void onComplete() {
-                            if (plots.isEmpty())
-                                future.completeExceptionally(new RuntimeException("No results found for owner uniqueId: " + owner));
-                            else future.complete(plots);
-                        }
-
-                        @Override
-                        public void onError(Throwable t) {
-                            future.completeExceptionally(t);
-                        }
-                    });
-            return future.join();
-        } catch (Exception exception) {
-            throw new RuntimeException(exception);
-        }
     }
 
     @Override
@@ -259,7 +201,7 @@ public class PlotDatabase implements IPlotDatabase {
                     @Override
                     public void onComplete() {
                         if (plots.isEmpty())
-                            future.completeExceptionally(new RuntimeException("No results found for owner uniqueId: " + owner));
+                            future.completeExceptionally(new EntryNotFoundException("No results found"));
                         else future.complete(plots);
                     }
 
@@ -269,37 +211,6 @@ public class PlotDatabase implements IPlotDatabase {
                     }
                 });
         return future;
-    }
-
-    @Override
-    public List<Plot> findSync() {
-        try {
-            List<Plot> plots = new ArrayList<>();
-
-            CompletableFuture<List<Plot>> future = new CompletableFuture<>();
-            this.collection.find()
-                    .subscribe(new SubscriberHelpers.OperationSubscriber<Plot>() {
-                        @Override
-                        public void onNext(Plot plot) {
-                            plots.add(plot);
-                        }
-
-                        @Override
-                        public void onComplete() {
-                            if (plots.isEmpty())
-                                future.completeExceptionally(new RuntimeException("No results found"));
-                            else future.complete(plots);
-                        }
-
-                        @Override
-                        public void onError(Throwable t) {
-                            future.completeExceptionally(t);
-                        }
-                    });
-            return future.join();
-        } catch (Exception exception) {
-            throw new RuntimeException(exception);
-        }
     }
 
     @Override
@@ -317,7 +228,7 @@ public class PlotDatabase implements IPlotDatabase {
                     @Override
                     public void onComplete() {
                         if (plots.isEmpty())
-                            future.completeExceptionally(new RuntimeException("No results found"));
+                            future.completeExceptionally(new EntryNotFoundException("No results found"));
                         else future.complete(plots);
                     }
 
