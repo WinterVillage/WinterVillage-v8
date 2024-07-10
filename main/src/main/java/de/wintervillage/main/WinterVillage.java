@@ -9,8 +9,10 @@ import com.mongodb.ServerAddress;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
-import de.wintervillage.main.adventcalendar.AdventCalendar;
-import de.wintervillage.main.adventcalendar.commands.CMD_AdventsKalender;
+import de.wintervillage.main.calendar.CalendarHandler;
+import de.wintervillage.main.calendar.codec.CalenderDayCodecProvider;
+import de.wintervillage.main.calendar.commands.CalendarCommand;
+import de.wintervillage.main.calendar.database.CalendarDatabase;
 import de.wintervillage.main.commands.CMD_Home;
 import de.wintervillage.main.commands.FreezeCommand;
 import de.wintervillage.main.commands.InvseeCommand;
@@ -32,10 +34,8 @@ import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
-import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -47,12 +47,14 @@ import java.util.List;
 public final class WinterVillage extends JavaPlugin {
 
     @Inject public PlotDatabase plotDatabase;
+    @Inject public CalendarDatabase calendarDatabase;
+
     @Inject public PlotHandler plotHandler;
+    @Inject public CalendarHandler calendarHandler;
     @Inject public ShopManager shopManager;
     @Inject public EconomyManager economyManager;
     @Inject public SpecialItems specialItems;
     @Inject public EventManager eventManager;
-    @Inject public AdventCalendar adventCalendar;
 
     public final Component PREFIX = MiniMessage.miniMessage().deserialize("<gradient:#d48fff:#00f7ff>WinterVillage</gradient> | <reset>");
 
@@ -87,10 +89,10 @@ public final class WinterVillage extends JavaPlugin {
                     this.databaseDocument.getString("password").toCharArray()
             );
 
-            CodecProvider provider = PojoCodecProvider.builder().automatic(true).build();
             CodecRegistry registry = CodecRegistries.fromRegistries(
                     MongoClientSettings.getDefaultCodecRegistry(),
-                    CodecRegistries.fromProviders(new PlotCodecProvider(), provider)
+                    CodecRegistries.fromProviders(new PlotCodecProvider()),
+                    CodecRegistries.fromProviders(new CalenderDayCodecProvider())
             );
 
             this.mongoClient = MongoClients.create(
@@ -108,8 +110,6 @@ public final class WinterVillage extends JavaPlugin {
         Injector injector = Guice.createInjector(new WinterVillageModule());
         injector.injectMembers(this);
 
-        // TODO: Inject into WinterVillageModule
-
         //General-System
         new PlayerMoveListener(this);
 
@@ -123,7 +123,7 @@ public final class WinterVillage extends JavaPlugin {
             new InvseeCommand(command);
             new PlotCommand(command);
 
-            //Economy-System
+            //Economy-System TODO: proxy
             new CMD_Transfer(command);
 
             //SpecialItems
@@ -131,7 +131,7 @@ public final class WinterVillage extends JavaPlugin {
             new CMD_SpecialItem(command);
 
             //AdventCalendar
-            new CMD_AdventsKalender(command);
+            new CalendarCommand(command);
         });
     }
 
