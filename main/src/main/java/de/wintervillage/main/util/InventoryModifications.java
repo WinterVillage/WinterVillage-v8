@@ -11,6 +11,9 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
+/**
+ * @see <a href="https://github.com/TriumphTeam/triumph-gui/blob/master/core/src/main/java/dev/triumphteam/gui/guis/InteractionModifierListener.java">Find class on GitHub</a>
+ */
 public final class InventoryModifications {
 
     /**

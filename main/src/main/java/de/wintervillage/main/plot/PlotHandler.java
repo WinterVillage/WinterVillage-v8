@@ -27,7 +27,7 @@ public class PlotHandler {
 
     private final WinterVillage winterVillage;
 
-    public List<Plot> plotCache;
+    public final List<Plot> plotCache;
     private final ScheduledExecutorService executorService;
 
     private final String CHARACTERS = "ABDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -65,8 +65,10 @@ public class PlotHandler {
     public void forceUpdate() {
         this.winterVillage.plotDatabase.findAsync()
                 .thenAccept(plots -> {
-                    this.plotCache.clear();
-                    this.plotCache.addAll(plots);
+                    synchronized (this.plotCache) {
+                        this.plotCache.clear();
+                        this.plotCache.addAll(plots);
+                    }
                 })
                 .exceptionally(t -> {
                     this.winterVillage.getLogger().warning("Could not load plots: " + t.getMessage());
