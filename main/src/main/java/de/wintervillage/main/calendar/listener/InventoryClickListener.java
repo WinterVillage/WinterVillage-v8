@@ -6,6 +6,7 @@ import de.wintervillage.main.calendar.CalendarInventory;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -18,6 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static de.wintervillage.main.util.InventoryModifications.*;
+
 public class InventoryClickListener implements Listener {
 
     private final WinterVillage winterVillage;
@@ -28,10 +31,15 @@ public class InventoryClickListener implements Listener {
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
+    public void execute(InventoryClickEvent event) {
         Inventory inventory = event.getInventory();
         if (!(inventory.getHolder(false) instanceof CalendarInventory calendarInventory)) return;
-        event.setCancelled(true);
+
+        // block disabled actions
+        if (isPlacingItem(event) || isTakingItem(event) || isSwappingItem(event) || isDroppingItem(event) || isOtherEvent(event)) {
+            event.setCancelled(true);
+            event.setResult(Event.Result.DENY);
+        }
 
         if (event.getCurrentItem() == null) return;
         ItemStack clicked = event.getCurrentItem();
