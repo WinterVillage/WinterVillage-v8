@@ -126,7 +126,7 @@ public final class WinterVillage extends JavaPlugin {
 
         // listener
         new AsyncChatListener();
-        new PlayerMoveListener(this);
+        new PlayerMoveListener();
 
         // commands
         final LifecycleEventManager<Plugin> lifecycleEventManager = this.getLifecycleManager();
