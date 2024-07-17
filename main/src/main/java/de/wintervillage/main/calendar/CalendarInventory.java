@@ -35,21 +35,8 @@ public class CalendarInventory implements InventoryHolder {
 
         int current = LocalDate.now().getDayOfMonth();
         IntStream.rangeClosed(1, 24).forEach(i -> {
-            ItemStack itemStack = ItemBuilder.from(Material.RED_STAINED_GLASS_PANE)
-                    .amount(1)
-                    .persistentDataContainer(pdc -> pdc.set(this.winterVillage.calendarKey, PersistentDataType.INTEGER, i))
-                    .build();
-
             Optional<CalendarDay> optional = this.winterVillage.calendarHandler.byDay(i);
-            if (!optional.isPresent()) {
-                this.inventory.addItem(ItemBuilder.from(Material.RED_STAINED_GLASS_PANE)
-                        .name(Component.text("Türchen " + i + " verschlossen", NamedTextColor.RED))
-                        .persistentDataContainer(pdc -> pdc.set(this.winterVillage.calendarKey, PersistentDataType.INTEGER, i))
-                        .build());
-                return;
-            }
-
-            if (current < i) {
+            if (optional.isEmpty() || current < i) {
                 this.inventory.addItem(ItemBuilder.from(Material.RED_STAINED_GLASS_PANE)
                         .name(Component.text("Türchen " + i + " verschlossen", NamedTextColor.RED))
                         .persistentDataContainer(pdc -> pdc.set(this.winterVillage.calendarKey, PersistentDataType.INTEGER, i))
