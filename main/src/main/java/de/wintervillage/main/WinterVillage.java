@@ -21,6 +21,7 @@ import de.wintervillage.main.economy.EconomyManager;
 import de.wintervillage.main.economy.commands.CMD_Transfer;
 import de.wintervillage.main.economy.shop.ShopManager;
 import de.wintervillage.main.event.EventManager;
+import de.wintervillage.main.listener.AsyncChatListener;
 import de.wintervillage.main.listener.PlayerMoveListener;
 import de.wintervillage.main.plot.PlotCommand;
 import de.wintervillage.main.plot.PlotHandler;
@@ -124,6 +125,7 @@ public final class WinterVillage extends JavaPlugin {
         injector.injectMembers(this);
 
         // listener
+        new AsyncChatListener();
         new PlayerMoveListener(this);
 
         // commands
