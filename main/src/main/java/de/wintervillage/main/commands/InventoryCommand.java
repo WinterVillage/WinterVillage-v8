@@ -5,31 +5,39 @@ import de.wintervillage.main.WinterVillage;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 
-public class InvseeCommand {
+public class InventoryCommand {
 
     private final WinterVillage winterVillage;
 
-    public InvseeCommand(Commands commands) {
+    public InventoryCommand(Commands commands) {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
 
-        // TODO: LuckPerms
-        final LiteralArgumentBuilder builder = Commands.literal("invsee")
-                .requires((source) -> source.getSender() instanceof Player)
-                .then(
-                        Commands.argument("player", ArgumentTypes.player())
+        final LiteralArgumentBuilder builder = Commands.literal("inventory")
+                .requires((source) -> source.getSender() instanceof Player player && player.hasPermission("wintervillage.command.inventory"))
+                .then(Commands.literal("normal")
+                        .then(Commands.argument("player", ArgumentTypes.player())
                                 .executes((source) -> {
                                     Player player = source.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(source.getSource()).get(0);
 
                                     ((Player) source.getSource().getExecutor()).openInventory(player.getInventory());
-                                    ((Player) source.getSource().getExecutor()).playSound(((Player) source.getSource().getExecutor()).getLocation(), Sound.BLOCK_CHEST_OPEN, 3.0f, 3.0f);
                                     return 1;
                                 })
+                        )
+                )
+                .then(Commands.literal("enderchest")
+                        .then(Commands.argument("player", ArgumentTypes.player())
+                                .executes((source) -> {
+                                    Player player = source.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(source.getSource()).get(0);
+
+                                    ((Player) source.getSource().getExecutor()).openInventory(player.getEnderChest());
+                                    return 1;
+                                })
+                        )
                 );
         commands.register(this.winterVillage.getPluginMeta(), builder.build(), "Opens the inventory of the player you want", List.of());
     }

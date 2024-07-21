@@ -27,6 +27,9 @@ dependencies {
 
     // google guice
     implementation("com.google.inject:guice:7.0.0")
+
+    // luckperms
+    compileOnly("net.luckperms:api:5.4")
 }
 
 tasks {
@@ -56,4 +59,5 @@ bukkitPluginYaml{
     authors.addAll("Eagler", "Voldechse")
     apiVersion = "1.21"
     version = "${project.version}"
+    loadBefore.addAll("LuckPerms")
 }
