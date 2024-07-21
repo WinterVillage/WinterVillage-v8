@@ -3,6 +3,7 @@ package de.wintervillage.main.specialitems.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.wintervillage.main.WinterVillage;
+import de.wintervillage.main.specialitems.SpecialItem;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
@@ -34,25 +35,16 @@ public class CMD_SpecialItem {
                                     }
 
                                     String item_name = source.getArgument("item_name", String.class);
-                                    ItemStack item = new ItemStack(Material.AIR);
+                                    ItemStack item;
 
-                                    if(item_name.equalsIgnoreCase("timberaxt")){
-                                        item = this.winterVillage.specialItems.getSpecialItem(Component.text("TimberAxt"), Material.IRON_AXE, 1, true);
-                                    } else if(item_name.equalsIgnoreCase("disenchantmenttable")){
-                                        item = this.winterVillage.specialItems.getSpecialItem(Component.text("Disenchantment Table"), Material.GRINDSTONE, 1, true);
-                                    } else if(item_name.equalsIgnoreCase("fastfurnace")){
-                                        item = this.winterVillage.specialItems.getSpecialItem(Component.text("Fast Furnace"), Material.FURNACE, 1, true);
-                                    } else if(item_name.equalsIgnoreCase("backpack")){
-                                        item = this.winterVillage.specialItems.getSpecialItem(Component.text("Backpack"), Material.SHULKER_BOX, 1, true);
-                                    } else if(item_name.equalsIgnoreCase("santaspants")){
-                                        item = this.winterVillage.specialItems.getSpecialItem(Component.text("Santa's Pants"), Material.DIAMOND_LEGGINGS, 1, true);
-                                    } else if(item_name.equalsIgnoreCase("wvtable")){
-                                        item = this.winterVillage.specialItems.getSpecialItem(Component.text("WV Enchantment Table"), Material.ENCHANTING_TABLE, 1, true);
-                                    } else if(item_name.equalsIgnoreCase("wve_autosmelt")) {
-                                        item = this.winterVillage.specialItems.getSpecialItem(Component.text("WVE: AutoSmelt"), Material.ENCHANTED_BOOK, 1, true);
+                                    SpecialItem specialItem = this.winterVillage.specialItems.getSIByName(item_name);
+
+                                    if(specialItem != null){
+                                        item = specialItem.getItem();
+                                        player.getInventory().addItem(item);
+                                    } else {
+                                        player.sendMessage(this.winterVillage.PREFIX + "Das SpecialItem " + item_name + " existiert nicht.");
                                     }
-
-                                    player.getInventory().addItem(item);
 
                                     return 1;
                                 })
