@@ -1,6 +1,7 @@
-package de.wintervillage.main.config;
+package de.wintervillage.common.core.config;
 
 import com.google.gson.*;
+import de.wintervillage.common.core.config.adapter.DocumentTypeAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,11 +21,12 @@ public class Document {
 
     private final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Document.class, new DocumentTypeAdapter())
+            //.registerTypeAdapter(Location.class, new LocationTypeAdapter())
             .serializeNulls()
             .setPrettyPrinting()
             .create();
 
-    protected JsonObject jsonObject;
+    public JsonObject jsonObject;
 
     public Document() {
         this.jsonObject = new JsonObject();
@@ -138,6 +140,17 @@ public class Document {
         return this.jsonObject.get(key).getAsBoolean();
     }
 
+    public Object getObject(@NotNull String key) {
+        if (!this.jsonObject.has(key)) return null;
+        return this.jsonObject.get(key);
+    }
+
+    public <T> T getObject(@NotNull String key, @NotNull Class<?> classOf) {
+        if (!this.jsonObject.has(key)) return null;
+        JsonElement element = this.jsonObject.get(key);
+        return (T) this.GSON.fromJson(element, classOf);
+    }
+
     public Document getDocument(@NotNull String key) {
         if (!this.jsonObject.has(key)) return null;
         return new Document(this.jsonObject.getAsJsonObject(key));
@@ -156,6 +169,10 @@ public class Document {
 
     public int size() {
         return this.jsonObject.size();
+    }
+
+    public boolean isEmpty() {
+        return this.jsonObject.isEmpty();
     }
 
     public Document clear() {
@@ -188,5 +205,9 @@ public class Document {
         } catch (IOException exception) {
             throw new RuntimeException("Failed to save document to path: " + path, exception);
         }
+    }
+
+    public Gson getGSON() {
+        return GSON;
     }
 }

@@ -1,5 +1,7 @@
 name: WinterVillage-Main
-version: '${version}'
 main: de.wintervillage.main.WinterVillage
+load: STARTUP
+authors: ["Eagler", "Voldechse"]
 api-version: '1.21'
-authors: [Eagler, Voldechse]
+version: "8.0-SNAPSHOT"
+depend: ["LuckPerms"]
