@@ -22,12 +22,11 @@ public class SpecialItem_FastFurnace extends SpecialItem {
         super();
         ItemStack item = SpecialItems.getSpecialItem(Component.text("Fast Furnace"), Material.FURNACE, 1, true);
         this.setItem(item);
+        this.setNameStr("fast_furnace");
     }
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        super.onBlockBreak(event);
-
         World world = event.getBlock().getWorld();
 
         if(this.winterVillage.specialItems.isSIBlock(event.getBlock(), "fast_furnace")){
@@ -38,8 +37,6 @@ public class SpecialItem_FastFurnace extends SpecialItem {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        super.onBlockPlace(event);
-
         ItemStack item_placed = event.getItemInHand();
 
         if(isSpecialitem(item_placed)){
@@ -49,8 +46,6 @@ public class SpecialItem_FastFurnace extends SpecialItem {
 
     @EventHandler
     public void onFurnaceBurn(FurnaceBurnEvent event) {
-        super.onFurnaceBurn(event);
-
         Block block_furnace = event.getBlock();
 
         if(this.winterVillage.specialItems.isSIBlock(block_furnace, "fast_furnace")) {
@@ -60,8 +55,6 @@ public class SpecialItem_FastFurnace extends SpecialItem {
 
     @EventHandler
     public void onFurnaceSmelt(FurnaceSmeltEvent event) {
-        super.onFurnaceSmelt(event);
-
         Block block_furnace = event.getBlock();
         ItemStack item_outcome = event.getResult();
 
@@ -76,8 +69,6 @@ public class SpecialItem_FastFurnace extends SpecialItem {
 
     @EventHandler
     public void onFurnaceStartSmelt(FurnaceStartSmeltEvent event) {
-        super.onFurnaceStartSmelt(event);
-
         Block block_furnace = event.getBlock();
 
         if(this.winterVillage.specialItems.isSIBlock(block_furnace, "fast_furnace")) {

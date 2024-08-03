@@ -9,6 +9,7 @@ import com.mongodb.ServerAddress;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
+import de.wintervillage.main.antifreezle.AntiFreezle;
 import de.wintervillage.common.core.config.Document;
 import de.wintervillage.common.core.player.codec.PlayerCodecProvider;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
@@ -18,7 +19,7 @@ import de.wintervillage.main.calendar.commands.CalendarCommand;
 import de.wintervillage.main.calendar.database.CalendarDatabase;
 import de.wintervillage.main.commands.FreezeCommand;
 import de.wintervillage.main.commands.InventoryCommand;
-import de.wintervillage.main.config.Document;
+import de.wintervillage.main.death.DeathManager;
 import de.wintervillage.main.economy.EconomyManager;
 import de.wintervillage.main.economy.commands.CMD_Transfer;
 import de.wintervillage.main.economy.shop.ShopManager;
@@ -65,6 +66,8 @@ public final class WinterVillage extends JavaPlugin {
     public @Inject EconomyManager economyManager;
     public @Inject SpecialItems specialItems;
     public @Inject EventManager eventManager;
+    public @Inject DeathManager deathManager;
+    public @Inject AntiFreezle antiFreezle;
 
     public LuckPerms luckPerms;
 

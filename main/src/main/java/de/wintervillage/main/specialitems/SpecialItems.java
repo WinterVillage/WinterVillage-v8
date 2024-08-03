@@ -68,7 +68,7 @@ public class SpecialItems {
 
     public SpecialItem getSIByName(String name){
         for(SpecialItem si : list_specialItems){
-            if(PlainTextComponentSerializer.plainText().serialize(si.getName()).toLowerCase().contains(name.toLowerCase()))
+            if(si.getNameStr().equalsIgnoreCase(name))
                 return si;
         }
 

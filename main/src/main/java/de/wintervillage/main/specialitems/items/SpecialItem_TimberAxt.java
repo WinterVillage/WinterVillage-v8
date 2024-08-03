@@ -17,6 +17,7 @@ public class SpecialItem_TimberAxt extends SpecialItem {
         super();
         ItemStack item = SpecialItems.getSpecialItem(Component.text("TimberAxt"), Material.IRON_AXE, 1, true);
         this.setItem(item);
+        this.setNameStr("timberaxt");
     }
 
     @EventHandler

@@ -27,12 +27,11 @@ public class SpecialItem_WVETable extends SpecialItem {
         super();
         ItemStack item = SpecialItems.getSpecialItem(Component.text("WV Enchantment Table"), Material.ENCHANTING_TABLE, 1, true);
         this.setItem(item);
+        this.setNameStr("wve_table");
     }
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        super.onBlockBreak(event);
-
         World world = event.getBlock().getWorld();
 
         if(this.winterVillage.specialItems.isSIBlock(event.getBlock(), "wve_table")){
@@ -43,8 +42,6 @@ public class SpecialItem_WVETable extends SpecialItem {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        super.onBlockPlace(event);
-
         ItemStack item_placed = event.getItemInHand();
 
         if(isSpecialitem(item_placed)){
@@ -54,8 +51,6 @@ public class SpecialItem_WVETable extends SpecialItem {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        super.onInventoryClick(event);
-
         if(event.getView().title().equals(Component.text("WV Enchantment Table", NamedTextColor.RED).decoration(TextDecoration.BOLD, true))) {
             Inventory inventory = event.getInventory();
             ItemStack item_clicked = event.getCurrentItem();
@@ -89,8 +84,6 @@ public class SpecialItem_WVETable extends SpecialItem {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        super.onInventoryClose(event);
-
         if(!(event.getPlayer() instanceof Player player))
             return;
 
@@ -105,8 +98,6 @@ public class SpecialItem_WVETable extends SpecialItem {
 
     @EventHandler
     public void onPlayerUpdate(PlayerUpdateEvent event) {
-        super.onPlayerUpdate(event);
-
         Player player = event.getPlayer();
 
         if(player.getOpenInventory() != null && player.getOpenInventory().getTopInventory() != null
@@ -133,8 +124,6 @@ public class SpecialItem_WVETable extends SpecialItem {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-        super.onPlayerInteract(event);
-
         Player player = event.getPlayer();
 
         if(event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null) {

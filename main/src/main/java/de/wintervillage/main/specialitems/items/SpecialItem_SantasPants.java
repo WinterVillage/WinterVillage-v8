@@ -15,12 +15,11 @@ public class SpecialItem_SantasPants extends SpecialItem {
         super();
         ItemStack item = SpecialItems.getSpecialItem(Component.text("Santa's Pants"), Material.DIAMOND_LEGGINGS, 1, true);
         this.setItem(item);
+        this.setNameStr("santas_pants");
     }
 
     @EventHandler
     public void onPlayerUpdate(PlayerUpdateEvent event) {
-        super.onPlayerUpdate(event);
-
         Player player = event.getPlayer();
         ItemStack leggings_player = player.getInventory().getLeggings();
 

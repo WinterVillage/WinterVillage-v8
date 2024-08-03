@@ -22,12 +22,11 @@ public class SpecialItemWVE_AutoSmelt extends SpecialItem {
         super();
         ItemStack item = SpecialItems.getSpecialItem(Component.text("WVE: AutoSmelt"), Material.ENCHANTED_BOOK, 1, true);
         this.setItem(item);
+        this.setNameStr("wve_autosmelt");
     }
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        super.onBlockBreak(event);
-
         Player player = event.getPlayer();
         ItemStack item_in_hand = player.getInventory().getItemInMainHand();
         World world = event.getBlock().getWorld();
