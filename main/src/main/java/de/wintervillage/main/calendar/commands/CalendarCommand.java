@@ -17,7 +17,7 @@ import java.util.Optional;
 
 public class CalendarCommand {
 
-    private WinterVillage winterVillage;
+    private final WinterVillage winterVillage;
 
     public CalendarCommand(Commands commands) {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
@@ -25,7 +25,7 @@ public class CalendarCommand {
         final LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("adventskalender")
                 .requires(source -> source.getExecutor() instanceof Player)
                 .then(Commands.literal("set")
-                        // TODO: LuckPerms
+                        .requires(source -> source.getSender().hasPermission("wintervillage.calendar.command.set"))
                         .then(Commands.argument("day", IntegerArgumentType.integer(1, 24))
                                 .executes((source) -> {
                                     Player player = (Player) source.getSource().getExecutor();
@@ -52,7 +52,7 @@ public class CalendarCommand {
                         )
                 )
                 .then(Commands.literal("get")
-                        // TODO: LuckPerms
+                        .requires(source -> source.getSender().hasPermission("wintervillage.calendar.command.get"))
                         .then(Commands.argument("day", IntegerArgumentType.integer(1, 24))
                                 .executes((source) -> {
                                     Player player = (Player) source.getSource().getExecutor();

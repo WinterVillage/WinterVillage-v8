@@ -1,8 +1,8 @@
 package de.wintervillage.main.plot.codec;
 
 import com.mongodb.MongoClientSettings;
+import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.plot.Plot;
-import de.wintervillage.main.util.BoundingBox2D;
 import org.bson.BsonReader;
 import org.bson.BsonWriter;
 import org.bson.Document;

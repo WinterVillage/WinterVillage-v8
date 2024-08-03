@@ -6,10 +6,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.minecraft.nbt.IntTag;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -22,7 +20,7 @@ import java.util.List;
 
 public class EnchantmentUtils {
 
-    private WinterVillage winterVillage;
+    private final WinterVillage winterVillage;
 
     public EnchantmentUtils(){
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);

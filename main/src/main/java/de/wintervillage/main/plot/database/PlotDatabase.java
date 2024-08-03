@@ -5,11 +5,11 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import com.mongodb.reactivestreams.client.MongoCollection;
+import de.wintervillage.common.core.database.SubscriberHelpers;
+import de.wintervillage.common.core.database.exception.EntryNotFoundException;
+import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.database.SubscriberHelpers;
-import de.wintervillage.main.database.exception.EntryNotFoundException;
 import de.wintervillage.main.plot.Plot;
-import de.wintervillage.main.util.BoundingBox2D;
 import org.bson.Document;
 import org.bukkit.plugin.java.JavaPlugin;
 

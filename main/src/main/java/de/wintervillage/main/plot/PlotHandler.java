@@ -1,7 +1,7 @@
 package de.wintervillage.main.plot;
 
+import de.wintervillage.common.paper.item.ItemBuilder;
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.item.ItemBuilder;
 import de.wintervillage.main.plot.listener.BlockBreakListener;
 import de.wintervillage.main.plot.listener.PlayerInteractListener;
 import de.wintervillage.main.plot.listener.PlayerQuitListener;

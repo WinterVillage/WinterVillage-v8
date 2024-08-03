@@ -1,7 +1,7 @@
 package de.wintervillage.main.persistent;
 
+import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.util.BoundingBox2D;
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;

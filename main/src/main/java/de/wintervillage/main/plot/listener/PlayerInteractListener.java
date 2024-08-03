@@ -1,8 +1,8 @@
 package de.wintervillage.main.plot.listener;
 
+import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.persistent.BoundingBoxDataType;
-import de.wintervillage.main.util.BoundingBox2D;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;

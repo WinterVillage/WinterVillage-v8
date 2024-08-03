@@ -67,8 +67,6 @@ public class SpecialItem_Backpack extends SpecialItem {
                 shulkerBox.getInventory().setContents(event.getInventory().getContents());
                 blockStateMeta.setBlockState(shulkerBox);
                 item_backpack.setItemMeta(blockStateMeta);
-
-                //TODO: Save Inventory in Database
             }
         }
     }
@@ -88,8 +86,6 @@ public class SpecialItem_Backpack extends SpecialItem {
 
                     Inventory inventory_backpack = Bukkit.createInventory(null, InventoryType.SHULKER_BOX, Component.text("Backpack", NamedTextColor.RED).decoration(TextDecoration.BOLD, true));
                     inventory_backpack.setContents(shulkerBox.getInventory().getContents());
-
-                    //TODO: Load Inventory from Database
 
                     player.openInventory(inventory_backpack);
 

@@ -1,0 +1,7 @@
+name: WinterVillage-Main
+main: de.wintervillage.main.WinterVillage
+load: STARTUP
+authors: ["Eagler", "Voldechse"]
+api-version: '1.21'
+version: "8.0-SNAPSHOT"
+depend: ["LuckPerms"]

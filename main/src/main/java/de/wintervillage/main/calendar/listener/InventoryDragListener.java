@@ -8,7 +8,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import static de.wintervillage.main.util.InventoryModifications.isDraggingItem;
+import static de.wintervillage.common.paper.util.InventoryModifications.isDraggingItem;
 
 public class InventoryDragListener implements Listener {
 

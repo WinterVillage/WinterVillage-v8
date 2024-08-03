@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static de.wintervillage.main.util.InventoryModifications.*;
+import static de.wintervillage.common.paper.util.InventoryModifications.*;
 
 public class InventoryClickListener implements Listener {
 

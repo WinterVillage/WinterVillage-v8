@@ -1,8 +1,8 @@
 package de.wintervillage.main.plot;
 
+import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.persistent.BoundingBoxDataType;
-import de.wintervillage.main.util.BoundingBox2D;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -55,8 +55,9 @@ public class ParticleRectangle implements Runnable {
         int maxX = (int) boundingBox.getMaxX();
         int maxZ = (int) boundingBox.getMaxZ();
 
-        boolean tooLarge = boundingBox.getWidthX() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH
-                || boundingBox.getWidthZ() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH;
+        boolean tooLarge = (!this.player.hasPermission("wintervillage.plot.width_bypass")
+                && (boundingBox.getWidthX() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH
+                || boundingBox.getWidthZ() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH));
 
         Particle.DustOptions dustOptions = new Particle.DustOptions(
                 tooLarge ? Color.RED : Color.GREEN, 4f
@@ -67,7 +68,6 @@ public class ParticleRectangle implements Runnable {
         this.spawnAlongLine(minX, minZ, minX, maxZ, dustOptions); // LEFT
         this.spawnAlongLine(maxX, minZ, maxX, maxZ, dustOptions); // RIGHT
 
-        // TODO: LuckPerms (&& !this.player.hasPermission("..."))
         Component component = tooLarge
                 ? Component.text("✘ ", NamedTextColor.RED).decoration(TextDecoration.BOLD, true)
                 .append(Component.text("Selected area is too big ", NamedTextColor.RED))

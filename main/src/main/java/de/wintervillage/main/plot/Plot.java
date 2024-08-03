@@ -1,6 +1,6 @@
 package de.wintervillage.main.plot;
 
-import de.wintervillage.main.util.BoundingBox2D;
+import de.wintervillage.common.paper.util.BoundingBox2D;
 
 import java.util.Date;
 import java.util.List;
@@ -16,9 +16,6 @@ public final class Plot {
 
     private List<UUID> members;
 
-    /**
-     * Default constructor for the Plot class
-     */
     public Plot() { }
 
     public Plot(String name, String uniqueId, Date creation, UUID owner, BoundingBox2D boundingBox, List<UUID> members) {

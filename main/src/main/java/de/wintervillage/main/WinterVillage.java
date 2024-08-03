@@ -9,11 +9,13 @@ import com.mongodb.ServerAddress;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
+import de.wintervillage.common.core.config.Document;
+import de.wintervillage.common.core.player.codec.PlayerCodecProvider;
+import de.wintervillage.common.core.player.database.PlayerDatabase;
 import de.wintervillage.main.calendar.CalendarHandler;
 import de.wintervillage.main.calendar.codec.CalenderDayCodecProvider;
 import de.wintervillage.main.calendar.commands.CalendarCommand;
 import de.wintervillage.main.calendar.database.CalendarDatabase;
-import de.wintervillage.main.commands.CMD_Home;
 import de.wintervillage.main.commands.FreezeCommand;
 import de.wintervillage.main.commands.InventoryCommand;
 import de.wintervillage.main.config.Document;
@@ -23,6 +25,7 @@ import de.wintervillage.main.economy.shop.ShopManager;
 import de.wintervillage.main.event.EventManager;
 import de.wintervillage.main.listener.AsyncChatListener;
 import de.wintervillage.main.listener.PlayerMoveListener;
+import de.wintervillage.main.player.PlayerHandler;
 import de.wintervillage.main.plot.PlotCommand;
 import de.wintervillage.main.plot.PlotHandler;
 import de.wintervillage.main.plot.database.PlotDatabase;
@@ -51,15 +54,17 @@ import java.util.concurrent.TimeUnit;
 
 public final class WinterVillage extends JavaPlugin {
 
-    @Inject public PlotDatabase plotDatabase;
-    @Inject public CalendarDatabase calendarDatabase;
+    public @Inject PlotDatabase plotDatabase;
+    public @Inject CalendarDatabase calendarDatabase;
+    public @Inject PlayerDatabase playerDatabase;
 
-    @Inject public PlotHandler plotHandler;
-    @Inject public CalendarHandler calendarHandler;
-    @Inject public ShopManager shopManager;
-    @Inject public EconomyManager economyManager;
-    @Inject public SpecialItems specialItems;
-    @Inject public EventManager eventManager;
+    public @Inject PlotHandler plotHandler;
+    public @Inject CalendarHandler calendarHandler;
+    public @Inject PlayerHandler playerHandler;
+    public @Inject ShopManager shopManager;
+    public @Inject EconomyManager economyManager;
+    public @Inject SpecialItems specialItems;
+    public @Inject EventManager eventManager;
 
     public LuckPerms luckPerms;
 
@@ -102,7 +107,8 @@ public final class WinterVillage extends JavaPlugin {
             CodecRegistry registry = CodecRegistries.fromRegistries(
                     MongoClientSettings.getDefaultCodecRegistry(),
                     CodecRegistries.fromProviders(new PlotCodecProvider()),
-                    CodecRegistries.fromProviders(new CalenderDayCodecProvider())
+                    CodecRegistries.fromProviders(new CalenderDayCodecProvider()),
+                    CodecRegistries.fromProviders(new PlayerCodecProvider())
             );
 
             this.mongoClient = MongoClients.create(
@@ -110,18 +116,21 @@ public final class WinterVillage extends JavaPlugin {
                             .applyToClusterSettings(builder ->
                                     builder.hosts(List.of(new ServerAddress(this.databaseDocument.getString("host"), this.databaseDocument.getInt("port"))))
                             )
+                            .applyToConnectionPoolSettings(builder -> builder.maxConnectionIdleTime(60, TimeUnit.SECONDS))
+                            .applyToSocketSettings(builder -> builder.connectTimeout(10, TimeUnit.SECONDS))
+                            .applyToServerSettings(builder -> builder.heartbeatFrequency(10, TimeUnit.SECONDS))
                             .credential(credential)
+                            .codecRegistry(registry)
                             .build()
             );
-            this.mongoDatabase = this.mongoClient.getDatabase(this.databaseDocument.getString("database"))
-                    .withCodecRegistry(registry);
+            this.mongoDatabase = this.mongoClient.getDatabase(this.databaseDocument.getString("database"));
         }
 
         RegisteredServiceProvider<LuckPerms> luckPermsProvider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
         if (luckPermsProvider != null) this.luckPerms = luckPermsProvider.getProvider();
 
         // inject handlers
-        Injector injector = Guice.createInjector(new WinterVillageModule());
+        Injector injector = Guice.createInjector(new WinterVillageModule(this.mongoDatabase));
         injector.injectMembers(this);
 
         // listener
@@ -135,7 +144,6 @@ public final class WinterVillage extends JavaPlugin {
 
             //General-System
             new FreezeCommand(command);
-            new CMD_Home(command);
             new InventoryCommand(command);
             new PlotCommand(command);
 
@@ -155,6 +163,7 @@ public final class WinterVillage extends JavaPlugin {
     public void onDisable() {
         if (this.mongoClient != null) this.mongoClient.close();
         if (this.plotHandler != null) this.plotHandler.terminate();
+        if (this.playerHandler != null) this.playerHandler.terminate();
 
         this.eventManager.stop();
     }
