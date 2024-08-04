@@ -27,7 +27,7 @@ import de.wintervillage.main.event.EventManager;
 import de.wintervillage.main.listener.AsyncChatListener;
 import de.wintervillage.main.listener.PlayerMoveListener;
 import de.wintervillage.main.player.PlayerHandler;
-import de.wintervillage.main.plot.PlotCommand;
+import de.wintervillage.main.plot.commands.PlotCommand;
 import de.wintervillage.main.plot.PlotHandler;
 import de.wintervillage.main.plot.database.PlotDatabase;
 import de.wintervillage.main.plot.codec.PlotCodecProvider;
@@ -38,6 +38,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.LuckPerms;
 import org.bson.codecs.configuration.CodecRegistries;
@@ -164,6 +165,17 @@ public final class WinterVillage extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // save data from the players, by blocking the main-thread and kicking them afterward to prevent data-loss
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            this.playerDatabase.modify(player.getUniqueId(), winterVillagePlayer -> {
+                winterVillagePlayer.playerInformation().save(player);
+            }).join();
+
+            player.kick(Component.text("Server is shutting down", NamedTextColor.RED)
+                    .append(Component.newline())
+                    .append(Component.text("discord.wintervillage.de", NamedTextColor.AQUA)));
+        });
+
         if (this.mongoClient != null) this.mongoClient.close();
         if (this.plotHandler != null) this.plotHandler.terminate();
         if (this.playerHandler != null) this.playerHandler.terminate();
