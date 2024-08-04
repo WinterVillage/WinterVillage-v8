@@ -13,6 +13,7 @@ import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -33,8 +34,12 @@ public class SpecialItem_DisenchantmentTable extends SpecialItem {
         this.setNameStr("disenchantment_table");
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event) {
+        // Cancelled
+        // | If the player tries to place a specialitem within a plot where he is not allowed to
+        if (event.isCancelled()) return;
+
         Player player = event.getPlayer();
         ItemStack item_placed = event.getItemInHand();
 
@@ -43,7 +48,7 @@ public class SpecialItem_DisenchantmentTable extends SpecialItem {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
         World world = event.getBlock().getWorld();
 

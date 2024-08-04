@@ -12,7 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class ListenerAF_InventoryClick implements Listener {
 
-    private WinterVillage winterVillage;
+    private final WinterVillage winterVillage;
 
     public ListenerAF_InventoryClick(WinterVillage winterVillage){
         this.winterVillage = winterVillage;

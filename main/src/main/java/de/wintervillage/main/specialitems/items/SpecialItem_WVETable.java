@@ -12,6 +12,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -30,8 +31,12 @@ public class SpecialItem_WVETable extends SpecialItem {
         this.setNameStr("wve_table");
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
+        // Cancelled
+        // | If the player tries to break a specialitem within a plot where he is not allowed to
+        if (event.isCancelled()) return;
+
         World world = event.getBlock().getWorld();
 
         if(this.winterVillage.specialItems.isSIBlock(event.getBlock(), "wve_table")){
@@ -42,6 +47,10 @@ public class SpecialItem_WVETable extends SpecialItem {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
+        // Cancelled
+        // | If the player tries to place a specialitem within a plot where he is not allowed to
+        if (event.isCancelled()) return;
+
         ItemStack item_placed = event.getItemInHand();
 
         if(isSpecialitem(item_placed)){

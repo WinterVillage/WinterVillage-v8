@@ -5,20 +5,21 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class ListenerAF_BlockBreakBuild implements Listener {
 
-    private WinterVillage winterVillage;
+    private final WinterVillage winterVillage;
 
     public ListenerAF_BlockBreakBuild(WinterVillage winterVillage){
         this.winterVillage = winterVillage;
         this.winterVillage.getServer().getPluginManager().registerEvents(this, this.winterVillage);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event){
         Player player = event.getPlayer();
 

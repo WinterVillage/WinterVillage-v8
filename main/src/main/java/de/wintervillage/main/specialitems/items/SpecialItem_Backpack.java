@@ -9,9 +9,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -28,12 +28,6 @@ public class SpecialItem_Backpack extends SpecialItem {
         ItemStack item = SpecialItems.getSpecialItem(Component.text("Backpack"), Material.SHULKER_BOX, 1, true);
         this.setItem(item);
         this.setNameStr("backpack");
-    }
-
-    @EventHandler
-    public void onBlockPlace(BlockPlaceEvent event) {
-        if(isSpecialitem(event.getItemInHand()))
-            event.setCancelled(true);
     }
 
     @EventHandler
@@ -83,6 +77,7 @@ public class SpecialItem_Backpack extends SpecialItem {
                     player.openInventory(inventory_backpack);
 
                     event.setCancelled(true);
+                    event.setUseInteractedBlock(Event.Result.DENY);
                 }
 
             }

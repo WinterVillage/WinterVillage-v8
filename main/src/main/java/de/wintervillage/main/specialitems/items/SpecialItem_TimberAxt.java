@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -20,8 +21,12 @@ public class SpecialItem_TimberAxt extends SpecialItem {
         this.setNameStr("timberaxt");
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
+        // Cancelled
+        // | If the player tries to timber a tree within a plot where he is not allowed to
+        if (event.isCancelled()) return;
+
         Player player = event.getPlayer();
         ItemStack item_in_hand = player.getInventory().getItemInMainHand();
 
