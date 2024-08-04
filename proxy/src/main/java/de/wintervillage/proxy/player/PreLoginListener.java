@@ -76,7 +76,21 @@ public class PreLoginListener {
                             return;
                         }
 
-                        // TODO: whitelist check
+                        // Cancelled
+                        // | If the player has no whitelistInformation and is not able to bypass it
+                        if (player.whitelistInformation() == null || !user.getCachedData().getPermissionData().checkPermission("wintervillage.whitelist-bypass").asBoolean()) {
+                            event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
+                                    Component.text("Du bist nicht auf der Whitelist", NamedTextColor.RED)
+                                            .append(Component.newline())
+                                            .append(Component.text("discord.wintervillage.de", NamedTextColor.AQUA))
+                            ));
+                            continuation.resume();
+                            return;
+                        }
+
+                        // Allowed
+                        event.setResult(PreLoginEvent.PreLoginComponentResult.allowed());
+                        continuation.resume();
                     });
         });
     }
