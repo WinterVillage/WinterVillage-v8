@@ -1,9 +1,7 @@
 package de.wintervillage.common.core.player.impl;
 
 import de.wintervillage.common.core.player.WinterVillagePlayer;
-import de.wintervillage.common.core.player.data.BanInformation;
-import de.wintervillage.common.core.player.data.MuteInformation;
-import de.wintervillage.common.core.player.data.PlayerInformation;
+import de.wintervillage.common.core.player.data.*;
 import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
@@ -31,6 +29,12 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
     @BsonProperty("playerInformation")
     private @NotNull PlayerInformation playerInformation;
+
+    @BsonProperty("wildcardInformation")
+    private @Nullable WildcardInformation wildcardInformation;
+
+    @BsonProperty("whitelistInformation")
+    private @Nullable WhitelistInformation whitelistInformation;
 
     public WinterVillagePlayerImpl(@NotNull UUID uniqueId) {
         this.uniqueId = uniqueId;
@@ -86,6 +90,26 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         this.playerInformation = playerInformation;
     }
 
+    @Override
+    public @Nullable WildcardInformation wildcardInformation() {
+        return this.wildcardInformation;
+    }
+
+    @Override
+    public void wildcardInformation(@Nullable WildcardInformation wildcardInformation) {
+        this.wildcardInformation = wildcardInformation;
+    }
+
+    @Override
+    public @Nullable WhitelistInformation whitelistInformation() {
+        return this.whitelistInformation;
+    }
+
+    @Override
+    public void whitelistInformation(@Nullable WhitelistInformation whitelistInformation) {
+        this.whitelistInformation = whitelistInformation;
+    }
+
     public Document toDocument() {
         Document document = new Document();
 
@@ -98,6 +122,12 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
             document.put("muteInformation", this.muteInformation.toDocument(this.muteInformation));
 
         document.put("playerInformation", this.playerInformation.toDocument(this.playerInformation));
+
+        if (this.wildcardInformation != null)
+            document.put("wildcardInformation", this.wildcardInformation.toDocument(this.wildcardInformation));
+
+        if (this.whitelistInformation != null)
+            document.put("whitelistInformation", this.whitelistInformation.toDocument(this.whitelistInformation));
 
         return document;
     }
@@ -122,17 +152,29 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         PlayerInformation playerInformation = PlayerInformation.fromDocument(document.get("playerInformation", Document.class));
         player.playerInformation = playerInformation;
 
+        if (document.containsKey("wildcardInformation") && !document.get("wildcardInformation", Document.class).isEmpty()) {
+            Document wildcardDocument = document.get("wildcardInformation", Document.class);
+            player.wildcardInformation = WildcardInformation.fromDocument(wildcardDocument);
+        }
+
+        if (document.containsKey("whitelistInformation") && !document.get("whitelistInformation", Document.class).isEmpty()) {
+            Document whitelistDocument = document.get("whitelistInformation", Document.class);
+            player.whitelistInformation = WhitelistInformation.fromDocument(whitelistDocument);
+        }
+
         return player;
     }
 
     @Override
     public String toString() {
         return "WinterVillagePlayerImpl{" +
-                "uniqueId=" + uniqueId +
-                ", money=" + money +
-                ", banInformation=" + banInformation +
-                ", muteInformation=" + muteInformation +
-                ", playerInformation=" + playerInformation +
+                "uniqueId=" + this.uniqueId +
+                ", money=" + this.money +
+                ", banInformation=" + this.banInformation +
+                ", muteInformation=" + this.muteInformation +
+                ", playerInformation=" + this.playerInformation +
+                ", wildcardInformation=" + this.wildcardInformation +
+                ", whitelistInformation=" + this.whitelistInformation +
                 '}';
     }
 }

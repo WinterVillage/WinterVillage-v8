@@ -73,10 +73,10 @@ public class BanInformation {
     @Override
     public String toString() {
         return "BanInformation{" +
-                "from=" + from +
-                ", reason='" + reason + '\'' +
-                ", created=" + created +
-                ", expiring=" + expiring +
+                "from=" + this.from +
+                ", reason='" + this.reason + '\'' +
+                ", created=" + this.created +
+                ", expiring=" + this.expiring +
                 '}';
     }
 }

@@ -1,8 +1,6 @@
 package de.wintervillage.common.core.player;
 
-import de.wintervillage.common.core.player.data.BanInformation;
-import de.wintervillage.common.core.player.data.MuteInformation;
-import de.wintervillage.common.core.player.data.PlayerInformation;
+import de.wintervillage.common.core.player.data.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,4 +33,14 @@ public interface WinterVillagePlayer {
     PlayerInformation playerInformation();
 
     void playerInformation(@NotNull PlayerInformation playerInformation);
+
+    @Nullable
+    WildcardInformation wildcardInformation();
+
+    void wildcardInformation(@Nullable WildcardInformation wildcardInformation);
+
+    @Nullable
+    WhitelistInformation whitelistInformation();
+
+    void whitelistInformation(@Nullable WhitelistInformation whitelistInformation);
 }
