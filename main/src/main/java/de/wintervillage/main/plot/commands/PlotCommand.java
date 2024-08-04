@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 public class PlotCommand {
 
@@ -53,8 +54,9 @@ public class PlotCommand {
                                         return 0;
                                     }
 
-                                    // TODO: LuckPerms
-                                    if (!this.winterVillage.plotHandler.byOwner(player.getUniqueId()).isEmpty()) {
+                                    boolean hasPlot = !this.winterVillage.plotHandler.byOwner(player.getUniqueId()).isEmpty();
+                                    boolean canBypass = player.hasPermission("wintervillage.plot.ignore_limit");
+                                    if (hasPlot && !canBypass) {
                                         player.sendMessage(Component.text("You already have a plot", NamedTextColor.RED));
                                         return 0;
                                     }
@@ -82,27 +84,25 @@ public class PlotCommand {
                                                         return 0;
                                                     }
 
-                                                    // TODO: Check max amount of plots by player
-
                                                     BoundingBox2D boundingBox = player.getPersistentDataContainer().get(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType());
-                                                    boolean tooLarge = boundingBox.getWidthX() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH
-                                                            || boundingBox.getWidthZ() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH;
-                                                    // TODO: LuckPerms
+                                                    boolean tooLarge = (!player.hasPermission("wintervillage.plot.width_bypass")
+                                                            && (boundingBox.getWidthX() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH
+                                                            || boundingBox.getWidthZ() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH));
                                                     if (tooLarge) {
                                                         player.sendMessage(Component.text("Plot is too large", NamedTextColor.RED));
                                                         return 0;
                                                     }
 
-                                                    Plot plot = new Plot(
+                                                    Plot plot = new PlotImpl(
+                                                            UUID.randomUUID(),
                                                             name,
-                                                            this.winterVillage.plotHandler.generateId(6),
                                                             new Date(),
                                                             player.getUniqueId(),
                                                             boundingBox,
                                                             List.of()
                                                     );
 
-                                                    this.winterVillage.plotDatabase.insertAsync(plot)
+                                                    this.winterVillage.plotDatabase.insert(plot)
                                                             .thenAccept((v) -> {
                                                                 player.sendMessage(Component.text("Plot inserted", NamedTextColor.GREEN));
                                                                 this.winterVillage.plotHandler.plotCache.add(plot);
@@ -134,13 +134,14 @@ public class PlotCommand {
                                         return 0;
                                     }
 
-                                    // TODO: LuckPerms ( && !player.hasPermission("...") )
-                                    if (!plot.getOwner().equals(player.getUniqueId())) {
+                                    boolean notOwner = !plot.owner().equals(player.getUniqueId());
+                                    boolean canBypass = player.hasPermission("wintervillage.plot.ignore_owner");
+                                    if (notOwner && !canBypass) {
                                         player.sendMessage(Component.text("You are not the owner of this plot", NamedTextColor.RED));
                                         return 0;
                                     }
 
-                                    this.winterVillage.plotDatabase.deleteAsync(plot.getUniqueId())
+                                    this.winterVillage.plotDatabase.delete(plot.uniqueId())
                                             .thenAccept((v) -> {
                                                 player.sendMessage(Component.text("Deleted plot", NamedTextColor.GREEN));
                                                 this.winterVillage.plotHandler.plotCache.remove(plot);
@@ -152,31 +153,6 @@ public class PlotCommand {
 
                                     return 1;
                                 })
-                                .then(
-                                        Commands.argument("uniqueId", StringArgumentType.word())
-                                                // TODO: LuckPerms
-                                                .executes((source) -> {
-                                                    String uniqueId = StringArgumentType.getString(source, "uniqueId");
-                                                    final Player player = (Player) source.getSource().getSender();
-
-                                                    Plot plot = this.winterVillage.plotHandler.byUniqueId(uniqueId);
-                                                    if (plot == null) {
-                                                        player.sendMessage(Component.text("Could not find plot", NamedTextColor.RED));
-                                                        return 0;
-                                                    }
-
-                                                    this.winterVillage.plotDatabase.deleteAsync(plot.getUniqueId())
-                                                            .thenAccept((v) -> {
-                                                                player.sendMessage(Component.text("Deleted plot", NamedTextColor.GREEN));
-                                                                this.winterVillage.plotHandler.plotCache.remove(plot);
-                                                            })
-                                                            .exceptionally((t) -> {
-                                                                player.sendMessage(Component.text("Could not delete plot", NamedTextColor.RED));
-                                                                return null;
-                                                            });
-                                                    return 1;
-                                                })
-                                )
                 );
         commands.register(this.winterVillage.getPluginMeta(), builder.build(), "Manage your plots", List.of());
     }

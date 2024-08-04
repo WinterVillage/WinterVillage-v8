@@ -4,6 +4,7 @@ import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.ParticleRectangle;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.persistence.PersistentDataType;
@@ -20,7 +21,7 @@ public class PlayerQuitListener implements Listener {
         this.winterVillage.getServer().getPluginManager().registerEvents(this, this.winterVillage);
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void execute(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
