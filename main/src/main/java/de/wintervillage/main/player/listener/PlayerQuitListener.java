@@ -3,6 +3,7 @@ package de.wintervillage.main.player.listener;
 import de.wintervillage.main.WinterVillage;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,7 +17,7 @@ public class PlayerQuitListener implements Listener {
         this.winterVillage.getServer().getPluginManager().registerEvents(this, this.winterVillage);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST) // HIGHEST, so every listener can modify the player before he's being saved
     public void execute(PlayerQuitEvent event) {
         final Player player = event.getPlayer();
 
