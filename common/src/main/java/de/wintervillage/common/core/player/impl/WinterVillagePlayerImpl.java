@@ -8,6 +8,7 @@ import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.Decimal128;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -17,10 +18,10 @@ import java.util.UUID;
 public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
     @BsonId
-    private final UUID uniqueId;
+    private final @NotNull UUID uniqueId;
 
     @BsonProperty("money")
-    private BigDecimal money;
+    private @NotNull BigDecimal money;
 
     @BsonProperty("banInformation")
     private @Nullable BanInformation banInformation;
@@ -29,9 +30,9 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     private @Nullable MuteInformation muteInformation;
 
     @BsonProperty("playerInformation")
-    private PlayerInformation playerInformation;
+    private @NotNull PlayerInformation playerInformation;
 
-    public WinterVillagePlayerImpl(UUID uniqueId) {
+    public WinterVillagePlayerImpl(@NotNull UUID uniqueId) {
         this.uniqueId = uniqueId;
         this.money = BigDecimal.ZERO;
 
@@ -42,17 +43,17 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     }
 
     @Override
-    public UUID uniqueId() {
+    public @NotNull UUID uniqueId() {
         return this.uniqueId;
     }
 
     @Override
-    public BigDecimal money() {
+    public @NotNull BigDecimal money() {
         return this.money;
     }
 
     @Override
-    public void money(BigDecimal money) {
+    public void money(@NotNull BigDecimal money) {
         this.money = money;
     }
 
@@ -76,12 +77,12 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     }
 
     @Override
-    public PlayerInformation playerInformation() {
+    public @NotNull PlayerInformation playerInformation() {
         return this.playerInformation;
     }
 
     @Override
-    public void playerInformation(PlayerInformation playerInformation) {
+    public void playerInformation(@NotNull PlayerInformation playerInformation) {
         this.playerInformation = playerInformation;
     }
 
