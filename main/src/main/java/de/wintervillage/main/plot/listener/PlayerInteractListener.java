@@ -31,6 +31,11 @@ public class PlayerInteractListener implements Listener {
         if (!player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)) return;
         event.setUseInteractedBlock(Event.Result.DENY);
 
+        if (this.winterVillage.plotHandler.byBounds(event.getClickedBlock().getLocation()) != null) {
+            player.sendMessage(Component.text("You can't set your bounds within a plot", NamedTextColor.RED));
+            return;
+        }
+
         BoundingBox2D boundingBox2D = player.getPersistentDataContainer().get(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType());
 
         if (event.getAction().isLeftClick()) {
