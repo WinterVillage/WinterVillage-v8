@@ -1,29 +1,23 @@
-package de.wintervillage.main.persistent;
+package de.wintervillage.common.paper.persistent;
 
 import de.wintervillage.common.paper.util.BoundingBox2D;
-import de.wintervillage.main.WinterVillage;
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
 public class BoundingBoxDataType implements PersistentDataType<PersistentDataContainer, BoundingBox2D> {
 
-    private final WinterVillage winterVillage;
-
     private final NamespacedKey minXKey, minZKey, maxXKey, maxZKey;
 
     public BoundingBoxDataType() {
-        this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
-
-        this.minXKey = new NamespacedKey(this.winterVillage, "minX");
-        this.minZKey = new NamespacedKey(this.winterVillage, "minZ");
-        this.maxXKey = new NamespacedKey(this.winterVillage, "maxX");
-        this.maxZKey = new NamespacedKey(this.winterVillage, "maxZ");
+        this.minXKey = new NamespacedKey("wintervillage", "boundingbox_min_x");
+        this.minZKey = new NamespacedKey("wintervillage", "boundingbox_min_z");
+        this.maxXKey = new NamespacedKey("wintervillage", "boundingbox_max_x");
+        this.maxZKey = new NamespacedKey("wintervillage", "boundingbox_max_z");
     }
 
     @Override
@@ -56,18 +50,5 @@ public class BoundingBoxDataType implements PersistentDataType<PersistentDataCon
         double maxZ = Objects.requireNonNull(primitive.get(this.maxZKey, PersistentDataType.DOUBLE));
 
         return new BoundingBox2D(minX, minZ, maxX, maxZ);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        BoundingBoxDataType that = (BoundingBoxDataType) o;
-        return Objects.equals(winterVillage, that.winterVillage) && Objects.equals(minXKey, that.minXKey) && Objects.equals(minZKey, that.minZKey) && Objects.equals(maxXKey, that.maxXKey) && Objects.equals(maxZKey, that.maxZKey);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(winterVillage, minXKey, minZKey, maxXKey, maxZKey);
     }
 }

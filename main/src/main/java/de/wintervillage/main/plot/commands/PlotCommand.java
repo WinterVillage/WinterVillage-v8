@@ -1,10 +1,13 @@
-package de.wintervillage.main.plot;
+package de.wintervillage.main.plot.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.persistent.BoundingBoxDataType;
+import de.wintervillage.common.paper.persistent.BoundingBoxDataType;
+import de.wintervillage.main.plot.ParticleRectangle;
+import de.wintervillage.main.plot.Plot;
+import de.wintervillage.main.plot.impl.PlotImpl;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.Component;
