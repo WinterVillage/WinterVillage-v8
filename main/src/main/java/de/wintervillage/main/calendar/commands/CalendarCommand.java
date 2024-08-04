@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.calendar.CalendarDay;
 import de.wintervillage.main.calendar.CalendarInventory;
+import de.wintervillage.main.calendar.impl.CalendarDayImpl;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.Component;
@@ -31,13 +32,13 @@ public class CalendarCommand {
                                     Player player = (Player) source.getSource().getExecutor();
                                     int day = IntegerArgumentType.getInteger(source, "day");
 
-                                    CalendarDay calendarDay = new CalendarDay(
+                                    CalendarDay calendarDay = new CalendarDayImpl(
                                             day,
                                             player.getInventory().getItemInMainHand(),
                                             List.of()
                                     );
 
-                                    this.winterVillage.calendarDatabase.insertAsync(calendarDay)
+                                    this.winterVillage.calendarDatabase.insert(calendarDay)
                                             .thenAccept((v) -> {
                                                 player.sendMessage(Component.text("Inserted"));
                                                 this.winterVillage.calendarHandler.forceUpdate();
@@ -64,7 +65,7 @@ public class CalendarCommand {
                                         return 0;
                                     }
 
-                                    player.getInventory().addItem(optional.get().getItemStack());
+                                    player.getInventory().addItem(optional.get().itemStack());
                                     return 1;
                                 })
                         )

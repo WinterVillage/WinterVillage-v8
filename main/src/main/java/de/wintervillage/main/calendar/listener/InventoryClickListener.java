@@ -1,10 +1,12 @@
 package de.wintervillage.main.calendar.listener;
 
+import de.wintervillage.common.paper.item.ItemBuilder;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.calendar.CalendarDay;
 import de.wintervillage.main.calendar.CalendarInventory;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -59,22 +61,28 @@ public class InventoryClickListener implements Listener {
             return;
         }
 
-        if (calendarDay.get().getOpened().contains(event.getWhoClicked().getUniqueId())) {
+        List<UUID> opened = calendarDay.get().opened();
+        if (opened.contains(event.getWhoClicked().getUniqueId())) {
             event.getWhoClicked().sendMessage(Component.text("Already opened"));
             return;
         }
 
-        List<UUID> opened = calendarDay.get().getOpened();
-        opened.add(event.getWhoClicked().getUniqueId());
-
-        this.winterVillage.calendarDatabase.updateOpened(day, opened)
+        this.winterVillage.calendarDatabase.modify(day, consumer -> {
+                    consumer.addOpened(event.getWhoClicked().getUniqueId());
+                })
                 .thenAccept((v) -> {
-                    calendarDay.get().setOpened(opened);
+                    this.winterVillage.calendarHandler.forceUpdate();
 
-                    ItemStack reward = calendarDay.get().getItemStack();
+                    ItemStack reward = calendarDay.get().itemStack();
                     ((Player) event.getWhoClicked()).getInventory().addItem(reward);
 
+                    event.setCurrentItem(ItemBuilder.from(Material.ORANGE_STAINED_GLASS_PANE)
+                            .name(Component.text("Türchen " + day + " bereits geöffnet", NamedTextColor.GOLD))
+                            .persistentDataContainer(pdc -> pdc.set(this.winterVillage.calendarKey, PersistentDataType.INTEGER, day))
+                            .build());
+
                     event.getWhoClicked().sendMessage(Component.text("Opened", NamedTextColor.GREEN));
+                    // TODO: sound
                 })
                 .exceptionally((t) -> {
                     event.getWhoClicked().sendMessage(Component.text("Could not open: " + t.getMessage()));
