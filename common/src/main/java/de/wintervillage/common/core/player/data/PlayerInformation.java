@@ -2,23 +2,29 @@ package de.wintervillage.common.core.player.data;
 
 import org.bson.Document;
 import org.bson.types.Binary;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class PlayerInformation {
 
     private Inventory inventory;
     private EnderChest enderChest;
+    private PotionEffects potionEffects;
 
     public PlayerInformation(
             Inventory inventory,
-            EnderChest enderChest
+            EnderChest enderChest,
+            PotionEffects potionEffects
     ) {
         this.inventory = inventory;
         this.enderChest = enderChest;
+        this.potionEffects = potionEffects;
     }
 
     public Inventory inventory() {
@@ -37,12 +43,21 @@ public class PlayerInformation {
         this.enderChest = enderChest;
     }
 
+    public PotionEffects potionEffects() {
+        return this.potionEffects;
+    }
+
+    public void potionEffects(PotionEffects potionEffects) {
+        this.potionEffects = potionEffects;
+    }
+
     /**
      * Clears the {@link PlayerInformation}
      */
     public void clear() {
         this.inventory.inventoryItems().clear();
         this.enderChest.enderChestItems().clear();
+        this.potionEffects(new PotionEffects(new ArrayList<>()));
     }
 
     /**
@@ -67,6 +82,18 @@ public class PlayerInformation {
 
             this.enderChest.enderChestItems.put(i, new PlayerInformation.Item(itemStack.serializeAsBytes()));
         }
+
+        // potion effects
+        player.getActivePotionEffects().forEach(potionEffect -> {
+            this.potionEffects.effects.add(new Effect(
+                    potionEffect.getType().getKey().toString(),
+                    potionEffect.getDuration(),
+                    potionEffect.getAmplifier(),
+                    potionEffect.isAmbient(),
+                    potionEffect.hasParticles(),
+                    potionEffect.hasIcon()
+            ));
+        });
     }
 
 
@@ -84,6 +111,16 @@ public class PlayerInformation {
         for (var entry : this.enderChest.enderChestItems.entrySet()) {
             player.getEnderChest().setItem(entry.getKey(), ItemStack.deserializeBytes(entry.getValue().bytes()));
         }
+
+        // potion effects
+        this.potionEffects.effects.stream().map(effect -> new PotionEffect(
+                Registry.POTION_EFFECT_TYPE.get(NamespacedKey.fromString(effect.key.split(":")[1])),
+                effect.duration,
+                effect.amplifier,
+                effect.ambient,
+                effect.particles,
+                effect.icon
+        )).forEach(player::addPotionEffect);
     }
 
     public Document toDocument(PlayerInformation playerInformation) {
@@ -101,14 +138,28 @@ public class PlayerInformation {
             enderChestDocument.put(entry.getKey().toString(), entry.getValue().bytes());
         }
 
-        document.put("inventory", inventoryDocument);
-        document.put("enderchest", enderChestDocument);
+        // potion effects
+        Document potionEffectsDocument = new Document();
+        for (var effect : playerInformation.potionEffects().effects()) {
+            Document effectDocument = new Document("key", effect.key)
+                    .append("duration", effect.duration)
+                    .append("amplifier", effect.amplifier)
+                    .append("ambient", effect.ambient)
+                    .append("particles", effect.particles)
+                    .append("icon", effect.icon);
+            potionEffectsDocument.put(effect.key, effectDocument);
+        }
+
+        document.append("inventory", inventoryDocument)
+                .append("enderchest", enderChestDocument)
+                .append("potionEffects", potionEffectsDocument);
         return document;
     }
 
     public static PlayerInformation fromDocument(Document document) {
         Document inventoryDocument = document.get("inventory", Document.class);
         Document enderchestDocument = document.get("enderchest", Document.class);
+        Document potionEffectsDocument = document.get("potionEffects", Document.class);
 
         // player inventory
         HashMap<Integer, Item> inventoryItems = new HashMap<>();
@@ -128,21 +179,36 @@ public class PlayerInformation {
             enderChestItems.put(slot, new Item(bytes));
         }
 
+        // potion effects
+        Collection<Effect> effects = potionEffectsDocument.entrySet().stream().map(entry -> {
+            Document effectDocument = (Document) entry.getValue();
+            return new Effect(
+                    effectDocument.getString("key"),
+                    effectDocument.getInteger("duration"),
+                    effectDocument.getInteger("amplifier"),
+                    effectDocument.getBoolean("ambient"),
+                    effectDocument.getBoolean("particles"),
+                    effectDocument.getBoolean("icon")
+            );
+        }).collect(Collectors.toList());
+
         return new PlayerInformation(
                 new Inventory(inventoryItems),
-                new EnderChest(enderChestItems)
+                new EnderChest(enderChestItems),
+                new PotionEffects(effects)
         );
     }
 
     @Override
     public String toString() {
         return "PlayerInformation{" +
-                "inventory=" + inventory +
-                ", enderChest=" + enderChest +
+                "inventory=" + this.inventory +
+                ", enderChest=" + this.enderChest +
+                ", potionEffects=" + this.potionEffects +
                 '}';
     }
 
-    public record Item(byte[] bytes) {
+    private record Item(byte[] bytes) {
 
         @Override
         public String toString() {
@@ -168,6 +234,35 @@ public class PlayerInformation {
         public String toString() {
             return "EnderChest{" +
                     "enderChestItems=" + this.enderChestItems +
+                    '}';
+        }
+    }
+
+    private record Effect(String key, int duration, int amplifier, boolean ambient, boolean particles, boolean icon) {
+
+        @Override
+        public String toString() {
+            return "Effect{" +
+                    "key='" + this.key + '\'' +
+                    ", duration=" + this.duration +
+                    ", amplifier=" + this.amplifier +
+                    ", ambient=" + this.ambient +
+                    ", particles=" + this.particles +
+                    ", icon=" + this.icon +
+                    '}';
+        }
+    }
+
+    public record PotionEffects(Collection<Effect> effects) {
+
+        public PotionEffects(Collection<Effect> effects) {
+            this.effects = new ArrayList<>(effects);
+        }
+
+        @Override
+        public String toString() {
+            return "PotionEffects{" +
+                    "effects=" + this.effects +
                     '}';
         }
     }

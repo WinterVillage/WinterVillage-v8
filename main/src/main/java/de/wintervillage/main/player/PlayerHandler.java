@@ -33,13 +33,16 @@ public class PlayerHandler {
     }
 
     public void clear(Player player) {
+        player.getInventory().setHeldItemSlot(0);
+
         player.getInventory().clear();
         player.getEnderChest().clear();
+        player.getActivePotionEffects().forEach(potionEffect -> player.removePotionEffect(potionEffect.getType()));
 
         player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getDefaultValue());
         player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
         player.setFoodLevel(20);
-        player.setSaturation(20);
+        player.setSaturation(5);
 
         // TODO: clear player data
     }

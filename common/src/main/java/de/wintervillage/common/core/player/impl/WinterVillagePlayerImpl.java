@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -42,7 +43,8 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
         this.playerInformation = new PlayerInformation(
                 new PlayerInformation.Inventory(new HashMap<>()),
-                new PlayerInformation.EnderChest(new HashMap<>())
+                new PlayerInformation.EnderChest(new HashMap<>()),
+                new PlayerInformation.PotionEffects(new ArrayList<>())
         );
     }
 
