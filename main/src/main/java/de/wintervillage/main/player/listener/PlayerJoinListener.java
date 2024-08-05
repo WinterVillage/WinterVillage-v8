@@ -3,6 +3,7 @@ package de.wintervillage.main.player.listener;
 import de.wintervillage.main.WinterVillage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -40,7 +41,7 @@ public class PlayerJoinListener implements Listener {
             public void run() {
                 winterVillage.playerDatabase.player(player.getUniqueId())
                         .thenAccept(winterVillagePlayer -> {
-                            winterVillagePlayer.playerInformation().apply(player);
+                            Bukkit.getScheduler().runTask(winterVillage, () -> winterVillagePlayer.playerInformation().apply(player)); // run on next tick to avoid applying data to the player asynchronously
 
                             player.sendMessage(Component.text("Your data has been loaded!", NamedTextColor.YELLOW));
                         })
