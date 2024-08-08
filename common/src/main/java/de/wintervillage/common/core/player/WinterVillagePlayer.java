@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface WinterVillagePlayer {
 
-    // TODO: Homes, Wildcard, Whitelist, Transactions, PlayerData (PotionEffects, Advancements, Statistics, Health, Attributes, Hunger, Level & XP)
+    // TODO: HomeInformation; Transactions -> ; PlayerInformation (Advancements, Statistics, Generics -> Flight, GameMode, Health, Hunger, Level, XP)
 
     @NotNull
     UUID uniqueId();

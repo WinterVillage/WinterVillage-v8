@@ -1,5 +1,7 @@
 package de.wintervillage.main;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -9,6 +11,7 @@ import com.mongodb.ServerAddress;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
+import de.wintervillage.common.paper.player.PlayerHandler;
 import de.wintervillage.main.antifreezle.AntiFreezle;
 import de.wintervillage.common.core.config.Document;
 import de.wintervillage.common.core.player.codec.PlayerCodecProvider;
@@ -26,7 +29,6 @@ import de.wintervillage.main.economy.shop.ShopManager;
 import de.wintervillage.main.event.EventManager;
 import de.wintervillage.main.listener.AsyncChatListener;
 import de.wintervillage.main.listener.PlayerMoveListener;
-import de.wintervillage.main.player.PlayerHandler;
 import de.wintervillage.main.plot.commands.PlotCommand;
 import de.wintervillage.main.plot.PlotHandler;
 import de.wintervillage.main.plot.database.PlotDatabase;
@@ -70,7 +72,9 @@ public final class WinterVillage extends JavaPlugin {
     public @Inject DeathManager deathManager;
     public @Inject AntiFreezle antiFreezle;
 
+    // plugin dependencies
     public LuckPerms luckPerms;
+    public ProtocolManager protocolManager;
 
     public final Component PREFIX = MiniMessage.miniMessage().deserialize("<gradient:#d48fff:#00f7ff>WinterVillage</gradient> | <reset>");
 
@@ -97,6 +101,8 @@ public final class WinterVillage extends JavaPlugin {
                     .append("password", "password")
                     .save(Paths.get(this.getDataFolder().getAbsolutePath(), "database.json"));
         this.databaseDocument = Document.load(Paths.get(this.getDataFolder().getAbsolutePath(), "database.json"));
+
+        this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
     @Override
@@ -134,7 +140,7 @@ public final class WinterVillage extends JavaPlugin {
         if (luckPermsProvider != null) this.luckPerms = luckPermsProvider.getProvider();
 
         // inject handlers
-        Injector injector = Guice.createInjector(new WinterVillageModule(this.mongoDatabase));
+        Injector injector = Guice.createInjector(new WinterVillageModule(this, this.protocolManager, this.mongoDatabase));
         injector.injectMembers(this);
 
         // listener

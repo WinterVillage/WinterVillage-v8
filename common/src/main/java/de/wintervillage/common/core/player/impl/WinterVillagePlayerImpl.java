@@ -44,7 +44,8 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         this.playerInformation = new PlayerInformation(
                 new PlayerInformation.Inventory(new HashMap<>()),
                 new PlayerInformation.EnderChest(new HashMap<>()),
-                new PlayerInformation.PotionEffects(new ArrayList<>())
+                new PlayerInformation.PotionEffects(new ArrayList<>()),
+                new PlayerInformation.Advancements(new ArrayList<>())
         );
     }
 

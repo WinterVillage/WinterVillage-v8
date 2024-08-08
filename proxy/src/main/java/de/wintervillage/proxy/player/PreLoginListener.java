@@ -32,6 +32,7 @@ public class PreLoginListener {
         return EventTask.withContinuation(continuation -> {
             final UUID uniqueId = event.getUniqueId();
 
+            // load User (LuckPerms) and WinterVillagePlayer and combine them
             CompletableFuture<User> userFuture = this.plugin.luckPerms.getUserManager().loadUser(uniqueId);
             CompletableFuture<WinterVillagePlayer> playerFuture = this.plugin.playerDatabase.player(uniqueId)
                     .exceptionally(throwable -> {
