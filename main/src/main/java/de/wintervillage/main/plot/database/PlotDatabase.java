@@ -2,55 +2,58 @@ package de.wintervillage.main.plot.database;
 
 import com.google.inject.Inject;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.result.DeleteResult;
-import com.mongodb.client.result.UpdateResult;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import de.wintervillage.common.core.database.SubscriberHelpers;
 import de.wintervillage.common.core.database.exception.EntryNotFoundException;
-import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.Plot;
-import org.bson.Document;
+import de.wintervillage.main.plot.impl.PlotImpl;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
-public class PlotDatabase implements IPlotDatabase {
+public class PlotDatabase {
 
     private final WinterVillage winterVillage;
-
-    private final MongoCollection<Plot> collection;
+    private final MongoCollection<PlotImpl> collection;
 
     @Inject
     public PlotDatabase() {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
-        this.collection = this.winterVillage.mongoDatabase.getCollection("plots", Plot.class);
+        this.collection = this.winterVillage.mongoDatabase.getCollection("plots", PlotImpl.class);
     }
 
-    @Override
-    public CompletableFuture<Void> insertAsync(Plot plot) {
+    public CompletableFuture<Void> insert(Plot plot) {
         CompletableFuture<Void> future = new CompletableFuture<>();
-        this.collection.insertOne(plot).subscribe(new SubscriberHelpers.OperationSubscriber<>() {
-            @Override
-            public void onComplete() {
-                future.complete(null);
-            }
 
-            @Override
-            public void onError(Throwable t) {
-                future.completeExceptionally(t);
-            }
-        });
+        this.collection.replaceOne(
+                        Filters.eq("_id", plot.uniqueId().toString()),
+                        ((PlotImpl) plot),
+                        new ReplaceOptions().upsert(true)
+                )
+                .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
+                    @Override
+                    public void onComplete() {
+                        future.complete(null);
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+                });
         return future;
     }
 
-    @Override
-    public CompletableFuture<Void> deleteAsync(String uniqueId) {
+    public CompletableFuture<Void> delete(UUID uniqueId) {
         CompletableFuture<Void> future = new CompletableFuture<>();
-        this.collection.deleteOne(Filters.eq("_id", uniqueId))
+        this.collection.deleteOne(Filters.eq("_id", uniqueId.toString()))
                 .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
                     @Override
                     public void onComplete() {
@@ -71,100 +74,21 @@ public class PlotDatabase implements IPlotDatabase {
         return future;
     }
 
-    @Override
-    public CompletableFuture<Void> replaceAsync(String uniqueId, Plot plot) {
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        this.collection.replaceOne(Filters.eq("_id", uniqueId), plot)
-                .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
-                    @Override
-                    public void onError(Throwable t) {
-                        future.completeExceptionally(t);
-                    }
-
-                    @Override
-                    public void onNext(UpdateResult updateResult) {
-                        if (updateResult.getModifiedCount() == 0)
-                            future.completeExceptionally(new EntryNotFoundException("No result found"));
-                        else future.complete(null);
-                    }
+    public CompletableFuture<Void> modify(UUID uniqueId, Consumer<Plot> consumer) {
+        return this.plot(uniqueId)
+                .thenCompose(plot -> {
+                    consumer.accept(plot);
+                    return this.insert(plot);
+                })
+                .exceptionallyCompose(throwable -> {
+                    throw new RuntimeException(throwable);
                 });
-        return future;
     }
 
-    public CompletableFuture<Void> updateOwner(String uniqueId, UUID owner) {
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        this.collection.updateOne(Filters.eq("_id", uniqueId),
-                        new Document("$set", new Document("owner", owner.toString())))
-                .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
-                    @Override
-                    public void onError(Throwable t) {
-                        future.completeExceptionally(t);
-                    }
-
-                    @Override
-                    public void onNext(UpdateResult updateResult) {
-                        if (updateResult.getModifiedCount() == 0)
-                            future.completeExceptionally(new EntryNotFoundException("No result found"));
-                        else future.complete(null);
-                    }
-                });
-        return future;
-    }
-
-    public CompletableFuture<Void> updateBoundingBox(String uniqueId, BoundingBox2D boundingBox) {
-        Document boundingBoxDocument = new Document();
-        boundingBoxDocument.append("minX", boundingBox.getMinX());
-        boundingBoxDocument.append("minZ", boundingBox.getMinZ());
-        boundingBoxDocument.append("maxX", boundingBox.getMaxX());
-        boundingBoxDocument.append("maxZ", boundingBox.getMaxZ());
-
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        this.collection.updateOne(Filters.eq("_id", uniqueId),
-                        new Document("$set", new Document("boundingBox", boundingBoxDocument)))
-                .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
-                    @Override
-                    public void onError(Throwable t) {
-                        future.completeExceptionally(t);
-                    }
-
-                    @Override
-                    public void onNext(UpdateResult updateResult) {
-                        if (updateResult.getModifiedCount() == 0)
-                            future.completeExceptionally(new EntryNotFoundException("No result found"));
-                        else future.complete(null);
-                    }
-                });
-        return future;
-    }
-
-    public CompletableFuture<Void> updateMembers(String uniqueId, List<UUID> members) {
-        List<String> memberStrings = members.stream()
-                .map(UUID::toString)
-                .toList();
-
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        this.collection.updateOne(Filters.eq("_id", uniqueId),
-                        new Document("$set", new Document("members", memberStrings)))
-                .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
-                    @Override
-                    public void onError(Throwable t) {
-                        future.completeExceptionally(t);
-                    }
-
-                    @Override
-                    public void onNext(UpdateResult updateResult) {
-                        if (updateResult.getModifiedCount() == 0)
-                            future.completeExceptionally(new EntryNotFoundException("No result found"));
-                        else future.complete(null);
-                    }
-                });
-        return future;
-    }
-
-    @Override
-    public CompletableFuture<Plot> findAsync(String uniqueId) {
+    public CompletableFuture<Plot> plot(UUID uniqueId) {
         CompletableFuture<Plot> future = new CompletableFuture<>();
-        this.collection.find(Filters.eq("_id", uniqueId))
+
+        this.collection.find(Filters.eq("_id", uniqueId.toString()))
                 .first()
                 .subscribe(new SubscriberHelpers.OperationSubscriber<Plot>() {
                     @Override
@@ -186,11 +110,10 @@ public class PlotDatabase implements IPlotDatabase {
         return future;
     }
 
-    @Override
-    public CompletableFuture<List<Plot>> findByOwnerAsync(UUID owner) {
+    public CompletableFuture<List<Plot>> byOwner(UUID owner) {
         List<Plot> plots = new ArrayList<>();
-
         CompletableFuture<List<Plot>> future = new CompletableFuture<>();
+
         this.collection.find(Filters.eq("owner", owner.toString()))
                 .subscribe(new SubscriberHelpers.OperationSubscriber<Plot>() {
                     @Override
@@ -213,11 +136,10 @@ public class PlotDatabase implements IPlotDatabase {
         return future;
     }
 
-    @Override
-    public CompletableFuture<List<Plot>> findAsync() {
+    public CompletableFuture<List<Plot>> find() {
         List<Plot> plots = new ArrayList<>();
-
         CompletableFuture<List<Plot>> future = new CompletableFuture<>();
+
         this.collection.find()
                 .subscribe(new SubscriberHelpers.OperationSubscriber<Plot>() {
                     @Override

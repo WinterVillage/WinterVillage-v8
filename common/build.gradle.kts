@@ -8,7 +8,12 @@ java {
 
 repositories {
     mavenCentral()
+
+    // paper
     maven("https://repo.papermc.io/repository/maven-public/")
+
+    // protocollib
+    maven("https://repo.dmulloy2.net/repository/public/")
 }
 
 dependencies {
@@ -27,6 +32,9 @@ dependencies {
 
     // luckperms
     compileOnly("net.luckperms:api:5.4")
+
+    // protocollib
+    compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
 }
 
 tasks {

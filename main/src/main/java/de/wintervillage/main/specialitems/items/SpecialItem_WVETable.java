@@ -12,6 +12,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -27,11 +28,14 @@ public class SpecialItem_WVETable extends SpecialItem {
         super();
         ItemStack item = SpecialItems.getSpecialItem(Component.text("WV Enchantment Table"), Material.ENCHANTING_TABLE, 1, true);
         this.setItem(item);
+        this.setNameStr("wve_table");
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
-        super.onBlockBreak(event);
+        // Cancelled
+        // | If the player tries to break a specialitem within a plot where he is not allowed to
+        if (event.isCancelled()) return;
 
         World world = event.getBlock().getWorld();
 
@@ -43,7 +47,9 @@ public class SpecialItem_WVETable extends SpecialItem {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        super.onBlockPlace(event);
+        // Cancelled
+        // | If the player tries to place a specialitem within a plot where he is not allowed to
+        if (event.isCancelled()) return;
 
         ItemStack item_placed = event.getItemInHand();
 
@@ -54,8 +60,6 @@ public class SpecialItem_WVETable extends SpecialItem {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        super.onInventoryClick(event);
-
         if(event.getView().title().equals(Component.text("WV Enchantment Table", NamedTextColor.RED).decoration(TextDecoration.BOLD, true))) {
             Inventory inventory = event.getInventory();
             ItemStack item_clicked = event.getCurrentItem();
@@ -89,8 +93,6 @@ public class SpecialItem_WVETable extends SpecialItem {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        super.onInventoryClose(event);
-
         if(!(event.getPlayer() instanceof Player player))
             return;
 
@@ -105,8 +107,6 @@ public class SpecialItem_WVETable extends SpecialItem {
 
     @EventHandler
     public void onPlayerUpdate(PlayerUpdateEvent event) {
-        super.onPlayerUpdate(event);
-
         Player player = event.getPlayer();
 
         if(player.getOpenInventory() != null && player.getOpenInventory().getTopInventory() != null
@@ -133,8 +133,6 @@ public class SpecialItem_WVETable extends SpecialItem {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-        super.onPlayerInteract(event);
-
         Player player = event.getPlayer();
 
         if(event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null) {

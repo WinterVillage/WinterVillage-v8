@@ -6,83 +6,59 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-public final class Plot {
+public interface Plot {
 
-    private String name, uniqueId;
-    private Date creation;
-    private UUID owner;
+    /**
+     * Unique identifier of the plot
+     * @return {@link UUID} uniqueId
+     */
+    UUID uniqueId();
 
-    private BoundingBox2D boundingBox;
+    /**
+     * Name of the plot
+     * @return {@link String} name
+     */
+    String name();
 
-    private List<UUID> members;
+    /**
+     * Date of creation
+     * @return {@link Date} creation
+     */
+    Date created();
 
-    public Plot() { }
+    /**
+     * Owner of the plot
+     * @return {@link UUID} owner
+     */
+    UUID owner();
 
-    public Plot(String name, String uniqueId, Date creation, UUID owner, BoundingBox2D boundingBox, List<UUID> members) {
-        this.name = name;
-        this.uniqueId = uniqueId;
-        this.creation = creation;
-        this.owner = owner;
-        this.boundingBox = boundingBox;
-        this.members = members;
-    }
+    /**
+     * Applies the owner to the plot
+     * @param uuid {@link UUID} owner
+     */
+    void owner(UUID uuid);
 
-    public String getName() {
-        return name;
-    }
+    /**
+     * Bounding box of the plot
+     * @return {@link BoundingBox2D} boundingBox
+     */
+    BoundingBox2D boundingBox();
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    /**
+     * Applies the bounding box to the plot
+     * @param boundingBox {@link BoundingBox2D} boundingBox
+     */
+    void boundingBox(BoundingBox2D boundingBox);
 
-    public String getUniqueId() {
-        return uniqueId;
-    }
+    /**
+     * Members of the plot
+     * @return {@link List} of {@link UUID} members
+     */
+    List<UUID> members();
 
-    public void setUniqueId(String uniqueId) {
-        this.uniqueId = uniqueId;
-    }
-
-    public Date getCreation() {
-        return creation;
-    }
-
-    public void setCreation(Date creation) {
-        this.creation = creation;
-    }
-
-    public UUID getOwner() {
-        return owner;
-    }
-
-    public void setOwner(UUID owner) {
-        this.owner = owner;
-    }
-
-    public BoundingBox2D getBoundingBox() {
-        return boundingBox;
-    }
-
-    public void setBoundingBox(BoundingBox2D boundingBox) {
-        this.boundingBox = boundingBox;
-    }
-
-    public List<UUID> getMembers() {
-        return members;
-    }
-
-    public void setMembers(List<UUID> members) {
-        this.members = members;
-    }
-
-    @Override
-    public String toString() {
-        return "Plot{" +
-                "name='" + name + '\'' +
-                ", creation=" + creation +
-                ", owner=" + owner +
-                ", boundingBox=" + boundingBox +
-                ", members=" + members +
-                '}';
-    }
+    /**
+     * Adds a member to the plot
+     * @param uuid {@link UUID} member
+     */
+    void addMember(UUID uuid);
 }

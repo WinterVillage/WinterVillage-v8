@@ -53,12 +53,12 @@ public class BanInformation {
         this.expiring = expiring;
     }
 
-    public Document toDocument(BanInformation banInformation) {
+    public Document toDocument() {
         return new Document()
-                .append("from", banInformation.from.toString())
-                .append("reason", banInformation.reason)
-                .append("created", banInformation.created)
-                .append("expiring", banInformation.expiring);
+                .append("from", this.from().toString())
+                .append("reason", this.reason())
+                .append("created", this.created())
+                .append("expiring", this.expiring());
     }
 
     public static BanInformation fromDocument(Document document) {
@@ -73,10 +73,10 @@ public class BanInformation {
     @Override
     public String toString() {
         return "BanInformation{" +
-                "from=" + from +
-                ", reason='" + reason + '\'' +
-                ", created=" + created +
-                ", expiring=" + expiring +
+                "from=" + this.from +
+                ", reason='" + this.reason + '\'' +
+                ", created=" + this.created +
+                ", expiring=" + this.expiring +
                 '}';
     }
 }

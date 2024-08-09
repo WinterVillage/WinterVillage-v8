@@ -9,9 +9,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -27,20 +27,11 @@ public class SpecialItem_Backpack extends SpecialItem {
         super();
         ItemStack item = SpecialItems.getSpecialItem(Component.text("Backpack"), Material.SHULKER_BOX, 1, true);
         this.setItem(item);
-    }
-
-    @EventHandler
-    public void onBlockPlace(BlockPlaceEvent event) {
-        super.onBlockPlace(event);
-
-        if(isSpecialitem(event.getItemInHand()))
-            event.setCancelled(true);
+        this.setNameStr("backpack");
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        super.onInventoryClick(event);
-
         if(event.getView().title().equals(Component.text("Backpack", NamedTextColor.RED).decoration(TextDecoration.BOLD, true))){
 
             if(isSpecialitem(event.getCurrentItem()))
@@ -53,8 +44,6 @@ public class SpecialItem_Backpack extends SpecialItem {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        super.onInventoryClose(event);
-
         if(!(event.getPlayer() instanceof Player player))
             return;
 
@@ -73,8 +62,6 @@ public class SpecialItem_Backpack extends SpecialItem {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-        super.onPlayerInteract(event);
-
         Player player = event.getPlayer();
 
         if(event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR){
@@ -90,6 +77,7 @@ public class SpecialItem_Backpack extends SpecialItem {
                     player.openInventory(inventory_backpack);
 
                     event.setCancelled(true);
+                    event.setUseInteractedBlock(Event.Result.DENY);
                 }
 
             }

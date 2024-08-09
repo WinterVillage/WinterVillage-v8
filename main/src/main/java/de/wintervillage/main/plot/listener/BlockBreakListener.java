@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -19,16 +20,17 @@ public class BlockBreakListener implements Listener {
         this.winterVillage.getServer().getPluginManager().registerEvents(this, this.winterVillage);
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void execute(BlockBreakEvent event) {
         Player player = event.getPlayer();
 
         Plot plot = this.winterVillage.plotHandler.byBounds(event.getBlock().getLocation());
         if (plot == null) return;
 
-        // TODO: LuckPerms
-        if (!plot.getOwner().equals(player.getUniqueId())
-                && !plot.getMembers().contains(player.getUniqueId())) {
+        if (player.hasPermission("wintervillage.plot.bypass")) return;
+
+        if (!plot.owner().equals(player.getUniqueId())
+                && !plot.members().contains(player.getUniqueId())) {
             event.setCancelled(true);
             player.sendMessage(Component.text("You are not allowed to break this block", NamedTextColor.RED));
             return;

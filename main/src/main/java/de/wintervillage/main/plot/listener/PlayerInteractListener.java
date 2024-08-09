@@ -2,7 +2,7 @@ package de.wintervillage.main.plot.listener;
 
 import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.persistent.BoundingBoxDataType;
+import de.wintervillage.common.paper.persistent.BoundingBoxDataType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
@@ -30,6 +30,11 @@ public class PlayerInteractListener implements Listener {
 
         if (!player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)) return;
         event.setUseInteractedBlock(Event.Result.DENY);
+
+        if (this.winterVillage.plotHandler.byBounds(event.getClickedBlock().getLocation()) != null) {
+            player.sendMessage(Component.text("You can't set your bounds within a plot", NamedTextColor.RED));
+            return;
+        }
 
         BoundingBox2D boundingBox2D = player.getPersistentDataContainer().get(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType());
 

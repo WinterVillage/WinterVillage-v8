@@ -44,7 +44,7 @@ public class CalendarInventory implements InventoryHolder {
                 return;
             }
 
-            if (!optional.get().getOpened().contains(player.getUniqueId())) {
+            if (!optional.get().opened().contains(player.getUniqueId())) {
                 this.inventory.addItem(ItemBuilder.from(Material.GREEN_STAINED_GLASS_PANE)
                         .name(Component.text("Türchen " + i + " öffnen", NamedTextColor.GREEN))
                         .persistentDataContainer(pdc -> pdc.set(this.winterVillage.calendarKey, PersistentDataType.INTEGER, i))

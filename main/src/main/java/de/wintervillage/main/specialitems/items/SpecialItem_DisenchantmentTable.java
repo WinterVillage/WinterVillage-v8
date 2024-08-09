@@ -13,6 +13,7 @@ import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -30,11 +31,14 @@ public class SpecialItem_DisenchantmentTable extends SpecialItem {
         super();
         ItemStack item = SpecialItems.getSpecialItem(Component.text("Disenchantment Table"), Material.GRINDSTONE, 1, true);
         this.setItem(item);
+        this.setNameStr("disenchantment_table");
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event) {
-        super.onBlockPlace(event);
+        // Cancelled
+        // | If the player tries to place a specialitem within a plot where he is not allowed to
+        if (event.isCancelled()) return;
 
         Player player = event.getPlayer();
         ItemStack item_placed = event.getItemInHand();
@@ -44,10 +48,8 @@ public class SpecialItem_DisenchantmentTable extends SpecialItem {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
-        super.onBlockBreak(event);
-
         World world = event.getBlock().getWorld();
 
         if(this.winterVillage.specialItems.isSIBlock(event.getBlock(), "disenchantment_table")){
@@ -58,8 +60,6 @@ public class SpecialItem_DisenchantmentTable extends SpecialItem {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        super.onInventoryClick(event);
-
         if(event.getView().title().equals(Component.text("Entzauberungstisch", NamedTextColor.RED).decoration(TextDecoration.BOLD, true))){
             if(event.getWhoClicked() instanceof Player player){
                 if(event.getCurrentItem()!=null && event.getCurrentItem().getType().equals(Material.BLACK_STAINED_GLASS_PANE)){
@@ -115,8 +115,6 @@ public class SpecialItem_DisenchantmentTable extends SpecialItem {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        super.onInventoryClose(event);
-
         if(event.getView().title().equals(Component.text("Entzauberungstisch", NamedTextColor.RED).decoration(TextDecoration.BOLD, true))){
 
             ItemStack item = event.getInventory().getItem(13);
@@ -130,8 +128,6 @@ public class SpecialItem_DisenchantmentTable extends SpecialItem {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-        super.onPlayerInteract(event);
-
         Player player = event.getPlayer();
 
         if(event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null) {

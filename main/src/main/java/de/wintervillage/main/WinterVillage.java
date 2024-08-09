@@ -1,5 +1,7 @@
 package de.wintervillage.main;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -9,6 +11,8 @@ import com.mongodb.ServerAddress;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
+import de.wintervillage.common.paper.player.PlayerHandler;
+import de.wintervillage.main.antifreezle.AntiFreezle;
 import de.wintervillage.common.core.config.Document;
 import de.wintervillage.common.core.player.codec.PlayerCodecProvider;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
@@ -18,15 +22,14 @@ import de.wintervillage.main.calendar.commands.CalendarCommand;
 import de.wintervillage.main.calendar.database.CalendarDatabase;
 import de.wintervillage.main.commands.FreezeCommand;
 import de.wintervillage.main.commands.InventoryCommand;
-import de.wintervillage.main.config.Document;
+import de.wintervillage.main.death.DeathManager;
 import de.wintervillage.main.economy.EconomyManager;
 import de.wintervillage.main.economy.commands.CMD_Transfer;
 import de.wintervillage.main.economy.shop.ShopManager;
 import de.wintervillage.main.event.EventManager;
 import de.wintervillage.main.listener.AsyncChatListener;
 import de.wintervillage.main.listener.PlayerMoveListener;
-import de.wintervillage.main.player.PlayerHandler;
-import de.wintervillage.main.plot.PlotCommand;
+import de.wintervillage.main.plot.commands.PlotCommand;
 import de.wintervillage.main.plot.PlotHandler;
 import de.wintervillage.main.plot.database.PlotDatabase;
 import de.wintervillage.main.plot.codec.PlotCodecProvider;
@@ -37,6 +40,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.LuckPerms;
 import org.bson.codecs.configuration.CodecRegistries;
@@ -65,8 +69,12 @@ public final class WinterVillage extends JavaPlugin {
     public @Inject EconomyManager economyManager;
     public @Inject SpecialItems specialItems;
     public @Inject EventManager eventManager;
+    public @Inject DeathManager deathManager;
+    public @Inject AntiFreezle antiFreezle;
 
+    // plugin dependencies
     public LuckPerms luckPerms;
+    public ProtocolManager protocolManager;
 
     public final Component PREFIX = MiniMessage.miniMessage().deserialize("<gradient:#d48fff:#00f7ff>WinterVillage</gradient> | <reset>");
 
@@ -93,6 +101,8 @@ public final class WinterVillage extends JavaPlugin {
                     .append("password", "password")
                     .save(Paths.get(this.getDataFolder().getAbsolutePath(), "database.json"));
         this.databaseDocument = Document.load(Paths.get(this.getDataFolder().getAbsolutePath(), "database.json"));
+
+        this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
     @Override
@@ -130,7 +140,7 @@ public final class WinterVillage extends JavaPlugin {
         if (luckPermsProvider != null) this.luckPerms = luckPermsProvider.getProvider();
 
         // inject handlers
-        Injector injector = Guice.createInjector(new WinterVillageModule(this.mongoDatabase));
+        Injector injector = Guice.createInjector(new WinterVillageModule(this, this.protocolManager, this.mongoDatabase));
         injector.injectMembers(this);
 
         // listener
@@ -161,6 +171,17 @@ public final class WinterVillage extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // save data from the players, by blocking the main-thread and kicking them afterward to prevent data-loss
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            this.playerDatabase.modify(player.getUniqueId(), winterVillagePlayer -> {
+                winterVillagePlayer.playerInformation().save(player);
+            }).join();
+
+            player.kick(Component.text("Server is shutting down", NamedTextColor.RED)
+                    .append(Component.newline())
+                    .append(Component.text("discord.wintervillage.de", NamedTextColor.AQUA)));
+        });
+
         if (this.mongoClient != null) this.mongoClient.close();
         if (this.plotHandler != null) this.plotHandler.terminate();
         if (this.playerHandler != null) this.playerHandler.terminate();

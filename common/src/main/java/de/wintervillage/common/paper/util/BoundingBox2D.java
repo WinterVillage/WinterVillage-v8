@@ -46,13 +46,16 @@ public class BoundingBox2D {
         this.maxZ = maxZ;
     }
 
-    public boolean contains(double x, double z) {
-        return x >= this.minX && x <= this.maxX
-                && z >= this.minZ && z <= this.maxZ;
+    public boolean contains(int x, int z) {
+        return x >= Math.min(this.minX, this.maxX) && x <= Math.max(this.minX, this.maxX)
+                && z >= Math.min(this.minZ, this.maxZ) && z <= Math.max(this.minZ, this.maxZ);
     }
 
     public boolean intersects(BoundingBox2D other) {
-        return this.maxX >= other.minX && this.minX <= other.maxX && this.maxZ >= other.minZ && this.minZ <= other.maxZ;
+        return Math.max(this.minX, this.maxX) >= Math.min(other.minX, other.maxX)
+                && Math.min(this.minX, this.maxX) <= Math.max(other.minX, other.maxX)
+                && Math.max(this.minZ, this.maxZ) >= Math.min(other.minZ, other.maxZ)
+                && Math.min(this.minZ, this.maxZ) <= Math.max(other.minZ, other.maxZ);
     }
 
     public double getArea() {
@@ -77,11 +80,6 @@ public class BoundingBox2D {
 
     @Override
     public String toString() {
-        return "BoundingBox2D{" +
-                "minX=" + minX +
-                ", minZ=" + minZ +
-                ", maxX=" + maxX +
-                ", maxZ=" + maxZ +
-                '}';
+        return "BoundingBox2D{" + "minX=" + this.minX + ", minZ=" + this.minZ + ", maxX=" + this.maxX + ", maxZ=" + this.maxZ + '}';
     }
 }

@@ -1,26 +1,25 @@
 package de.wintervillage.common.core.player.impl;
 
 import de.wintervillage.common.core.player.WinterVillagePlayer;
-import de.wintervillage.common.core.player.data.BanInformation;
-import de.wintervillage.common.core.player.data.MuteInformation;
-import de.wintervillage.common.core.player.data.PlayerInformation;
+import de.wintervillage.common.core.player.data.*;
+import de.wintervillage.common.paper.models.*;
 import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.Decimal128;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.UUID;
 
 public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
     @BsonId
-    private final UUID uniqueId;
+    private final @NotNull UUID uniqueId;
 
     @BsonProperty("money")
-    private BigDecimal money;
+    private @NotNull BigDecimal money;
 
     @BsonProperty("banInformation")
     private @Nullable BanInformation banInformation;
@@ -29,30 +28,40 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     private @Nullable MuteInformation muteInformation;
 
     @BsonProperty("playerInformation")
-    private PlayerInformation playerInformation;
+    private @NotNull PlayerInformation playerInformation;
 
-    public WinterVillagePlayerImpl(UUID uniqueId) {
+    @BsonProperty("wildcardInformation")
+    private @Nullable WildcardInformation wildcardInformation;
+
+    @BsonProperty("whitelistInformation")
+    private @Nullable WhitelistInformation whitelistInformation;
+
+    public WinterVillagePlayerImpl(@NotNull UUID uniqueId) {
         this.uniqueId = uniqueId;
         this.money = BigDecimal.ZERO;
 
         this.playerInformation = new PlayerInformation(
-                new PlayerInformation.Inventory(new HashMap<>()),
-                new PlayerInformation.EnderChest(new HashMap<>())
+                Inventory.generateDefault(),
+                EnderChest.generateDefault(),
+                PotionEffects.generateDefault(),
+                Advancements.generateDefault(),
+                Generic.generateDefault(),
+                Statistics.generateDefault()
         );
     }
 
     @Override
-    public UUID uniqueId() {
+    public @NotNull UUID uniqueId() {
         return this.uniqueId;
     }
 
     @Override
-    public BigDecimal money() {
+    public @NotNull BigDecimal money() {
         return this.money;
     }
 
     @Override
-    public void money(BigDecimal money) {
+    public void money(@NotNull BigDecimal money) {
         this.money = money;
     }
 
@@ -76,13 +85,33 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     }
 
     @Override
-    public PlayerInformation playerInformation() {
+    public @NotNull PlayerInformation playerInformation() {
         return this.playerInformation;
     }
 
     @Override
-    public void playerInformation(PlayerInformation playerInformation) {
+    public void playerInformation(@NotNull PlayerInformation playerInformation) {
         this.playerInformation = playerInformation;
+    }
+
+    @Override
+    public @Nullable WildcardInformation wildcardInformation() {
+        return this.wildcardInformation;
+    }
+
+    @Override
+    public void wildcardInformation(@Nullable WildcardInformation wildcardInformation) {
+        this.wildcardInformation = wildcardInformation;
+    }
+
+    @Override
+    public @Nullable WhitelistInformation whitelistInformation() {
+        return this.whitelistInformation;
+    }
+
+    @Override
+    public void whitelistInformation(@Nullable WhitelistInformation whitelistInformation) {
+        this.whitelistInformation = whitelistInformation;
     }
 
     public Document toDocument() {
@@ -92,11 +121,17 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         document.put("money", this.money);
 
         if (this.banInformation != null)
-            document.put("banInformation", this.banInformation.toDocument(this.banInformation));
+            document.put("banInformation", this.banInformation.toDocument());
         if (this.muteInformation != null)
-            document.put("muteInformation", this.muteInformation.toDocument(this.muteInformation));
+            document.put("muteInformation", this.muteInformation.toDocument());
 
-        document.put("playerInformation", this.playerInformation.toDocument(this.playerInformation));
+        document.put("playerInformation", this.playerInformation.toDocument());
+
+        if (this.wildcardInformation != null)
+            document.put("wildcardInformation", this.wildcardInformation.toDocument());
+
+        if (this.whitelistInformation != null)
+            document.put("whitelistInformation", this.whitelistInformation.toDocument());
 
         return document;
     }
@@ -118,8 +153,17 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
             player.muteInformation = MuteInformation.fromDocument(muteDocument);
         }
 
-        PlayerInformation playerInformation = PlayerInformation.fromDocument(document.get("playerInformation", Document.class));
-        player.playerInformation = playerInformation;
+        player.playerInformation = PlayerInformation.fromDocument(document.get("playerInformation", Document.class));
+
+        if (document.containsKey("wildcardInformation") && !document.get("wildcardInformation", Document.class).isEmpty()) {
+            Document wildcardDocument = document.get("wildcardInformation", Document.class);
+            player.wildcardInformation = WildcardInformation.fromDocument(wildcardDocument);
+        }
+
+        if (document.containsKey("whitelistInformation") && !document.get("whitelistInformation", Document.class).isEmpty()) {
+            Document whitelistDocument = document.get("whitelistInformation", Document.class);
+            player.whitelistInformation = WhitelistInformation.fromDocument(whitelistDocument);
+        }
 
         return player;
     }
@@ -127,11 +171,13 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     @Override
     public String toString() {
         return "WinterVillagePlayerImpl{" +
-                "uniqueId=" + uniqueId +
-                ", money=" + money +
-                ", banInformation=" + banInformation +
-                ", muteInformation=" + muteInformation +
-                ", playerInformation=" + playerInformation +
+                "uniqueId=" + this.uniqueId +
+                ", money=" + this.money +
+                ", banInformation=" + this.banInformation +
+                ", muteInformation=" + this.muteInformation +
+                ", playerInformation=" + this.playerInformation +
+                ", wildcardInformation=" + this.wildcardInformation +
+                ", whitelistInformation=" + this.whitelistInformation +
                 '}';
     }
 }

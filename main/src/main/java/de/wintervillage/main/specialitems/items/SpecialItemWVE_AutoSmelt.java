@@ -10,6 +10,7 @@ import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
@@ -22,11 +23,14 @@ public class SpecialItemWVE_AutoSmelt extends SpecialItem {
         super();
         ItemStack item = SpecialItems.getSpecialItem(Component.text("WVE: AutoSmelt"), Material.ENCHANTED_BOOK, 1, true);
         this.setItem(item);
+        this.setNameStr("wve_autosmelt");
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
-        super.onBlockBreak(event);
+        // Cancelled
+        // | If the player tries to place a specialitem within a plot where he is not allowed to
+        if (event.isCancelled()) return;
 
         Player player = event.getPlayer();
         ItemStack item_in_hand = player.getInventory().getItemInMainHand();

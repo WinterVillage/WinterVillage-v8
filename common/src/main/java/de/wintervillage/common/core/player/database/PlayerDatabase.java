@@ -26,7 +26,11 @@ public class PlayerDatabase {
     public CompletableFuture<Void> insert(WinterVillagePlayer player) {
         CompletableFuture<Void> future = new CompletableFuture<>();
 
-        this.collection.replaceOne(Filters.eq("_id", player.uniqueId().toString()), (WinterVillagePlayerImpl) player, new ReplaceOptions().upsert(true))
+        this.collection.replaceOne(
+                        Filters.eq("_id", player.uniqueId().toString()),
+                        (WinterVillagePlayerImpl) player,
+                        new ReplaceOptions().upsert(true)
+                )
                 .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
                     @Override
                     public void onComplete() {

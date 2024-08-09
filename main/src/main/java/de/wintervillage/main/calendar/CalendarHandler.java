@@ -34,7 +34,7 @@ public class CalendarHandler {
     }
 
     public void forceUpdate() {
-        this.winterVillage.calendarDatabase.findAsync()
+        this.winterVillage.calendarDatabase.find()
                 .thenAccept(calendarDays -> {
                     this.days.clear();
                     this.days.addAll(calendarDays);
@@ -52,7 +52,7 @@ public class CalendarHandler {
      */
     public Optional<CalendarDay> byDay(int day) {
         return this.days.stream()
-                .filter(calendarDay -> calendarDay.getDay() == day)
+                .filter(calendarDay -> calendarDay.day() == day)
                 .findFirst();
     }
 

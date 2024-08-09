@@ -3,6 +3,7 @@ package de.wintervillage.main.plot;
 import de.wintervillage.common.paper.item.ItemBuilder;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.listener.BlockBreakListener;
+import de.wintervillage.main.plot.listener.BlockPlaceListener;
 import de.wintervillage.main.plot.listener.PlayerInteractListener;
 import de.wintervillage.main.plot.listener.PlayerQuitListener;
 import net.kyori.adventure.text.Component;
@@ -17,7 +18,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,9 +29,6 @@ public class PlotHandler {
 
     public final List<Plot> plotCache;
     private final ScheduledExecutorService executorService;
-
-    private final String CHARACTERS = "ABDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    private final Random random = new Random();
 
     /**
      * Area of the plot will be MAX_PLOT_WIDTH x MAX_PLOT_WIDTH
@@ -58,12 +55,13 @@ public class PlotHandler {
         this.executorService.scheduleAtFixedRate(this::forceUpdate, 0, 30, TimeUnit.SECONDS);
 
         new BlockBreakListener();
+        new BlockPlaceListener();
         new PlayerInteractListener();
         new PlayerQuitListener();
     }
 
     public void forceUpdate() {
-        this.winterVillage.plotDatabase.findAsync()
+        this.winterVillage.plotDatabase.find()
                 .thenAccept(plots -> {
                     synchronized (this.plotCache) {
                         this.plotCache.clear();
@@ -76,26 +74,26 @@ public class PlotHandler {
                 });
     }
 
-    public boolean exists(String uniqueId) {
-        return this.plotCache.stream().anyMatch(plot -> plot.getUniqueId().equals(uniqueId));
+    public boolean exists(UUID uniqueId) {
+        return this.plotCache.stream().anyMatch(plot -> plot.uniqueId().equals(uniqueId));
     }
 
     public List<Plot> byOwner(UUID owner) {
         return this.plotCache.stream()
-                .filter(plot -> plot.getOwner().equals(owner))
+                .filter(plot -> plot.owner().equals(owner))
                 .toList();
     }
 
-    public Plot byUniqueId(String uniqueId) {
+    public Plot byUniqueId(UUID uniqueId) {
         return this.plotCache.stream()
-                .filter(plot -> plot.getUniqueId().equals(uniqueId))
+                .filter(plot -> plot.uniqueId().equals(uniqueId))
                 .findFirst()
                 .orElse(null);
     }
 
     public Plot byBounds(Location location) {
         return this.plotCache.stream()
-                .filter(plot -> plot.getBoundingBox().contains(location.getBlockX(), location.getBlockZ()))
+                .filter(plot -> plot.boundingBox().contains(location.getBlockX(), location.getBlockZ()))
                 .findFirst()
                 .orElse(null);
     }
@@ -115,13 +113,5 @@ public class PlotHandler {
                         player.getPersistentDataContainer().remove(this.plotRectangleKey);
                     }
                 });
-    }
-
-    public String generateId(int length) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            builder.append(this.CHARACTERS.charAt(this.random.nextInt(this.CHARACTERS.length())));
-        }
-        return builder.toString();
     }
 }

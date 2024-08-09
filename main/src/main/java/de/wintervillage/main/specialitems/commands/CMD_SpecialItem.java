@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.specialitems.SpecialItem;
+import de.wintervillage.main.specialitems.commands.arguments.Argument_SpecialItem;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
@@ -27,23 +28,22 @@ public class CMD_SpecialItem {
     public void register(Commands commands){
         LiteralArgumentBuilder<CommandSourceStack> builder_specialitem = Commands.literal("specialitem")
                 .then(
-                        Commands.argument("item_name", StringArgumentType.string())
+                        Commands.argument("special_item", new Argument_SpecialItem(this.winterVillage))
                                 .executes((source) -> {
                                     if(!(source.getSource().getExecutor() instanceof Player player)){
                                         source.getSource().getSender().sendMessage(this.winterVillage.PREFIX + "Dieser Command ist nur durch einen Spieler ausführbar.");
                                         return 0;
                                     }
 
-                                    String item_name = source.getArgument("item_name", String.class);
+                                    SpecialItem specialItem = source.getArgument("special_item", SpecialItem.class);
+                                    //String item_name = source.getArgument("item_name", String.class);
                                     ItemStack item;
 
-                                    SpecialItem specialItem = this.winterVillage.specialItems.getSIByName(item_name);
+                                    //SpecialItem specialItem = this.winterVillage.specialItems.getSIByName(item_name);
 
                                     if(specialItem != null){
                                         item = specialItem.getItem();
                                         player.getInventory().addItem(item);
-                                    } else {
-                                        player.sendMessage(this.winterVillage.PREFIX + "Das SpecialItem " + item_name + " existiert nicht.");
                                     }
 
                                     return 1;
