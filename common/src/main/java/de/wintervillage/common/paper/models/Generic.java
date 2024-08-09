@@ -16,6 +16,21 @@ public record Generic(
         int level
 ) {
 
+    public Document document() {
+        return new Document()
+                .append("maxHealth", this.maxHealth())
+                .append("health", this.health())
+                .append("foodLevel", this.foodLevel())
+                .append("exhaustion", this.exhaustion())
+                .append("saturation", this.saturation())
+                .append("allowFlight", this.allowFlight())
+                .append("isFlying", this.isFlying())
+                .append("gameMode", this.gameMode())
+                .append("fireTicks", this.fireTicks())
+                .append("experience", this.experience())
+                .append("level", this.level());
+    }
+
     public static Generic generate(Document document) {
         return new Generic(
                 document.getDouble("maxHealth"),

@@ -7,6 +7,15 @@ import java.util.HashMap;
 
 public record EnderChest(HashMap<Integer, Item> enderChestItems) {
 
+    public Document document() {
+        return this.enderChestItems().entrySet().stream()
+                .collect(
+                        Document::new,
+                        (document, entry) -> document.put(String.valueOf(entry.getKey()), new Binary(entry.getValue().bytes())),
+                        Document::putAll
+                );
+    }
+
     public static EnderChest generate(Document document) {
         HashMap<Integer, Item> items = new HashMap<>();
         for (var entry : document.entrySet()) {

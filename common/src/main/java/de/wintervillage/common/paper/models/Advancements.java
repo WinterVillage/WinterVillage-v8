@@ -9,6 +9,19 @@ import java.util.stream.Collectors;
 
 public record Advancements(Collection<Advancement> advancements) {
 
+    public Document document() {
+        return this.advancements().stream()
+                .collect(
+                        Document::new,
+                        (document, advancement) -> {
+                            Document advancementDocument = new Document("key", advancement.key())
+                                    .append("completedCriteria", advancement.completedCriteria());
+                            document.put(advancement.key(), advancementDocument);
+                        },
+                        Document::putAll
+                );
+    }
+
     public static Advancements generate(Document document) {
         return new Advancements(document.values().stream().map(entry -> {
             Document advancement = (Document) entry;

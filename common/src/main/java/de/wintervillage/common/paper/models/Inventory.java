@@ -7,6 +7,15 @@ import java.util.HashMap;
 
 public record Inventory(HashMap<Integer, Item> inventoryItems) {
 
+    public Document document() {
+        return this.inventoryItems().entrySet().stream()
+                .collect(
+                        Document::new,
+                        (document, entry) -> document.put(String.valueOf(entry.getKey()), new Binary(entry.getValue().bytes())),
+                        Document::putAll
+                );
+    }
+
     public static Inventory generate(Document document) {
         HashMap<Integer, Item> items = new HashMap<>();
         for (var entry : document.entrySet()) {

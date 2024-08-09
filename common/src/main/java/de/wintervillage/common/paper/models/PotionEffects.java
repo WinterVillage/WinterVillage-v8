@@ -12,6 +12,15 @@ public record PotionEffects(Collection<Effect> effects) {
         this.effects = new ArrayList<>(effects);
     }
 
+    public Document document() {
+        return this.effects.stream()
+                .collect(
+                        Document::new,
+                        (document, effect) -> document.append(effect.key(), effect.document()),
+                        Document::putAll
+                );
+    }
+
     public static PotionEffects generate(Document document) {
         return new PotionEffects(document.values().stream().map(entry -> {
             Document effect = (Document) entry;
