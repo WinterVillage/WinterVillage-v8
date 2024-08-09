@@ -2,15 +2,18 @@ package de.wintervillage.common.core.player.data;
 
 import com.google.common.collect.Maps;
 import de.wintervillage.common.paper.models.*;
+import de.wintervillage.common.paper.util.KeyedAdapter;
 import org.bson.Document;
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
+import org.bukkit.Statistic;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,19 +25,22 @@ public class PlayerInformation {
     private PotionEffects potionEffects;
     private Advancements advancements;
     private Generic generic;
+    private Statistics statistics;
 
     public PlayerInformation(
             Inventory inventory,
             EnderChest enderChest,
             PotionEffects potionEffects,
             Advancements advancements,
-            Generic generic
+            Generic generic,
+            Statistics statistics
     ) {
         this.inventory = inventory;
         this.enderChest = enderChest;
         this.potionEffects = potionEffects;
         this.advancements = advancements;
         this.generic = generic;
+        this.statistics = statistics;
     }
 
     public Inventory inventory() {
@@ -77,6 +83,14 @@ public class PlayerInformation {
         this.generic = generic;
     }
 
+    public Statistics statistics() {
+        return this.statistics;
+    }
+
+    public void statistics(Statistics statistics) {
+        this.statistics = statistics;
+    }
+
     /**
      * Clears the information
      */
@@ -86,6 +100,7 @@ public class PlayerInformation {
         this.potionEffects(PotionEffects.generateDefault());
         this.advancements(Advancements.generateDefault());
         this.generic(Generic.generateDefault());
+        this.statistics(Statistics.generateDefault());
     }
 
     /**
@@ -153,6 +168,16 @@ public class PlayerInformation {
                 player.getExp(),
                 player.getLevel()
         );
+
+        // statistics
+        Registry.STATISTIC.forEach(statistic -> {
+            switch (statistic.getType()) {
+                case UNTYPED -> this.addStatistic(player, statistic, this.statistics.generic());
+                case BLOCK -> this.addMaterialStatistic(player, statistic, this.statistics.blocks(), true);
+                case ITEM -> this.addMaterialStatistic(player, statistic, this.statistics.items(), false);
+                case ENTITY -> this.addEntityStatistic(player, statistic, this.statistics.entities());
+            }
+        });
     }
 
 
@@ -215,6 +240,12 @@ public class PlayerInformation {
         player.setFireTicks(this.generic.fireTicks());
         player.setExp(this.generic.experience());
         player.setLevel(this.generic.level());
+
+        // statistics
+        this.statistics().generic().forEach((id, value) -> this.applyStatistic(player, id, Statistic.Type.UNTYPED, value));
+        this.statistics().blocks().forEach((id, map) -> map.forEach((key, value) -> this.applyStatistic(player, id, Statistic.Type.BLOCK, value, key)));
+        this.statistics().items().forEach((id, map) -> map.forEach((key, value) -> this.applyStatistic(player, id, Statistic.Type.ITEM, value, key)));
+        this.statistics().entities().forEach((id, map) -> map.forEach((key, value) -> this.applyStatistic(player, id, Statistic.Type.ENTITY, value, key)));
     }
 
     private void setAdvancement(
@@ -228,61 +259,45 @@ public class PlayerInformation {
         toRevoke.forEach(progress::revokeCriteria);
     }
 
-    public Document toDocument(PlayerInformation playerInformation) {
-        Document document = new Document();
+    private void applyStatistic(@NotNull Player player, @NotNull String id, @NotNull Statistic.Type type, int value, @NotNull String... key) {
+        final Statistic statistic = KeyedAdapter.matchStatistic(id);
+        if (statistic == null) return;
 
-        // player information
-        Document inventoryDocument = new Document();
-        for (var entry : playerInformation.inventory().inventoryItems().entrySet()) {
-            inventoryDocument.put(entry.getKey().toString(), entry.getValue().bytes());
+        switch (type) {
+            case UNTYPED -> player.setStatistic(statistic, value);
+            case BLOCK, ITEM -> player.setStatistic(statistic, KeyedAdapter.matchMaterial(key[0]), value);
+            case ENTITY -> player.setStatistic(statistic, KeyedAdapter.matchEntityType(key[0]), value);
         }
+    }
 
-        // enderchest
-        Document enderChestDocument = new Document();
-        for (var entry : playerInformation.enderChest().enderChestItems().entrySet()) {
-            enderChestDocument.put(entry.getKey().toString(), entry.getValue().bytes());
-        }
+    private void addStatistic(Player player, Statistic statistic, Map<String, Integer> map) {
+        final int value = player.getStatistic(statistic);
+        if (value != 0) map.put(statistic.getKey().getKey(), value);
+    }
 
-        // potion effects
-        Document potionEffectsDocument = new Document();
-        for (var effect : playerInformation.potionEffects().effects()) {
-            Document effectDocument = new Document("key", effect.key())
-                    .append("duration", effect.duration())
-                    .append("amplifier", effect.amplifier())
-                    .append("ambient", effect.ambient())
-                    .append("particles", effect.particles())
-                    .append("icon", effect.icon());
-            potionEffectsDocument.put(effect.key(), effectDocument);
-        }
+    private void addMaterialStatistic(Player player, Statistic statistic, Map<String, Map<String, Integer>> map, boolean isBlock) {
+        Registry.MATERIAL.forEach(material -> {
+            if ((material.isBlock() && !isBlock) || (material.isItem() && isBlock)) return;
+            final int value = player.getStatistic(statistic, material);
+            if (value != 0) map.computeIfAbsent(statistic.getKey().getKey(), k -> Maps.newHashMap()).put(material.getKey().getKey(), value);
+        });
+    }
 
-        // advancements
-        Document advancementsDocument = new Document();
-        for (var advancement : playerInformation.advancements().advancements()) {
-            Document advancementDocument = new Document("key", advancement.key())
-                    .append("completedCriteria", advancement.completedCriteria().entrySet().stream()
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-            advancementsDocument.put(advancement.key(), advancementDocument);
-        }
+    private void addEntityStatistic(Player player, Statistic statistic, Map<String, Map<String, Integer>> map) {
+        Registry.ENTITY_TYPE.forEach(entityType -> {
+            if (!entityType.isAlive()) return;
+            final int value = player.getStatistic(statistic, entityType);
+            if (value != 0) map.computeIfAbsent(statistic.getKey().getKey(), key -> Maps.newHashMap()).put(entityType.getKey().getKey(), value);
+        });
+    }
 
-        // generic
-        Document genericDocument = new Document("maxHealth", playerInformation.generic().maxHealth())
-                .append("health", playerInformation.generic().health())
-                .append("foodLevel", playerInformation.generic().foodLevel())
-                .append("exhaustion", playerInformation.generic().exhaustion())
-                .append("saturation", playerInformation.generic().saturation())
-                .append("allowFlight", playerInformation.generic().allowFlight())
-                .append("isFlying", playerInformation.generic().isFlying())
-                .append("gameMode", playerInformation.generic().gameMode())
-                .append("fireTicks", playerInformation.generic().fireTicks())
-                .append("experience", playerInformation.generic().experience())
-                .append("level", playerInformation.generic().level());
-
-        document.append("inventory", inventoryDocument)
-                .append("enderchest", enderChestDocument)
-                .append("potionEffects", potionEffectsDocument)
-                .append("advancements", advancementsDocument)
-                .append("generic", genericDocument);
-        return document;
+    public Document toDocument() {
+        return new Document("inventory", this.inventory().document())
+                .append("enderchest", this.enderChest().document())
+                .append("potionEffects", this.potionEffects().document())
+                .append("advancements", this.advancements().document())
+                .append("generic", this.generic().document())
+                .append("statistics", this.statistics().document());
     }
 
     public static PlayerInformation fromDocument(Document document) {
@@ -306,12 +321,17 @@ public class PlayerInformation {
                 ? Generic.generate(document.get("generic", Document.class))
                 : Generic.generateDefault();
 
+        Statistics statistics = document.containsKey("statistics") && !document.get("statistics", Document.class).isEmpty()
+                ? Statistics.generate(document.get("statistics", Document.class))
+                : Statistics.generateDefault();
+
         return new PlayerInformation(
                 inventory,
                 enderChest,
                 potionEffects,
                 advancements,
-                generic
+                generic,
+                statistics
         );
     }
 
@@ -323,6 +343,7 @@ public class PlayerInformation {
                 ", potionEffects=" + this.potionEffects +
                 ", advancements=" + this.advancements +
                 ", generic=" + this.generic +
+                ", statistics=" + this.statistics +
                 '}';
     }
 }

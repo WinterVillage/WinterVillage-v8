@@ -45,7 +45,8 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
                 EnderChest.generateDefault(),
                 PotionEffects.generateDefault(),
                 Advancements.generateDefault(),
-                Generic.generateDefault()
+                Generic.generateDefault(),
+                Statistics.generateDefault()
         );
     }
 
