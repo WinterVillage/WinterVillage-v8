@@ -120,17 +120,17 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         document.put("money", this.money);
 
         if (this.banInformation != null)
-            document.put("banInformation", this.banInformation.toDocument(this.banInformation));
+            document.put("banInformation", this.banInformation.toDocument());
         if (this.muteInformation != null)
-            document.put("muteInformation", this.muteInformation.toDocument(this.muteInformation));
+            document.put("muteInformation", this.muteInformation.toDocument());
 
-        document.put("playerInformation", this.playerInformation.toDocument(this.playerInformation));
+        document.put("playerInformation", this.playerInformation.toDocument());
 
         if (this.wildcardInformation != null)
-            document.put("wildcardInformation", this.wildcardInformation.toDocument(this.wildcardInformation));
+            document.put("wildcardInformation", this.wildcardInformation.toDocument());
 
         if (this.whitelistInformation != null)
-            document.put("whitelistInformation", this.whitelistInformation.toDocument(this.whitelistInformation));
+            document.put("whitelistInformation", this.whitelistInformation.toDocument());
 
         return document;
     }
