@@ -20,9 +20,8 @@ public class WildcardInformation {
         this.amount = amount;
     }
 
-    public Document toDocument(WildcardInformation wildcardInformation) {
-        return new Document()
-                .append("amount", wildcardInformation.amount);
+    public Document toDocument() {
+        return new Document("amount", this.amount());
     }
 
     public static WildcardInformation fromDocument(Document document) {
@@ -34,7 +33,7 @@ public class WildcardInformation {
     @Override
     public String toString() {
         return "WildcardInformation{" +
-                "amount=" + amount +
+                "amount=" + this.amount +
                 '}';
     }
 }

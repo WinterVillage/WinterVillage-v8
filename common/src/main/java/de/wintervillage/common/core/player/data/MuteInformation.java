@@ -53,12 +53,12 @@ public class MuteInformation {
         this.expiring = expiring;
     }
 
-    public Document toDocument(MuteInformation muteInformation) {
+    public Document toDocument() {
         return new Document()
-                .append("from", muteInformation.from)
-                .append("reason", muteInformation.reason)
-                .append("created", muteInformation.created)
-                .append("expiring", muteInformation.expiring);
+                .append("from", this.from().toString())
+                .append("reason", this.reason())
+                .append("created", this.created())
+                .append("expiring", this.expiring());
     }
 
     public static MuteInformation fromDocument(Document document) {

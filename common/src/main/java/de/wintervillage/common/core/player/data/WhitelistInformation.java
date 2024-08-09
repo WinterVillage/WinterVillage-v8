@@ -33,10 +33,9 @@ public class WhitelistInformation {
         this.whitelisted = whitelisted;
     }
 
-    public Document toDocument(WhitelistInformation whitelistInformation) {
-        return new Document()
-                .append("from", whitelistInformation.from().toString())
-                .append("whitelisted", whitelistInformation.whitelisted());
+    public Document toDocument() {
+        return new Document("from", this.from().toString())
+                .append("whitelisted", this.whitelisted());
     }
 
     public static WhitelistInformation fromDocument(Document document) {
@@ -49,8 +48,8 @@ public class WhitelistInformation {
     @Override
     public String toString() {
         return "WhitelistInformation{" +
-                "from=" + from +
-                ", whitelisted=" + whitelisted +
+                "from=" + this.from +
+                ", whitelisted=" + this.whitelisted +
                 '}';
     }
 }
