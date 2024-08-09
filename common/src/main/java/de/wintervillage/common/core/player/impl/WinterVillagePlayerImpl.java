@@ -2,6 +2,7 @@ package de.wintervillage.common.core.player.impl;
 
 import de.wintervillage.common.core.player.WinterVillagePlayer;
 import de.wintervillage.common.core.player.data.*;
+import de.wintervillage.common.paper.models.*;
 import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
@@ -10,8 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.UUID;
 
 public class WinterVillagePlayerImpl implements WinterVillagePlayer {
@@ -42,10 +41,10 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         this.money = BigDecimal.ZERO;
 
         this.playerInformation = new PlayerInformation(
-                new PlayerInformation.Inventory(new HashMap<>()),
-                new PlayerInformation.EnderChest(new HashMap<>()),
-                new PlayerInformation.PotionEffects(new ArrayList<>()),
-                new PlayerInformation.Advancements(new ArrayList<>())
+                Inventory.generateDefault(),
+                EnderChest.generateDefault(),
+                PotionEffects.generateDefault(),
+                Advancements.generateDefault()
         );
     }
 
@@ -152,8 +151,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
             player.muteInformation = MuteInformation.fromDocument(muteDocument);
         }
 
-        PlayerInformation playerInformation = PlayerInformation.fromDocument(document.get("playerInformation", Document.class));
-        player.playerInformation = playerInformation;
+        player.playerInformation = PlayerInformation.fromDocument(document.get("playerInformation", Document.class));
 
         if (document.containsKey("wildcardInformation") && !document.get("wildcardInformation", Document.class).isEmpty()) {
             Document wildcardDocument = document.get("wildcardInformation", Document.class);
