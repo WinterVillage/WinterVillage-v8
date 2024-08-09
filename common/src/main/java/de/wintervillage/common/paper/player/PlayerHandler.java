@@ -10,7 +10,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
+import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
@@ -58,16 +61,32 @@ public class PlayerHandler {
     public void clear(Player player) {
         player.getInventory().setHeldItemSlot(0);
 
+        Registry.ADVANCEMENT.forEach(advancement -> {
+            final AdvancementProgress progress = player.getAdvancementProgress(advancement);
+            progress.getAwardedCriteria().forEach(progress::revokeCriteria);
+        });
+
         player.getInventory().clear();
         player.getEnderChest().clear();
         player.getActivePotionEffects().forEach(potionEffect -> player.removePotionEffect(potionEffect.getType()));
 
         player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getDefaultValue());
         player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
-        player.setFoodLevel(20);
-        player.setSaturation(5);
+        player.setHealthScale(20.0d);
 
-        // TODO: clear player data
+        player.setFoodLevel(20);
+        player.setExhaustion(0.0f);
+        player.setSaturation(5.0f);
+
+        player.setAllowFlight(false);
+        player.setFlying(false);
+
+        player.setGameMode(GameMode.SURVIVAL);
+
+        player.setFireTicks(0);
+
+        player.setExp(0.0f);
+        player.setLevel(0);
     }
 
     /**

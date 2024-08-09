@@ -3,9 +3,11 @@ package de.wintervillage.common.core.player.data;
 import com.google.common.collect.Maps;
 import de.wintervillage.common.paper.models.*;
 import org.bson.Document;
+import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.advancement.AdvancementProgress;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -19,17 +21,20 @@ public class PlayerInformation {
     private EnderChest enderChest;
     private PotionEffects potionEffects;
     private Advancements advancements;
+    private Generic generic;
 
     public PlayerInformation(
             Inventory inventory,
             EnderChest enderChest,
             PotionEffects potionEffects,
-            Advancements advancements
+            Advancements advancements,
+            Generic generic
     ) {
         this.inventory = inventory;
         this.enderChest = enderChest;
         this.potionEffects = potionEffects;
         this.advancements = advancements;
+        this.generic = generic;
     }
 
     public Inventory inventory() {
@@ -64,6 +69,14 @@ public class PlayerInformation {
         this.advancements = advancements;
     }
 
+    public Generic generic() {
+        return this.generic;
+    }
+
+    public void generic(Generic generic) {
+        this.generic = generic;
+    }
+
     /**
      * Clears the information
      */
@@ -72,6 +85,7 @@ public class PlayerInformation {
         this.enderChest(EnderChest.generateDefault());
         this.potionEffects(PotionEffects.generateDefault());
         this.advancements(Advancements.generateDefault());
+        this.generic(Generic.generateDefault());
     }
 
     /**
@@ -124,6 +138,21 @@ public class PlayerInformation {
                             .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getTime()))
             ));
         });
+
+        // generic
+        this.generic = new Generic(
+                player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue(),
+                player.getHealth(),
+                player.getFoodLevel(),
+                player.getExhaustion(),
+                player.getSaturation(),
+                player.getAllowFlight(),
+                player.isFlying(),
+                player.getGameMode().name(),
+                player.getFireTicks(),
+                player.getExp(),
+                player.getLevel()
+        );
     }
 
 
@@ -173,6 +202,19 @@ public class PlayerInformation {
                     progress.getAwardedCriteria().stream().filter(key -> !criteria.containsKey(key)).toList()
             );
         });
+
+        // generic
+        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(this.generic.maxHealth());
+        player.setHealth(this.generic.health());
+        player.setFoodLevel(this.generic.foodLevel());
+        player.setExhaustion(this.generic.exhaustion());
+        player.setSaturation(this.generic.saturation());
+        player.setAllowFlight(this.generic.allowFlight());
+        player.setFlying(this.generic.isFlying());
+        player.setGameMode(GameMode.valueOf(this.generic.gameMode()));
+        player.setFireTicks(this.generic.fireTicks());
+        player.setExp(this.generic.experience());
+        player.setLevel(this.generic.level());
     }
 
     private void setAdvancement(
@@ -222,10 +264,24 @@ public class PlayerInformation {
             advancementsDocument.put(advancement.key(), advancementDocument);
         }
 
+        // generic
+        Document genericDocument = new Document("maxHealth", playerInformation.generic().maxHealth())
+                .append("health", playerInformation.generic().health())
+                .append("foodLevel", playerInformation.generic().foodLevel())
+                .append("exhaustion", playerInformation.generic().exhaustion())
+                .append("saturation", playerInformation.generic().saturation())
+                .append("allowFlight", playerInformation.generic().allowFlight())
+                .append("isFlying", playerInformation.generic().isFlying())
+                .append("gameMode", playerInformation.generic().gameMode())
+                .append("fireTicks", playerInformation.generic().fireTicks())
+                .append("experience", playerInformation.generic().experience())
+                .append("level", playerInformation.generic().level());
+
         document.append("inventory", inventoryDocument)
                 .append("enderchest", enderChestDocument)
                 .append("potionEffects", potionEffectsDocument)
-                .append("advancements", advancementsDocument);
+                .append("advancements", advancementsDocument)
+                .append("generic", genericDocument);
         return document;
     }
 
@@ -246,34 +302,16 @@ public class PlayerInformation {
                 ? Advancements.generate(document.get("advancements", Document.class))
                 : Advancements.generateDefault();
 
-        // potion effects
-        Collection<Effect> effects = potionEffectsDocument.entrySet().stream().map(entry -> {
-            Document effectDocument = (Document) entry.getValue();
-            return new Effect(
-                    effectDocument.getString("key"),
-                    effectDocument.getInteger("duration"),
-                    effectDocument.getInteger("amplifier"),
-                    effectDocument.getBoolean("ambient"),
-                    effectDocument.getBoolean("particles"),
-                    effectDocument.getBoolean("icon")
-            );
-        }).collect(Collectors.toList());
-
-        // advancements
-        Collection<Advancement> advancements = advancementsDocument.entrySet().stream().map(entry -> {
-            Document advancementDocument = (Document) entry.getValue();
-            return new Advancement(
-                    advancementDocument.getString("key"),
-                    advancementDocument.get("completedCriteria", Document.class).entrySet().stream()
-                            .collect(Collectors.toMap(Map.Entry::getKey, criteraValue -> (Long) criteraValue.getValue()))
-            );
-        }).collect(Collectors.toList());
+        Generic generic = document.containsKey("generic") && !document.get("generic", Document.class).isEmpty()
+                ? Generic.generate(document.get("generic", Document.class))
+                : Generic.generateDefault();
 
         return new PlayerInformation(
                 inventory,
                 enderChest,
                 potionEffects,
-                advancements
+                advancements,
+                generic
         );
     }
 
@@ -284,6 +322,7 @@ public class PlayerInformation {
                 ", enderChest=" + this.enderChest +
                 ", potionEffects=" + this.potionEffects +
                 ", advancements=" + this.advancements +
+                ", generic=" + this.generic +
                 '}';
     }
 }
