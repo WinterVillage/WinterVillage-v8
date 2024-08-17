@@ -6,12 +6,16 @@ import de.wintervillage.common.paper.models.*;
 import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
+import org.bson.types.Binary;
 import org.bson.types.Decimal128;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+
+import static de.wintervillage.common.core.database.UUIDConverter.fromBytes;
+import static de.wintervillage.common.core.database.UUIDConverter.toBinary;
 
 public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
@@ -117,7 +121,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     public Document toDocument() {
         Document document = new Document();
 
-        document.put("_id", this.uniqueId.toString());
+        document.put("_id", toBinary(this.uniqueId));
         document.put("money", this.money);
 
         if (this.banInformation != null)
@@ -137,7 +141,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     }
 
     public static WinterVillagePlayerImpl fromDocument(Document document) {
-        UUID uniqueId = UUID.fromString(document.getString("_id"));
+        UUID uniqueId = fromBytes(document.get("_id", Binary.class).getData());
         BigDecimal money = document.get("money", Decimal128.class).bigDecimalValue();
 
         WinterVillagePlayerImpl player = new WinterVillagePlayerImpl(uniqueId);

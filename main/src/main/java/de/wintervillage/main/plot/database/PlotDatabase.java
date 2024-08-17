@@ -18,22 +18,23 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import static de.wintervillage.common.core.database.UUIDConverter.toBinary;
+
 public class PlotDatabase {
 
-    private final WinterVillage winterVillage;
     private final MongoCollection<PlotImpl> collection;
 
     @Inject
     public PlotDatabase() {
-        this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
-        this.collection = this.winterVillage.mongoDatabase.getCollection("plots", PlotImpl.class);
+        WinterVillage winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
+        this.collection = winterVillage.mongoDatabase.getCollection("plots", PlotImpl.class);
     }
 
     public CompletableFuture<Void> insert(Plot plot) {
         CompletableFuture<Void> future = new CompletableFuture<>();
 
         this.collection.replaceOne(
-                        Filters.eq("_id", plot.uniqueId().toString()),
+                        Filters.eq("_id", toBinary(plot.uniqueId())),
                         ((PlotImpl) plot),
                         new ReplaceOptions().upsert(true)
                 )
@@ -53,7 +54,9 @@ public class PlotDatabase {
 
     public CompletableFuture<Void> delete(UUID uniqueId) {
         CompletableFuture<Void> future = new CompletableFuture<>();
-        this.collection.deleteOne(Filters.eq("_id", uniqueId.toString()))
+        this.collection.deleteOne(
+                        Filters.eq("_id", toBinary(uniqueId))
+                )
                 .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
                     @Override
                     public void onComplete() {
@@ -88,7 +91,9 @@ public class PlotDatabase {
     public CompletableFuture<Plot> plot(UUID uniqueId) {
         CompletableFuture<Plot> future = new CompletableFuture<>();
 
-        this.collection.find(Filters.eq("_id", uniqueId.toString()))
+        this.collection.find(
+                        Filters.eq("_id", toBinary(uniqueId))
+                )
                 .first()
                 .subscribe(new SubscriberHelpers.OperationSubscriber<Plot>() {
                     @Override
@@ -114,7 +119,9 @@ public class PlotDatabase {
         List<Plot> plots = new ArrayList<>();
         CompletableFuture<List<Plot>> future = new CompletableFuture<>();
 
-        this.collection.find(Filters.eq("owner", owner.toString()))
+        this.collection.find(
+                        Filters.eq("owner", toBinary(owner))
+                )
                 .subscribe(new SubscriberHelpers.OperationSubscriber<Plot>() {
                     @Override
                     public void onNext(Plot plot) {

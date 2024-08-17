@@ -21,7 +21,7 @@ public interface CalendarDay {
 
     /**
      * The list of {@link UUID} of players who have opened the calendar day
-     * @return
+     * @return {@link List} of {@link UUID}
      */
     List<UUID> opened();
 

@@ -58,7 +58,9 @@ public class CalendarDatabase {
     public CompletableFuture<Void> delete(int day) {
         CompletableFuture<Void> future = new CompletableFuture<>();
 
-        this.collection.deleteOne(Filters.eq("day", day))
+        this.collection.deleteOne(
+                        Filters.eq("day", day)
+                )
                 .subscribe(new SubscriberHelpers.OperationSubscriber<>() {
                     @Override
                     public void onComplete() {
@@ -82,7 +84,9 @@ public class CalendarDatabase {
     public CompletableFuture<CalendarDay> find(int day) {
         CompletableFuture<CalendarDay> future = new CompletableFuture<>();
 
-        this.collection.find(Filters.eq("day", day))
+        this.collection.find(
+                        Filters.eq("day", day)
+                )
                 .first()
                 .subscribe(new SubscriberHelpers.OperationSubscriber<CalendarDay>() {
                     @Override

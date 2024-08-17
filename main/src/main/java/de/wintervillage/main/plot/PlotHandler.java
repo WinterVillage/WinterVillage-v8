@@ -114,4 +114,8 @@ public class PlotHandler {
                     }
                 });
     }
+
+    public List<Plot> getPlotCache() {
+        return new ArrayList<>(this.plotCache);
+    }
 }

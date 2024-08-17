@@ -1,5 +1,6 @@
 package de.wintervillage.main.calendar.impl;
 
+import de.wintervillage.common.core.database.UUIDConverter;
 import de.wintervillage.main.calendar.CalendarDay;
 import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonProperty;
@@ -10,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static de.wintervillage.common.core.database.UUIDConverter.fromBytes;
 
 public class CalendarDayImpl implements CalendarDay {
 
@@ -51,7 +54,7 @@ public class CalendarDayImpl implements CalendarDay {
         return new Document("day", this.day)
                 .append("itemStack", this.itemStack.serializeAsBytes())
                 .append("opened", this.opened.stream()
-                        .map(UUID::toString)
+                        .map(UUIDConverter::toBinary)
                         .toList());
     }
 
@@ -59,9 +62,9 @@ public class CalendarDayImpl implements CalendarDay {
         return new CalendarDayImpl(
                 document.getInteger("day"),
                 ItemStack.deserializeBytes(document.get("itemStack", Binary.class).getData()),
-                new ArrayList<>(document.getList("opened", String.class)
+                new ArrayList<>(document.getList("opened", Binary.class)
                         .stream()
-                        .map(UUID::fromString)
+                        .map(binary -> fromBytes(binary.getData()))
                         .toList())
         );
     }
