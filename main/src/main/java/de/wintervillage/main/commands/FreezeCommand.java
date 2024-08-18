@@ -7,7 +7,8 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.luckperms.api.model.group.Group;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,38 +28,36 @@ public class FreezeCommand {
                         .requires((source) -> source.getSender().hasPermission("wintervillage.command.freeze.everyone"))
                         .executes((source) -> {
                             this.winterVillage.PLAYERS_FROZEN = !this.winterVillage.PLAYERS_FROZEN;
-                            source.getSource().getExecutor().sendMessage(
-                                    this.winterVillage.PREFIX.append(Component.text("Everyone has been ", NamedTextColor.WHITE)
-                                            .append(
-                                                    this.winterVillage.PLAYERS_FROZEN
-                                                            ? Component.text("frozen", NamedTextColor.RED)
-                                                            : Component.text("unfrozen", NamedTextColor.GREEN)
-                                            ))
-                            );
+
+                            String key = this.winterVillage.PLAYERS_FROZEN ? "wintervillage.commands.freeze.everyone-frozen" : "wintervillage.commands.freeze.everyone-unfrozen";
+                            source.getSource().getSender().sendMessage(Component.join(
+                                    this.winterVillage.prefix,
+                                    Component.translatable(key)
+                            ));
                             return 1;
                         })
                 )
                 .then(Commands.argument("player", ArgumentTypes.players())
                         .executes((source) -> {
-                                    Player player = source.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(source.getSource()).getFirst();
+                            Player player = source.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(source.getSource()).getFirst();
+                            Group highestGroup = this.winterVillage.playerHandler.highestGroup(player);
 
-                                    boolean isFrozen = player.getPersistentDataContainer().getOrDefault(this.winterVillage.frozenKey, PersistentDataType.BOOLEAN, false);
-                                    if (isFrozen) {
-                                        player.getPersistentDataContainer().remove(this.winterVillage.frozenKey);
-                                        source.getSource().getExecutor().sendMessage(
-                                                this.winterVillage.PREFIX.append(Component.text(player.getName(), NamedTextColor.AQUA)
-                                                        .append(Component.text(" has been unfrozen", NamedTextColor.GREEN))
-                                                ));
-                                    } else {
-                                        player.getPersistentDataContainer().set(this.winterVillage.frozenKey, PersistentDataType.BOOLEAN, true);
-                                        source.getSource().getExecutor().sendMessage(
-                                                this.winterVillage.PREFIX.append(Component.text(player.getName(), NamedTextColor.AQUA)
-                                                        .append(Component.text(" has been frozen", NamedTextColor.RED))
-                                                ));
-                                    }
-                                    return 1;
-                                }
-                        )
+                            boolean isFrozen = player.getPersistentDataContainer().getOrDefault(this.winterVillage.frozenKey, PersistentDataType.BOOLEAN, false);
+                            if (isFrozen) {
+                                player.getPersistentDataContainer().remove(this.winterVillage.frozenKey);
+                                source.getSource().getExecutor().sendMessage(Component.join(
+                                        this.winterVillage.prefix,
+                                        Component.translatable("wintervillage.commands.freeze.player-frozen", MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())))
+                                );
+                            } else {
+                                player.getPersistentDataContainer().set(this.winterVillage.frozenKey, PersistentDataType.BOOLEAN, true);
+                                source.getSource().getExecutor().sendMessage(Component.join(
+                                        this.winterVillage.prefix,
+                                        Component.translatable("wintervillage.commands.freeze.player-unfrozen", MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())))
+                                );
+                            }
+                            return 1;
+                        })
                 );
         commands.register(this.winterVillage.getPluginMeta(), builder.build(), "Freeze a specified player or everyone", List.of());
     }

@@ -11,6 +11,7 @@ import com.mongodb.ServerAddress;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
+import de.wintervillage.common.core.translation.MiniMessageTranslator;
 import de.wintervillage.common.paper.player.PlayerHandler;
 import de.wintervillage.main.antifreezle.AntiFreezle;
 import de.wintervillage.common.core.config.Document;
@@ -22,6 +23,7 @@ import de.wintervillage.main.calendar.commands.CalendarCommand;
 import de.wintervillage.main.calendar.database.CalendarDatabase;
 import de.wintervillage.main.commands.FreezeCommand;
 import de.wintervillage.main.commands.InventoryCommand;
+import de.wintervillage.main.commands.TestCommand;
 import de.wintervillage.main.death.DeathManager;
 import de.wintervillage.main.economy.EconomyManager;
 import de.wintervillage.main.economy.commands.CMD_Transfer;
@@ -39,9 +41,12 @@ import de.wintervillage.main.specialitems.commands.CMD_SpecialItem;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.translation.GlobalTranslator;
+import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import net.luckperms.api.LuckPerms;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -54,14 +59,18 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
 public final class WinterVillage extends JavaPlugin {
 
+    // databases
     public @Inject PlotDatabase plotDatabase;
     public @Inject CalendarDatabase calendarDatabase;
     public @Inject PlayerDatabase playerDatabase;
 
+    // handlers
     public @Inject PlotHandler plotHandler;
     public @Inject CalendarHandler calendarHandler;
     public @Inject PlayerHandler playerHandler;
@@ -76,7 +85,16 @@ public final class WinterVillage extends JavaPlugin {
     public LuckPerms luckPerms;
     public ProtocolManager protocolManager;
 
-    public final Component PREFIX = MiniMessage.miniMessage().deserialize("<gradient:#d48fff:#00f7ff>WinterVillage</gradient> | <reset>");
+    /**
+     * Usage: {@link Component#join(JoinConfiguration.Builder, ComponentLike...)} to send a message with prefix
+     */
+    public final JoinConfiguration prefix = JoinConfiguration.builder()
+            .prefix(Component.translatable("wintervillage.prefix"))
+            .separator(Component.empty())
+            .build();
+
+    @Deprecated(forRemoval = true)
+    public final Component PREFIX = Component.translatable("wintervillage.prefix");
 
     // configs
     public Document databaseDocument;
@@ -157,6 +175,8 @@ public final class WinterVillage extends JavaPlugin {
             new InventoryCommand(command);
             new PlotCommand(command);
 
+            new TestCommand(command);
+
             //Economy-System TODO: proxy
             new CMD_Transfer(command);
 
@@ -167,6 +187,18 @@ public final class WinterVillage extends JavaPlugin {
             //AdventCalendar
             new CalendarCommand(command);
         });
+
+        // translations
+        MiniMessageTranslator translator = new MiniMessageTranslator(Key.key("wintervillage", "translations"));
+
+        ResourceBundle bundleGerman = ResourceBundle.getBundle("Bundle", Locale.GERMANY, UTF8ResourceBundleControl.get());
+        ResourceBundle bundleEnglish = ResourceBundle.getBundle("Bundle", Locale.US, UTF8ResourceBundleControl.get());
+
+        translator.registerAll(Locale.US, bundleEnglish, true);
+        translator.registerAll(Locale.GERMANY, bundleGerman, true);
+        translator.defaultLocale(Locale.GERMANY);
+
+        GlobalTranslator.translator().addSource(translator);
     }
 
     @Override
@@ -177,9 +209,7 @@ public final class WinterVillage extends JavaPlugin {
                 winterVillagePlayer.playerInformation().save(player);
             }).join();
 
-            player.kick(Component.text("Server is shutting down", NamedTextColor.RED)
-                    .append(Component.newline())
-                    .append(Component.text("discord.wintervillage.de", NamedTextColor.AQUA)));
+            player.kick(Component.translatable("wintervillage.server-restarting"));
         });
 
         if (this.mongoClient != null) this.mongoClient.close();
