@@ -13,6 +13,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,12 +40,18 @@ public class CalendarCommand {
                                     );
 
                                     this.winterVillage.calendarDatabase.insert(calendarDay)
-                                            .thenAccept((v) -> {
-                                                player.sendMessage(Component.text("Inserted"));
+                                            .thenAccept(_ -> {
+                                                player.sendMessage(Component.join(
+                                                        this.winterVillage.prefix,
+                                                        Component.translatable("wintervillage.commands.calendar.set-day", Component.text(day))
+                                                ));
                                                 this.winterVillage.calendarHandler.forceUpdate();
                                             })
                                             .exceptionally((t) -> {
-                                                player.sendMessage(Component.text("Failed to insert"));
+                                                player.sendMessage(Component.join(
+                                                        this.winterVillage.prefix,
+                                                        Component.translatable("wintervillage.commands.calendar.set-day-error", Component.text(t.getMessage()))
+                                                ));
                                                 return null;
                                             });
 
@@ -61,7 +68,10 @@ public class CalendarCommand {
 
                                     Optional<CalendarDay> optional = this.winterVillage.calendarHandler.byDay(day);
                                     if (!optional.isPresent()) {
-                                        player.sendMessage(Component.text("Not found"));
+                                        player.sendMessage(Component.join(
+                                                this.winterVillage.prefix,
+                                                Component.translatable("wintervillage.commands.calendar.get-not-found")
+                                        ));
                                         return 0;
                                     }
 
@@ -73,12 +83,15 @@ public class CalendarCommand {
                 .executes((source) -> {
                     Player player = (Player) source.getSource().getExecutor();
 
-                    /**
                     if (!this.winterVillage.calendarHandler.withinRange()) {
-                        player.sendMessage(Component.text("Not available"));
+                        String formatted = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(this.winterVillage.calendarHandler.startDate);
+
+                        player.sendMessage(Component.join(
+                                this.winterVillage.prefix,
+                                Component.translatable("wintervillage.calendar.not-available", Component.text(formatted))
+                        ));
                         return 0;
                     }
-                     */
 
                     CalendarInventory inventory = new CalendarInventory(player);
                     player.openInventory(inventory.getInventory());

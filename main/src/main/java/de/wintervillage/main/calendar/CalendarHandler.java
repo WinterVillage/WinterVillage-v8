@@ -17,7 +17,7 @@ public class CalendarHandler {
 
     public List<CalendarDay> days;
 
-    private final LocalDate startDate, endDate;
+    public final LocalDate startDate, endDate;
 
     @Inject
     public CalendarHandler() {
