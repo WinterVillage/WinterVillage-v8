@@ -9,6 +9,9 @@ import de.wintervillage.common.paper.player.listener.packet.AdvancementPacketLis
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.model.group.Group;
+import net.luckperms.api.model.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
@@ -23,6 +26,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.Duration;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -33,15 +38,22 @@ public class PlayerHandler {
 
     private final JavaPlugin javaPlugin;
     private final PlayerDatabase playerDatabase;
+    private final LuckPerms luckPerms;
 
     private final ScheduledExecutorService executorService;
 
     public final NamespacedKey applyingKey;
 
     @Inject
-    public PlayerHandler(JavaPlugin javaPlugin, ProtocolManager protocolManager, PlayerDatabase playerDatabase) {
+    public PlayerHandler(
+            JavaPlugin javaPlugin,
+            ProtocolManager protocolManager,
+            PlayerDatabase playerDatabase,
+            LuckPerms luckPerms
+    ) {
         this.javaPlugin = javaPlugin;
         this.playerDatabase = playerDatabase;
+        this.luckPerms = luckPerms;
 
         this.executorService = Executors.newSingleThreadScheduledExecutor();
         this.executorService.scheduleAtFixedRate(this::save, 5, 5, TimeUnit.MINUTES);
@@ -146,6 +158,21 @@ public class PlayerHandler {
                     );
                     return null;
                 });
+    }
+
+    /**
+     * Gets the highest group of the given player
+     * USE THIS METHOD ONLY FOR ONLINE-PLAYERS
+     * @param player {@link Player} to get the group from
+     * @return {@link Group} of the player
+     */
+    public Group highestGroup(Player player) {
+        User user = this.luckPerms.getUserManager().getUser(player.getUniqueId());
+
+        Collection<Group> groups = user.getInheritedGroups(this.luckPerms.getPlayerAdapter(Player.class).getQueryOptions(player));
+        return groups.stream()
+                .max(Comparator.comparingInt(group -> group.getWeight().orElse(0)))
+                .orElse(this.luckPerms.getGroupManager().getGroup("default"));
     }
 
     /**

@@ -15,6 +15,7 @@ import de.wintervillage.main.event.EventManager;
 import de.wintervillage.main.plot.PlotHandler;
 import de.wintervillage.main.plot.database.PlotDatabase;
 import de.wintervillage.main.specialitems.SpecialItems;
+import net.luckperms.api.LuckPerms;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class WinterVillageModule extends AbstractModule {
@@ -22,11 +23,18 @@ public class WinterVillageModule extends AbstractModule {
     private final JavaPlugin javaPlugin;
     private final ProtocolManager protocolManager;
     private final MongoDatabase mongoDatabase;
+    private final LuckPerms luckPerms;
 
-    public WinterVillageModule(JavaPlugin javaPlugin, ProtocolManager protocolManager, MongoDatabase mongoDatabase) {
+    public WinterVillageModule(
+            JavaPlugin javaPlugin,
+            ProtocolManager protocolManager,
+            MongoDatabase mongoDatabase,
+            LuckPerms luckPerms
+    ) {
         this.javaPlugin = javaPlugin;
         this.protocolManager = protocolManager;
         this.mongoDatabase = mongoDatabase;
+        this.luckPerms = luckPerms;
     }
 
     @Override
@@ -59,5 +67,10 @@ public class WinterVillageModule extends AbstractModule {
     @Provides
     public ProtocolManager provideProtocolManager() {
         return this.protocolManager;
+    }
+
+    @Provides
+    public LuckPerms provideLuckPerms() {
+        return this.luckPerms;
     }
 }
