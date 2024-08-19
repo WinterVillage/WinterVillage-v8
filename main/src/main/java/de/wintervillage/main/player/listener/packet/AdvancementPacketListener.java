@@ -1,8 +1,8 @@
-package de.wintervillage.common.paper.player.listener.packet;
+package de.wintervillage.main.player.listener.packet;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.*;
-import de.wintervillage.common.paper.player.PlayerHandler;
+import de.wintervillage.main.player.PlayerHandler;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;

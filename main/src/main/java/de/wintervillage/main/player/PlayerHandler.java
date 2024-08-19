@@ -1,11 +1,12 @@
-package de.wintervillage.common.paper.player;
+package de.wintervillage.main.player;
 
 import com.comphenix.protocol.ProtocolManager;
 import com.google.inject.Inject;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
-import de.wintervillage.common.paper.player.listener.PlayerJoinListener;
-import de.wintervillage.common.paper.player.listener.PlayerQuitListener;
-import de.wintervillage.common.paper.player.listener.packet.AdvancementPacketListener;
+import de.wintervillage.main.WinterVillage;
+import de.wintervillage.main.player.listener.PlayerJoinListener;
+import de.wintervillage.main.player.listener.PlayerQuitListener;
+import de.wintervillage.main.player.listener.packet.AdvancementPacketListener;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
@@ -36,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 public class PlayerHandler {
 
-    private final JavaPlugin javaPlugin;
+    private final WinterVillage winterVillage;
     private final PlayerDatabase playerDatabase;
     private final LuckPerms luckPerms;
 
@@ -46,12 +47,11 @@ public class PlayerHandler {
 
     @Inject
     public PlayerHandler(
-            JavaPlugin javaPlugin,
             ProtocolManager protocolManager,
             PlayerDatabase playerDatabase,
             LuckPerms luckPerms
     ) {
-        this.javaPlugin = javaPlugin;
+        this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.playerDatabase = playerDatabase;
         this.luckPerms = luckPerms;
 
@@ -60,14 +60,15 @@ public class PlayerHandler {
 
         this.applyingKey = new NamespacedKey("wintervillage", "applying_player_information");
 
-        protocolManager.addPacketListener(new AdvancementPacketListener(javaPlugin, this));
+        protocolManager.addPacketListener(new AdvancementPacketListener(this.winterVillage, this));
 
-        new PlayerJoinListener(this.javaPlugin, this);
-        new PlayerQuitListener(this.javaPlugin, this);
+        new PlayerJoinListener(this);
+        new PlayerQuitListener(this);
     }
 
     /**
      * Clears the player data
+     *
      * @param player {@link Player} to clear
      */
     public void clear(Player player) {
@@ -103,7 +104,8 @@ public class PlayerHandler {
 
     /**
      * Applies the saved data to the player
-     * @param player {@link Player} to apply the data to
+     *
+     * @param player    {@link Player} to apply the data to
      * @param applyFrom {@link UUID} to apply the data from
      */
     public void apply(Player player, UUID applyFrom) {
@@ -115,8 +117,8 @@ public class PlayerHandler {
         ));
         player.getPersistentDataContainer().set(this.applyingKey, PersistentDataType.BOOLEAN, true);
         player.showTitle(Title.title(
-                Component.text("Loading data...", NamedTextColor.YELLOW),
-                Component.empty(),
+                Component.translatable("wintervillage.playerhandler.loading.title"),
+                Component.translatable("wintervillage.playerhandler.loading.subtitle"),
                 Title.Times.times(Duration.ZERO, Duration.ofSeconds(4), Duration.ofMillis(500))
         ));
 
@@ -126,36 +128,38 @@ public class PlayerHandler {
             public void run() {
                 playerDatabase.player(applyFrom)
                         .thenAccept(winterVillagePlayer -> {
-                            Bukkit.getScheduler().runTask(javaPlugin, () -> winterVillagePlayer.playerInformation().apply(player)); // run on next tick to avoid applying data to the player asynchronously
-                            Bukkit.getScheduler().runTaskLater(javaPlugin, () -> player.getPersistentDataContainer().remove(applyingKey), 60L);
+                            Bukkit.getScheduler().runTask(winterVillage, () -> winterVillagePlayer.playerInformation().apply(player)); // run on next tick to avoid applying data to the player asynchronously
+                            Bukkit.getScheduler().runTaskLater(winterVillage, () -> player.getPersistentDataContainer().remove(applyingKey), 60L);
 
-                            player.sendMessage(Component.text("Your data has been loaded!", NamedTextColor.YELLOW));
+                            player.sendMessage(Component.join(
+                                    winterVillage.prefix,
+                                    Component.translatable("wintervillage.playerhandler.loading-successfull")
+                            ));
                         })
                         .exceptionally(throwable -> {
-                            player.sendMessage(
-                                    Component.text("There was an error while loading your player data. Please contact an administrator!", NamedTextColor.DARK_RED)
-                                            .append(Component.newline())
-                                            .append(Component.text(throwable.getMessage(), NamedTextColor.DARK_RED))
-                            );
+                            player.sendMessage(Component.join(
+                                    winterVillage.prefix,
+                                    Component.translatable("wintervillage.playerhandler.loading-failed", Component.text(throwable.getMessage()))
+                            ));
                             return null;
                         });
             }
-        }.runTaskLater(this.javaPlugin, 60L);
+        }.runTaskLater(this.winterVillage, 60L);
     }
 
     /**
      * Saves the player data
-     * @param player {@link Player} to save from
+     *
+     * @param player  {@link Player} to save from
      * @param applyTo {@link UUID} to save to
      */
     public void save(Player player, UUID applyTo) {
         this.playerDatabase.modify(applyTo, winterVillagePlayer -> winterVillagePlayer.playerInformation().save(player))
                 .exceptionally(throwable -> {
-                    player.sendMessage(
-                            Component.text("There was an error while saving your player data. Please contact an administrator!", NamedTextColor.DARK_RED)
-                                    .append(Component.newline())
-                                    .append(Component.text(throwable.getMessage(), NamedTextColor.DARK_RED))
-                    );
+                    player.sendMessage(Component.join(
+                            this.winterVillage.prefix,
+                            Component.translatable("wintervillage.playerhandler.saving-failed", Component.text(throwable.getMessage()))
+                    ));
                     return null;
                 });
     }
@@ -163,6 +167,7 @@ public class PlayerHandler {
     /**
      * Gets the highest group of the given player
      * USE THIS METHOD ONLY FOR ONLINE-PLAYERS
+     *
      * @param player {@link Player} to get the group from
      * @return {@link Group} of the player
      */
@@ -177,6 +182,7 @@ public class PlayerHandler {
 
     /**
      * Saves the player data
+     *
      * @param player {@link Player} to save from
      */
     public void save(Player player) {

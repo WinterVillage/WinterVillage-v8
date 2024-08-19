@@ -32,9 +32,6 @@ dependencies {
 
     // luckperms
     compileOnly("net.luckperms:api:5.4")
-
-    // protocollib
-    compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
 }
 
 tasks {
