@@ -47,13 +47,13 @@ public class FreezeCommand {
                                 player.getPersistentDataContainer().remove(this.winterVillage.frozenKey);
                                 source.getSource().getSender().sendMessage(Component.join(
                                         this.winterVillage.prefix,
-                                        Component.translatable("wintervillage.commands.freeze.player-frozen", MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())))
+                                        Component.translatable("wintervillage.commands.freeze.player-unfrozen", MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())))
                                 );
                             } else {
                                 player.getPersistentDataContainer().set(this.winterVillage.frozenKey, PersistentDataType.BOOLEAN, true);
                                 source.getSource().getSender().sendMessage(Component.join(
                                         this.winterVillage.prefix,
-                                        Component.translatable("wintervillage.commands.freeze.player-unfrozen", MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())))
+                                        Component.translatable("wintervillage.commands.freeze.player-frozen", MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())))
                                 );
                             }
                             return 1;
