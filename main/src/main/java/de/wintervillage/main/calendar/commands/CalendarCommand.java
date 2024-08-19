@@ -30,7 +30,7 @@ public class CalendarCommand {
                         .requires(source -> source.getSender().hasPermission("wintervillage.calendar.command.set"))
                         .then(Commands.argument("day", IntegerArgumentType.integer(1, 24))
                                 .executes((source) -> {
-                                    Player player = (Player) source.getSource().getExecutor();
+                                    Player player = (Player) source.getSource().getSender();
                                     int day = IntegerArgumentType.getInteger(source, "day");
 
                                     CalendarDay calendarDay = new CalendarDayImpl(
@@ -63,7 +63,7 @@ public class CalendarCommand {
                         .requires(source -> source.getSender().hasPermission("wintervillage.calendar.command.get"))
                         .then(Commands.argument("day", IntegerArgumentType.integer(1, 24))
                                 .executes((source) -> {
-                                    Player player = (Player) source.getSource().getExecutor();
+                                    Player player = (Player) source.getSource().getSender();
                                     int day = IntegerArgumentType.getInteger(source, "day");
 
                                     Optional<CalendarDay> optional = this.winterVillage.calendarHandler.byDay(day);
@@ -81,7 +81,7 @@ public class CalendarCommand {
                         )
                 )
                 .executes((source) -> {
-                    Player player = (Player) source.getSource().getExecutor();
+                    Player player = (Player) source.getSource().getSender();
 
                     if (!this.winterVillage.calendarHandler.withinRange()) {
                         String formatted = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(this.winterVillage.calendarHandler.startDate);

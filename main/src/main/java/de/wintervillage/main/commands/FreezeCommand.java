@@ -45,13 +45,13 @@ public class FreezeCommand {
                             boolean isFrozen = player.getPersistentDataContainer().getOrDefault(this.winterVillage.frozenKey, PersistentDataType.BOOLEAN, false);
                             if (isFrozen) {
                                 player.getPersistentDataContainer().remove(this.winterVillage.frozenKey);
-                                source.getSource().getExecutor().sendMessage(Component.join(
+                                source.getSource().getSender().sendMessage(Component.join(
                                         this.winterVillage.prefix,
                                         Component.translatable("wintervillage.commands.freeze.player-frozen", MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())))
                                 );
                             } else {
                                 player.getPersistentDataContainer().set(this.winterVillage.frozenKey, PersistentDataType.BOOLEAN, true);
-                                source.getSource().getExecutor().sendMessage(Component.join(
+                                source.getSource().getSender().sendMessage(Component.join(
                                         this.winterVillage.prefix,
                                         Component.translatable("wintervillage.commands.freeze.player-unfrozen", MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())))
                                 );
