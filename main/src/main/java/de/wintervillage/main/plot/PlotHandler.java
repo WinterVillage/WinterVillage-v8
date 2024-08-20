@@ -12,11 +12,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -100,19 +103,28 @@ public class PlotHandler {
 
     public void terminate() {
         if (!this.executorService.isShutdown()) this.executorService.shutdown();
+        Bukkit.getOnlinePlayers().forEach(this::stopSetup);
+    }
 
-        Bukkit.getOnlinePlayers().stream()
-                .filter(player -> player.getPersistentDataContainer().has(this.plotSetupKey) || player.getPersistentDataContainer().has(this.plotRectangleKey))
-                .forEach(player -> {
-                    if (player.getPersistentDataContainer().has(this.plotSetupKey))
-                        player.getPersistentDataContainer().remove(this.plotSetupKey);
+    public void stopSetup(Player player) {
+        PersistentDataContainer container = player.getPersistentDataContainer();
+        // contains BoundingBox2D
+        if (container.has(this.plotSetupKey)) container.remove(this.plotSetupKey);
 
-                    if (player.getPersistentDataContainer().has(this.plotRectangleKey)) {
-                        int taskId = player.getPersistentDataContainer().get(this.plotRectangleKey, PersistentDataType.INTEGER);
-                        ParticleRectangle.getRectangle(taskId).stop();
-                        player.getPersistentDataContainer().remove(this.plotRectangleKey);
-                    }
-                });
+        // contains taskId
+        if (container.has(this.plotRectangleKey)) {
+            int taskId = container.get(this.plotRectangleKey, PersistentDataType.INTEGER);
+
+            ParticleRectangle task = ParticleRectangle.getRectangle(taskId);
+            if (task != null) task.stop();
+
+            container.remove(this.plotRectangleKey);
+        }
+
+        // remove setup item
+        Arrays.stream(player.getInventory().getContents())
+                .filter(item -> item != null && item.hasItemMeta() && item.getPersistentDataContainer().has(this.plotSetupKey))
+                .forEach(item -> player.getInventory().remove(item));
     }
 
     public List<Plot> getPlotCache() {
