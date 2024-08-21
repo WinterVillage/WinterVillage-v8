@@ -2,10 +2,7 @@ package de.wintervillage.main.plot;
 
 import de.wintervillage.common.paper.item.ItemBuilder;
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.plot.listener.BlockBreakListener;
-import de.wintervillage.main.plot.listener.BlockPlaceListener;
-import de.wintervillage.main.plot.listener.PlayerInteractListener;
-import de.wintervillage.main.plot.listener.PlayerQuitListener;
+import de.wintervillage.main.plot.listener.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -61,6 +58,7 @@ public class PlotHandler {
         new BlockPlaceListener();
         new PlayerInteractListener();
         new PlayerQuitListener();
+        new SignChangeListener();
     }
 
     public void forceUpdate() {
