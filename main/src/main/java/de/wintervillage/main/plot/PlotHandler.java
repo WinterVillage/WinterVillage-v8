@@ -2,9 +2,7 @@ package de.wintervillage.main.plot;
 
 import de.wintervillage.common.paper.item.ItemBuilder;
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.plot.listener.block.BlockBreakListener;
-import de.wintervillage.main.plot.listener.block.BlockPlaceListener;
-import de.wintervillage.main.plot.listener.block.SignChangeListener;
+import de.wintervillage.main.plot.listener.block.*;
 import de.wintervillage.main.plot.listener.entity.EntityExplodeListener;
 import de.wintervillage.main.plot.listener.entity.EntityMountListener;
 import de.wintervillage.main.plot.listener.misc.InventoryOpenListener;
@@ -64,6 +62,7 @@ public class PlotHandler {
         // listeners TODO: block water/ lava flowing into plots, ... ?
         // block
         new BlockBreakListener();
+        new BlockPistonExtendListener();
         new BlockPlaceListener();
         new de.wintervillage.main.plot.listener.block.PlayerInteractListener();
         new SignChangeListener();
