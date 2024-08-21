@@ -2,6 +2,8 @@ package de.wintervillage.main.plot.listener.block;
 
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.Plot;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -24,6 +26,9 @@ public class PlayerInteractListener implements Listener {
         Player player = event.getPlayer();
 
         if (event.getClickedBlock() == null) return;
+        // ignore non-interactable blocks
+        if (!event.getClickedBlock().getType().isInteractable()) return;
+
         Plot plot = this.winterVillage.plotHandler.byBounds(event.getClickedBlock().getLocation());
         if (plot == null) return;
 
@@ -34,5 +39,6 @@ public class PlayerInteractListener implements Listener {
         // cancel interactions with blocks in plots that the player is not a member of
         // event.setUseItemInHand(Event.Result.DENY);
         event.setUseInteractedBlock(Event.Result.DENY);
+        player.sendMessage(Component.text("You are not allowed to interact with this block", NamedTextColor.RED));
     }
 }
