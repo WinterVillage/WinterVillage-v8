@@ -1,4 +1,4 @@
-package de.wintervillage.main.plot.listener;
+package de.wintervillage.main.plot.listener.player;
 
 import de.wintervillage.main.WinterVillage;
 import org.bukkit.entity.Player;

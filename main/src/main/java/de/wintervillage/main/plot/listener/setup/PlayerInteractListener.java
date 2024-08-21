@@ -1,4 +1,4 @@
-package de.wintervillage.main.plot.listener;
+package de.wintervillage.main.plot.listener.setup;
 
 import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;

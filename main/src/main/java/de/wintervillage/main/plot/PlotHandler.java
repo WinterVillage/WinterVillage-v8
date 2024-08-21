@@ -2,7 +2,13 @@ package de.wintervillage.main.plot;
 
 import de.wintervillage.common.paper.item.ItemBuilder;
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.plot.listener.*;
+import de.wintervillage.main.plot.listener.block.BlockBreakListener;
+import de.wintervillage.main.plot.listener.block.BlockPlaceListener;
+import de.wintervillage.main.plot.listener.block.SignChangeListener;
+import de.wintervillage.main.plot.listener.entity.EntityMountListener;
+import de.wintervillage.main.plot.listener.misc.InventoryOpenListener;
+import de.wintervillage.main.plot.listener.player.PlayerInteractAtEntityListener;
+import de.wintervillage.main.plot.listener.player.PlayerQuitListener;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -54,11 +60,25 @@ public class PlotHandler {
         this.executorService = Executors.newSingleThreadScheduledExecutor();
         this.executorService.scheduleAtFixedRate(this::forceUpdate, 0, 30, TimeUnit.SECONDS);
 
+        // listeners TODO: block water/ lava flowing into plots, ... ?
+        // block
         new BlockBreakListener();
         new BlockPlaceListener();
-        new PlayerInteractListener();
-        new PlayerQuitListener();
+        new de.wintervillage.main.plot.listener.block.PlayerInteractListener();
         new SignChangeListener();
+
+        // entity
+        new EntityMountListener();
+
+        // misc
+        new InventoryOpenListener();
+
+        // player
+        new PlayerInteractAtEntityListener();
+        new PlayerQuitListener();
+
+        // setup
+        new de.wintervillage.main.plot.listener.setup.PlayerInteractListener();
     }
 
     public void forceUpdate() {

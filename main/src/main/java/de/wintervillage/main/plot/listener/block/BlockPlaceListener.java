@@ -1,4 +1,4 @@
-package de.wintervillage.main.plot.listener;
+package de.wintervillage.main.plot.listener.block;
 
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.Plot;
@@ -8,20 +8,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class BlockBreakListener implements Listener {
+public class BlockPlaceListener implements Listener {
 
     private final WinterVillage winterVillage;
 
-    public BlockBreakListener() {
+    public BlockPlaceListener() {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.winterVillage.getServer().getPluginManager().registerEvents(this, this.winterVillage);
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
-    public void execute(BlockBreakEvent event) {
+    public void execute(BlockPlaceEvent event) {
         Player player = event.getPlayer();
 
         Plot plot = this.winterVillage.plotHandler.byBounds(event.getBlock().getLocation());
@@ -29,13 +29,10 @@ public class BlockBreakListener implements Listener {
 
         if (player.hasPermission("wintervillage.plot.bypass")) return;
 
-        if (!plot.owner().equals(player.getUniqueId())
-                && !plot.members().contains(player.getUniqueId())) {
-            event.setCancelled(true);
-            player.sendMessage(Component.text("You are not allowed to break this block", NamedTextColor.RED));
-            return;
-        }
+        if (plot.owner().equals(player.getUniqueId()) || plot.members().contains(player.getUniqueId())) return;
 
-        player.sendMessage(Component.text("You are allowed to break this block", NamedTextColor.GREEN));
+        // cancel block places in plots that the player is not a member of
+        event.setCancelled(true);
+        player.sendMessage(Component.text("You are allowed to place this block", NamedTextColor.RED));
     }
 }
