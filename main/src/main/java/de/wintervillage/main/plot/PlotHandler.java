@@ -5,6 +5,7 @@ import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.listener.block.BlockBreakListener;
 import de.wintervillage.main.plot.listener.block.BlockPlaceListener;
 import de.wintervillage.main.plot.listener.block.SignChangeListener;
+import de.wintervillage.main.plot.listener.entity.EntityExplodeListener;
 import de.wintervillage.main.plot.listener.entity.EntityMountListener;
 import de.wintervillage.main.plot.listener.misc.InventoryOpenListener;
 import de.wintervillage.main.plot.listener.player.PlayerInteractAtEntityListener;
@@ -68,6 +69,7 @@ public class PlotHandler {
         new SignChangeListener();
 
         // entity
+        new EntityExplodeListener();
         new EntityMountListener();
 
         // misc
