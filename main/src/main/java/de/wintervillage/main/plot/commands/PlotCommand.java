@@ -114,6 +114,11 @@ public class PlotCommand {
                                     }
 
                                     BoundingBox2D boundingBox = container.get(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType());
+                                    if (!boundingBox.isDefined()) {
+                                        player.sendMessage(Component.text("You need to finish your configuration first", NamedTextColor.RED));
+                                        return 0;
+                                    }
+
                                     boolean tooLarge = (!player.hasPermission("wintervillage.plot.width_bypass")
                                             && (boundingBox.getWidthX() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH
                                             || boundingBox.getWidthZ() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH));
