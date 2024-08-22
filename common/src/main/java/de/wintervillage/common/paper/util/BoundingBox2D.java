@@ -1,5 +1,7 @@
 package de.wintervillage.common.paper.util;
 
+import org.bukkit.Location;
+
 public class BoundingBox2D {
 
     private double minX, minZ, maxX, maxZ;
@@ -49,6 +51,10 @@ public class BoundingBox2D {
     public boolean contains(int x, int z) {
         return x >= Math.min(this.minX, this.maxX) && x <= Math.max(this.minX, this.maxX)
                 && z >= Math.min(this.minZ, this.maxZ) && z <= Math.max(this.minZ, this.maxZ);
+    }
+
+    public boolean contains(Location location) {
+        return this.contains(location.getBlockX(), location.getBlockZ());
     }
 
     public boolean intersects(BoundingBox2D other) {
