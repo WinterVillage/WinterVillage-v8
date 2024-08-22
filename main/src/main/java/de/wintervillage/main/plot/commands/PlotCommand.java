@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.common.paper.persistent.BoundingBoxDataType;
+import de.wintervillage.main.plot.task.BoundariesTask;
 import de.wintervillage.main.plot.task.SetupTask;
 import de.wintervillage.main.plot.Plot;
 import de.wintervillage.main.plot.impl.PlotImpl;
@@ -85,6 +86,26 @@ public class PlotCommand {
                             return 1;
                         })
                 )
+                .then(Commands.literal("showBorders")
+                        .executes((source) -> {
+                            final Player player = (Player) source.getSource().getSender();
+
+                            if (player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotBoundariesKey)) {
+                                int taskId = player.getPersistentDataContainer().get(this.winterVillage.plotHandler.plotBoundariesKey, PersistentDataType.INTEGER);
+
+                                BoundariesTask task = BoundariesTask.task(taskId);
+                                if (task != null) task.stop();
+
+                                player.getPersistentDataContainer().remove(this.winterVillage.plotHandler.plotBoundariesKey);
+                                return 1;
+                            }
+
+                            BoundariesTask task = new BoundariesTask(player);
+                            int taskId = task.start();
+
+                            player.getPersistentDataContainer().set(this.winterVillage.plotHandler.plotBoundariesKey, PersistentDataType.INTEGER, taskId);
+                            return 1;
+                        }))
                 .then(Commands.literal("listAll")
                         .requires((source) -> source.getSender().hasPermission("wintervillage.plot.command.listAll"))
                         .executes((source) -> {
@@ -146,7 +167,7 @@ public class PlotCommand {
                                                 return null;
                                             });
 
-                                    this.winterVillage.plotHandler.stopSetup(player);
+                                    this.winterVillage.plotHandler.stopTasks(player);
                                     return 1;
                                 })
                         )

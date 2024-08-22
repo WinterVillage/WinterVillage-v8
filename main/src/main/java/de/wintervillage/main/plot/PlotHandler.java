@@ -10,6 +10,7 @@ import de.wintervillage.main.plot.listener.player.PlayerBucketEmptyListener;
 import de.wintervillage.main.plot.listener.player.PlayerBucketFillListener;
 import de.wintervillage.main.plot.listener.player.PlayerInteractAtEntityListener;
 import de.wintervillage.main.plot.listener.player.PlayerQuitListener;
+import de.wintervillage.main.plot.task.BoundariesTask;
 import de.wintervillage.main.plot.task.SetupTask;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -51,8 +52,9 @@ public class PlotHandler {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.plotCache = new ArrayList<>();
 
-        this.plotSetupKey = new NamespacedKey("wintervillage", "plot_setup");
-        this.plotRectangleKey = new NamespacedKey("wintervillage", "plot_rectangle");
+        this.plotSetupKey = new NamespacedKey("wintervillage", "plot/setup");
+        this.plotRectangleKey = new NamespacedKey("wintervillage", "plot/setup_rectangle_task");
+        this.plotBoundariesKey = new NamespacedKey("wintervillage", "plot/setup_boundaries_task");
 
         this.SETUP_ITEM = ItemBuilder.from(Material.WOODEN_AXE)
                 .name(Component.text("Mark your plot corners", NamedTextColor.GREEN))
@@ -136,15 +138,15 @@ public class PlotHandler {
 
     public void terminate() {
         if (!this.executorService.isShutdown()) this.executorService.shutdown();
-        Bukkit.getOnlinePlayers().forEach(this::stopSetup);
+        Bukkit.getOnlinePlayers().forEach(this::stopTasks);
     }
 
-    public void stopSetup(Player player) {
+    public void stopTasks(Player player) {
         PersistentDataContainer container = player.getPersistentDataContainer();
         // contains BoundingBox2D
         if (container.has(this.plotSetupKey)) container.remove(this.plotSetupKey);
 
-        // contains taskId
+        // contains SetupTask taskId
         if (container.has(this.plotRectangleKey)) {
             int taskId = container.get(this.plotRectangleKey, PersistentDataType.INTEGER);
 
@@ -152,6 +154,16 @@ public class PlotHandler {
             if (task != null) task.stop();
 
             container.remove(this.plotRectangleKey);
+        }
+
+        // contains BoundariesTask taskId
+        if (container.has(this.plotBoundariesKey)) {
+            int taskId = container.get(this.plotBoundariesKey, PersistentDataType.INTEGER);
+
+            BoundariesTask task = BoundariesTask.task(taskId);
+            if (task != null) task.stop();
+
+            container.remove(this.plotBoundariesKey);
         }
 
         // remove setup item

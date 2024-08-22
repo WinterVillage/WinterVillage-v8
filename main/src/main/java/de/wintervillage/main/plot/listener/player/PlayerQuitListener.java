@@ -20,6 +20,6 @@ public class PlayerQuitListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void execute(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        this.winterVillage.plotHandler.stopSetup(player);
+        this.winterVillage.plotHandler.stopTasks(player);
     }
 }
