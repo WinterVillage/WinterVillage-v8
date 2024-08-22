@@ -8,23 +8,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class PlayerInteractAtEntityListener implements Listener {
+public class PlayerArmorStandManipulateListener implements Listener {
 
     private final WinterVillage winterVillage;
 
-    public PlayerInteractAtEntityListener() {
+    public PlayerArmorStandManipulateListener() {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.winterVillage.getServer().getPluginManager().registerEvents(this, this.winterVillage);
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
-    public void execute(PlayerInteractAtEntityEvent event) {
-        if (event instanceof PlayerInteractEntityEvent) return;
-
+    public void execute(PlayerArmorStandManipulateEvent event) {
         Player player = event.getPlayer();
 
         Plot plot = this.winterVillage.plotHandler.byBounds(event.getRightClicked().getLocation());
@@ -34,8 +31,8 @@ public class PlayerInteractAtEntityListener implements Listener {
 
         if (plot.owner().equals(player.getUniqueId()) || plot.members().contains(player.getUniqueId())) return;
 
-        // cancel interaction with entities in plots that the player is not a member of
+        // cancel manipulating armorstands in plots that the player is not a member of
         event.setCancelled(true);
-        player.sendMessage(Component.text("You are not allowed to interact with this entity", NamedTextColor.RED));
+        player.sendMessage(Component.text("You are not allowed to manipulate this armorstand", NamedTextColor.RED));
     }
 }

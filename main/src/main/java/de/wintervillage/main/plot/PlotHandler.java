@@ -6,10 +6,7 @@ import de.wintervillage.main.plot.listener.block.*;
 import de.wintervillage.main.plot.listener.entity.*;
 import de.wintervillage.main.plot.listener.misc.InventoryMoveItemListener;
 import de.wintervillage.main.plot.listener.misc.InventoryOpenListener;
-import de.wintervillage.main.plot.listener.player.PlayerBucketEmptyListener;
-import de.wintervillage.main.plot.listener.player.PlayerBucketFillListener;
-import de.wintervillage.main.plot.listener.player.PlayerInteractAtEntityListener;
-import de.wintervillage.main.plot.listener.player.PlayerQuitListener;
+import de.wintervillage.main.plot.listener.player.*;
 import de.wintervillage.main.plot.task.BoundariesTask;
 import de.wintervillage.main.plot.task.SetupTask;
 import net.kyori.adventure.text.Component;
@@ -83,15 +80,18 @@ public class PlotHandler {
         new EntityMountListener();
         new HangingBreakByEntityListener();
         new HangingPlaceListener();
+        new VehicleDestroyListener();
 
         // misc
         new InventoryMoveItemListener();
         new InventoryOpenListener();
 
         // player
+        new PlayerArmorStandManipulateListener();
         new PlayerBucketEmptyListener();
         new PlayerBucketFillListener();
-        new PlayerInteractAtEntityListener();
+        new PlayerInteractAtEntityListener(); // the client may send PlayerInteractEntityEvent in addition, thanks mojang
+        new PlayerInteractEntityListener();
         new PlayerQuitListener();
 
         // setup

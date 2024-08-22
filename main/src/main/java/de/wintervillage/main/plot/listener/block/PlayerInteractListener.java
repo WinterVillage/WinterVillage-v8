@@ -4,6 +4,7 @@ import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.Plot;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -21,15 +22,17 @@ public class PlayerInteractListener implements Listener {
         this.winterVillage.getServer().getPluginManager().registerEvents(this, this.winterVillage);
     }
 
+    // event gets called twice because EquipmentSlot.HAND & EquipmentSlot.OFF_HAND , thanks mojang
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void execute(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
-        if (event.getClickedBlock() == null) return;
+        Block clickedBlock = event.getClickedBlock();
+        if (clickedBlock == null) return;
         // ignore non-interactable blocks
-        if (!event.getClickedBlock().getType().isInteractable()) return;
+        if (!(clickedBlock.getType().isInteractable() && clickedBlock.getType().isBlock())) return;
 
-        Plot plot = this.winterVillage.plotHandler.byBounds(event.getClickedBlock().getLocation());
+        Plot plot = this.winterVillage.plotHandler.byBounds(clickedBlock.getLocation());
         if (plot == null) return;
 
         if (player.hasPermission("wintervillage.plot.bypass")) return;
