@@ -79,7 +79,7 @@ public class PreLoginListener {
 
                         // Cancelled
                         // | If the player has no whitelistInformation and is not able to bypass it
-                        if (player.whitelistInformation() == null || !user.getCachedData().getPermissionData().checkPermission("wintervillage.whitelist-bypass").asBoolean()) {
+                        if (player.whitelistInformation() == null && !user.getCachedData().getPermissionData().checkPermission("wintervillage.whitelist-bypass").asBoolean()) {
                             event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
                                     Component.text("Du bist nicht auf der Whitelist", NamedTextColor.RED)
                                             .append(Component.newline())
@@ -93,6 +93,8 @@ public class PreLoginListener {
                         event.setResult(PreLoginEvent.PreLoginComponentResult.allowed());
                         continuation.resume();
                     });
+
+            // cloudnet checks maintenance permission afterward
         });
     }
 }
