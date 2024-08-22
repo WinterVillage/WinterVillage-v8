@@ -8,7 +8,6 @@ import de.wintervillage.main.player.listener.PlayerJoinListener;
 import de.wintervillage.main.player.listener.PlayerQuitListener;
 import de.wintervillage.main.player.listener.packet.AdvancementPacketListener;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.group.Group;
@@ -58,7 +57,7 @@ public class PlayerHandler {
         this.executorService = Executors.newSingleThreadScheduledExecutor();
         this.executorService.scheduleAtFixedRate(this::save, 5, 5, TimeUnit.MINUTES);
 
-        this.applyingKey = new NamespacedKey("wintervillage", "applying_player_information");
+        this.applyingKey = new NamespacedKey("wintervillage", "playerhandler/applying_player_information");
 
         protocolManager.addPacketListener(new AdvancementPacketListener(this.winterVillage, this));
 
@@ -129,7 +128,7 @@ public class PlayerHandler {
                 playerDatabase.player(applyFrom)
                         .thenAccept(winterVillagePlayer -> {
                             Bukkit.getScheduler().runTask(winterVillage, () -> winterVillagePlayer.playerInformation().apply(player)); // run on next tick to avoid applying data to the player asynchronously
-                            Bukkit.getScheduler().runTaskLater(winterVillage, () -> player.getPersistentDataContainer().remove(applyingKey), 60L);
+                            Bukkit.getScheduler().runTaskLater(winterVillage, () -> player.getPersistentDataContainer().remove(applyingKey), 10 * 20L);
 
                             player.sendMessage(Component.join(
                                     winterVillage.prefix,
