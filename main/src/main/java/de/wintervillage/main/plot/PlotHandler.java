@@ -63,6 +63,7 @@ public class PlotHandler {
         // block
         new BlockBreakListener();
         new BlockPistonExtendListener();
+        new BlockPistonRetractListener();
         new BlockPlaceListener();
         new de.wintervillage.main.plot.listener.block.PlayerInteractListener();
         new SignChangeListener();
