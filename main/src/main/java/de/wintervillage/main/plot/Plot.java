@@ -8,6 +8,8 @@ import java.util.UUID;
 
 public interface Plot {
 
+    // TODO: flags
+
     /**
      * Unique identifier of the plot
      * @return {@link UUID} uniqueId

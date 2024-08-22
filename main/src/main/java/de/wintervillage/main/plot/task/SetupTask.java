@@ -1,4 +1,4 @@
-package de.wintervillage.main.plot;
+package de.wintervillage.main.plot.task;
 
 import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
@@ -13,35 +13,38 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ParticleRectangle implements Runnable {
+public class SetupTask implements Runnable {
 
     private final WinterVillage winterVillage;
 
     private final Player player;
     private int taskId;
 
-    private static final Map<Integer, ParticleRectangle> RECTANGLES = new HashMap<>();
+    private static final Map<Integer, SetupTask> TASKS = new HashMap<>();
 
-    public ParticleRectangle(Player player) {
+    public SetupTask(Player player) {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.player = player;
     }
 
     public int start() {
         this.taskId = Bukkit.getScheduler().runTaskTimer(this.winterVillage, this, 0L, 10L).getTaskId();
-        RECTANGLES.put(this.taskId, this);
+        TASKS.put(this.taskId, this);
         return this.taskId;
     }
 
     public void stop() {
-        RECTANGLES.remove(this.taskId);
+        TASKS.remove(this.taskId);
         if (Bukkit.getScheduler().isCurrentlyRunning(this.taskId)) Bukkit.getScheduler().cancelTask(this.taskId);
     }
 
-    public static ParticleRectangle getRectangle(int taskId) {
-        return RECTANGLES.get(taskId);
+    public static SetupTask task(int taskId) {
+        return TASKS.get(taskId);
     }
 
+    /**
+     * Shows the player the area of the plot they have selected
+     */
     @Override
     public void run() {
         if (!this.player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)) return;

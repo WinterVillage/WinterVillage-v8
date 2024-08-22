@@ -3,11 +3,14 @@ package de.wintervillage.main.plot;
 import de.wintervillage.common.paper.item.ItemBuilder;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.listener.block.*;
-import de.wintervillage.main.plot.listener.entity.EntityExplodeListener;
-import de.wintervillage.main.plot.listener.entity.EntityMountListener;
+import de.wintervillage.main.plot.listener.entity.*;
+import de.wintervillage.main.plot.listener.misc.InventoryMoveItemListener;
 import de.wintervillage.main.plot.listener.misc.InventoryOpenListener;
+import de.wintervillage.main.plot.listener.player.PlayerBucketEmptyListener;
+import de.wintervillage.main.plot.listener.player.PlayerBucketFillListener;
 import de.wintervillage.main.plot.listener.player.PlayerInteractAtEntityListener;
 import de.wintervillage.main.plot.listener.player.PlayerQuitListener;
+import de.wintervillage.main.plot.task.SetupTask;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -42,7 +45,7 @@ public class PlotHandler {
 
     public final ItemStack SETUP_ITEM;
 
-    public NamespacedKey plotSetupKey, plotRectangleKey;
+    public NamespacedKey plotSetupKey, plotRectangleKey, plotBoundariesKey;
 
     public PlotHandler() {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
@@ -59,23 +62,33 @@ public class PlotHandler {
         this.executorService = Executors.newSingleThreadScheduledExecutor();
         this.executorService.scheduleAtFixedRate(this::forceUpdate, 0, 30, TimeUnit.SECONDS);
 
-        // listeners TODO: block water/ lava flowing into plots, ... ?
+        // TODO: VehicleDestroyEvent
+
         // block
         new BlockBreakListener();
+        new BlockFadeListener();
+        new BlockFromToListener();
         new BlockPistonExtendListener();
         new BlockPistonRetractListener();
         new BlockPlaceListener();
         new de.wintervillage.main.plot.listener.block.PlayerInteractListener();
         new SignChangeListener();
+        new StructureGrowListener();
 
         // entity
+        new EntityBlockFormListener();
         new EntityExplodeListener();
         new EntityMountListener();
+        new HangingBreakByEntityListener();
+        new HangingPlaceListener();
 
         // misc
+        new InventoryMoveItemListener();
         new InventoryOpenListener();
 
         // player
+        new PlayerBucketEmptyListener();
+        new PlayerBucketFillListener();
         new PlayerInteractAtEntityListener();
         new PlayerQuitListener();
 
@@ -135,7 +148,7 @@ public class PlotHandler {
         if (container.has(this.plotRectangleKey)) {
             int taskId = container.get(this.plotRectangleKey, PersistentDataType.INTEGER);
 
-            ParticleRectangle task = ParticleRectangle.getRectangle(taskId);
+            SetupTask task = SetupTask.task(taskId);
             if (task != null) task.stop();
 
             container.remove(this.plotRectangleKey);

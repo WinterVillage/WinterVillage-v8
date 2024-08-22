@@ -44,7 +44,7 @@ public class BlockPistonRetractListener implements Listener {
                 event.setCancelled(true);
                 return;
             } else if (pistonPlot.isPresent() && targetPlot.isEmpty()) {
-                // piston inside a plot tries to pull a block outside a plot
+                // piston inside a plot tries to pull a block from outside
                 // do nothing
                 return;
             }
