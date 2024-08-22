@@ -22,7 +22,7 @@ public class HangingBreakByEntityListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void execute(HangingBreakByEntityEvent event) {
-        if (!(event.getEntity() instanceof Player player)) return;
+        if (!(event.getRemover() instanceof Player player)) return;
 
         Plot plot = this.winterVillage.plotHandler.byBounds(event.getEntity().getLocation());
         if (plot == null) return;
