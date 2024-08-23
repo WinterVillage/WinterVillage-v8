@@ -164,6 +164,7 @@ public class PlayerHandler {
 
     /**
      * Gets the highest group of the given player
+     * <p>
      * USE THIS METHOD ONLY FOR ONLINE-PLAYERS
      *
      * @param player {@link Player} to get the group from
@@ -173,6 +174,19 @@ public class PlayerHandler {
         User user = this.luckPerms.getUserManager().getUser(player.getUniqueId());
 
         Collection<Group> groups = user.getInheritedGroups(this.luckPerms.getPlayerAdapter(Player.class).getQueryOptions(player));
+        return groups.stream()
+                .max(Comparator.comparingInt(group -> group.getWeight().orElse(0)))
+                .orElse(this.luckPerms.getGroupManager().getGroup("default"));
+    }
+
+    /**
+     * Gets the highest group of the given player
+     *
+     * @param user {@link User} to get the group from
+     * @return {@link Group} containing the group of the player
+     */
+    public Group highestGroup(User user) {
+        Collection<Group> groups = user.getInheritedGroups(user.getQueryOptions());
         return groups.stream()
                 .max(Comparator.comparingInt(group -> group.getWeight().orElse(0)))
                 .orElse(this.luckPerms.getGroupManager().getGroup("default"));

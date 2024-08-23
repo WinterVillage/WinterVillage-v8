@@ -4,8 +4,6 @@ import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.common.paper.persistent.BoundingBoxDataType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -73,10 +71,8 @@ public class SetupTask implements Runnable {
         this.spawnAlongLine(maxX, minZ, maxX, maxZ, dustOptions); // RIGHT
 
         Component component = tooLarge
-                ? Component.text("✘ ", NamedTextColor.RED).decoration(TextDecoration.BOLD, true)
-                .append(Component.text("Selected area is too big ", NamedTextColor.RED))
-                .append(Component.text("✘", NamedTextColor.RED).decoration(TextDecoration.BOLD, true))
-                : Component.text("Selected area: " + boundingBox.getWidthX() + "x" + boundingBox.getWidthZ(), NamedTextColor.GREEN);
+                ? Component.translatable("wintervillage.plot.too-big")
+                : Component.translatable("wintervillage.plot.selected-area", Component.text(boundingBox.getWidthX()), Component.text(boundingBox.getWidthZ()));
 
         this.player.sendActionBar(component);
     }
