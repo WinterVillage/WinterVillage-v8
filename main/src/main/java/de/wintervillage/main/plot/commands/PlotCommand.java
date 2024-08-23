@@ -15,28 +15,34 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
+import org.bukkit.HeightMap;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class PlotCommand {
 
     /**
      * /gs setup | Starts the setup and gives the player an axe to select the corners
-     * /gs info | Gives information about the plot the player is standing on
+     * /gs info (uuid) | Gives information about the plot the player is standing on
      * /gs showBorders | Shows the border of every plot
      * /gs listAll | Lists all plots
      * /gs create <name> | Creates a plot with the name
-     * /gs delete (name) | Deletes the plot with the name
-     * /gs tp <uniqueId> | Teleports to the plot with the uniqueId
-     * /gs <name> owner <player> | Sets the owner of the plot
-     * /gs <name> member add <player> | Adds a player to the plot
-     * /gs <name> member remove <player> | Removes a player from the plot
+     * /gs delete (uuid) | Deletes the plot with the name
+     * /gs tp <uuid> | Teleports to the plot with the uniqueId
+     * /gs owner <player> | Sets the owner of the plot
+     * /gs member add <player> | Adds a player to the plot
+     * /gs member remove <player> | Removes a player from the plot
      */
 
     private final WinterVillage winterVillage;
@@ -226,6 +232,195 @@ public class PlotCommand {
 
                             return 1;
                         })
+                )
+                .then(Commands.literal("tp")
+                        .then(Commands.argument("uuid", ArgumentTypes.uuid())
+                                .executes((source) -> {
+                                    final Player player = (Player) source.getSource().getSender();
+
+                                    final UUID uniqueId = source.getArgument("uuid", UUID.class);
+                                    Plot plot = this.winterVillage.plotHandler.byUniqueId(uniqueId);
+                                    if (plot == null) {
+                                        player.sendMessage(Component.text("Plot not found", NamedTextColor.RED));
+                                        return 0;
+                                    }
+
+                                    int highestBlockAt = Bukkit.getWorld("world").getHighestBlockYAt(
+                                            (int) plot.boundingBox().getCenterX(),
+                                            (int) plot.boundingBox().getCenterZ(),
+                                            HeightMap.WORLD_SURFACE
+                                    );
+                                    Location location = new Location(
+                                            Bukkit.getWorld("world"),
+                                            plot.boundingBox().getCenterX(),
+                                            highestBlockAt,
+                                            plot.boundingBox().getCenterZ()
+                                    );
+
+                                    player.teleportAsync(location, PlayerTeleportEvent.TeleportCause.PLUGIN)
+                                            .thenAccept(_ -> {
+                                                player.sendMessage(Component.text("Teleported to plot", NamedTextColor.GREEN));
+                                            })
+                                            .exceptionally((t) -> {
+                                                player.sendMessage(Component.text("Could not teleport to plot", NamedTextColor.RED));
+                                                return null;
+                                            });
+                                    return 1;
+                                })))
+                .then(Commands.literal("owner")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .suggests((source, builder1) -> {
+                                    Bukkit.getOnlinePlayers().forEach(player -> builder1.suggest(player.getName()));
+                                    return builder1.buildFuture();
+                                })
+                                .executes((source) -> {
+                                    final Player player = (Player) source.getSource().getSender();
+                                    final String name = StringArgumentType.getString(source, "name");
+
+                                    Plot plot = this.winterVillage.plotHandler.byBounds(player.getLocation());
+                                    if (plot == null) {
+                                        player.sendMessage(Component.text("You are not standing in a plot", NamedTextColor.RED));
+                                        return 0;
+                                    }
+
+                                    boolean notOwner = !plot.owner().equals(player.getUniqueId());
+                                    boolean canBypass = player.hasPermission("wintervillage.plot.ignore_owner");
+                                    if (notOwner && !canBypass) {
+                                        player.sendMessage(Component.text("You are not the owner of this plot", NamedTextColor.RED));
+                                        return 0;
+                                    }
+
+                                    this.winterVillage.playerHandler.lookupUniqueId(name)
+                                            .thenCompose(uuidOptional -> {
+                                                if (uuidOptional.isEmpty()) {
+                                                    player.sendMessage(Component.text("Player not found", NamedTextColor.RED));
+                                                    return CompletableFuture.completedFuture(Optional.<Plot>empty());
+                                                }
+
+                                                UUID uuid = uuidOptional.get();
+                                                if (plot.owner().equals(uuid)) {
+                                                    player.sendMessage(Component.text(name + " is already the owner of this plot", NamedTextColor.RED));
+                                                    return CompletableFuture.completedFuture(Optional.<Plot>empty());
+                                                }
+
+                                                return this.winterVillage.plotDatabase.modify(plot.uniqueId(), updated -> updated.owner(uuid))
+                                                        .thenApply(Optional::of);
+                                            })
+                                            .thenAccept(plotOptional -> {
+                                                if (plotOptional.isEmpty()) return;
+
+                                                player.sendMessage(Component.text("Updated owner to " + name, NamedTextColor.GREEN));
+                                                this.winterVillage.plotHandler.forceUpdate();
+                                            })
+                                            .exceptionally(throwable -> {
+                                                player.sendMessage(Component.text("Could not update owner: " + throwable.getMessage(), NamedTextColor.RED));
+                                                return null;
+                                            });
+                                    return 1;
+                                })))
+                .then(Commands.literal("member")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .suggests((source, builder1) -> {
+                                    Bukkit.getOnlinePlayers().forEach(player -> builder1.suggest(player.getName()));
+                                    return builder1.buildFuture();
+                                })
+                                .then(Commands.literal("add")
+                                        .executes((source) -> {
+                                            final Player player = (Player) source.getSource().getSender();
+                                            final String name = StringArgumentType.getString(source, "name");
+
+                                            Plot plot = this.winterVillage.plotHandler.byBounds(player.getLocation());
+                                            if (plot == null) {
+                                                player.sendMessage(Component.text("You are not standing in a plot", NamedTextColor.RED));
+                                                return 0;
+                                            }
+
+                                            boolean notOwner = !plot.owner().equals(player.getUniqueId());
+                                            boolean canBypass = player.hasPermission("wintervillage.plot.ignore_owner");
+                                            if (notOwner && !canBypass) {
+                                                player.sendMessage(Component.text("You are not the owner of this plot", NamedTextColor.RED));
+                                                return 0;
+                                            }
+
+                                            this.winterVillage.playerHandler.lookupUniqueId(name)
+                                                    .thenCompose(uuidOptional -> {
+                                                        if (uuidOptional.isEmpty()) {
+                                                            player.sendMessage(Component.text("Player not found", NamedTextColor.RED));
+                                                            return CompletableFuture.completedFuture(Optional.<Plot>empty());
+                                                        }
+
+                                                        UUID uuid = uuidOptional.get();
+                                                        if (plot.owner().equals(uuid)) {
+                                                            player.sendMessage(Component.text(name + " is already the owner of this plot", NamedTextColor.RED));
+                                                            return CompletableFuture.completedFuture(Optional.<Plot>empty());
+                                                        }
+
+                                                        if (plot.members().contains(uuid)) {
+                                                            player.sendMessage(Component.text(name + " is already member of this plot", NamedTextColor.RED));
+                                                            return CompletableFuture.completedFuture(Optional.<Plot>empty());
+                                                        }
+
+                                                        return this.winterVillage.plotDatabase.modify(plot.uniqueId(), updated -> updated.addMember(uuid))
+                                                                .thenApply(Optional::of);
+                                                    })
+                                                    .thenAccept(plotOptional -> {
+                                                        if (plotOptional.isEmpty()) return;
+
+                                                        player.sendMessage(Component.text("Added " + name + " as a member to the plot", NamedTextColor.GREEN));
+                                                        this.winterVillage.plotHandler.forceUpdate();
+                                                    })
+                                                    .exceptionally(throwable -> {
+                                                        player.sendMessage(Component.text("Could not add " + name + " as a member to the plot: " + throwable.getMessage(), NamedTextColor.RED));
+                                                        return null;
+                                                    });
+                                            return 1;
+                                        }))
+                                .then(Commands.literal("remove")
+                                        .executes((source) -> {
+                                            final Player player = (Player) source.getSource().getSender();
+                                            final String name = StringArgumentType.getString(source, "name");
+
+                                            Plot plot = this.winterVillage.plotHandler.byBounds(player.getLocation());
+                                            if (plot == null) {
+                                                player.sendMessage(Component.text("You are not standing in a plot", NamedTextColor.RED));
+                                                return 0;
+                                            }
+
+                                            boolean notOwner = !plot.owner().equals(player.getUniqueId());
+                                            boolean canBypass = player.hasPermission("wintervillage.plot.ignore_owner");
+                                            if (notOwner && !canBypass) {
+                                                player.sendMessage(Component.text("You are not the owner of this plot", NamedTextColor.RED));
+                                                return 0;
+                                            }
+
+                                            this.winterVillage.playerHandler.lookupUniqueId(name)
+                                                    .thenCompose(uuidOptional -> {
+                                                        if (uuidOptional.isEmpty()) {
+                                                            player.sendMessage(Component.text("Player not found", NamedTextColor.RED));
+                                                            return CompletableFuture.completedFuture(Optional.<Plot>empty());
+                                                        }
+
+                                                        UUID uuid = uuidOptional.get();
+                                                        if (!plot.members().contains(uuid)) {
+                                                            player.sendMessage(Component.text(name + " is no member of this plot", NamedTextColor.RED));
+                                                            return CompletableFuture.completedFuture(Optional.<Plot>empty());
+                                                        }
+
+                                                        return this.winterVillage.plotDatabase.modify(plot.uniqueId(), updated -> updated.removeMember(uuid))
+                                                                .thenApply(Optional::of);
+                                                    })
+                                                    .thenAccept(plotOptional -> {
+                                                        if (plotOptional.isEmpty()) return;
+
+                                                        player.sendMessage(Component.text("Removed " + name + " as a member to the plot", NamedTextColor.GREEN));
+                                                        this.winterVillage.plotHandler.forceUpdate();
+                                                    })
+                                                    .exceptionally(throwable -> {
+                                                        player.sendMessage(Component.text("Could not remove " + name + " as a member to the plot: " + throwable.getMessage(), NamedTextColor.RED));
+                                                        return null;
+                                                    });
+                                            return 1;
+                                        })))
                 );
         commands.register(this.winterVillage.getPluginMeta(), builder.build(), "Manage your plots", List.of());
     }
