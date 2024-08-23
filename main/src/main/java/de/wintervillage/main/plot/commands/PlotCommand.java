@@ -222,7 +222,7 @@ public class PlotCommand {
                                     if (plot == null) {
                                         player.sendMessage(Component.join(
                                                 this.winterVillage.prefix,
-                                                Component.translatable("wintervillage.commands.plot.not-found-by-uniqueId")
+                                                Component.translatable("wintervillage.commands.plot.not-found-by-uniqueId", Component.text(uniqueId.toString()))
                                         ));
                                         return 0;
                                     }
@@ -298,7 +298,7 @@ public class PlotCommand {
                                     if (plot == null) {
                                         player.sendMessage(Component.join(
                                                 this.winterVillage.prefix,
-                                                Component.translatable("wintervillage.commands.plot.not-found-by-uniqueId")
+                                                Component.translatable("wintervillage.commands.plot.not-found-by-uniqueId", Component.text(uniqueId.toString()))
                                         ));
                                         return 0;
                                     }
