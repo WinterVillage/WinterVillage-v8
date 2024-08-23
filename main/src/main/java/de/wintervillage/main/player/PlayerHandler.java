@@ -3,6 +3,7 @@ package de.wintervillage.main.player;
 import com.comphenix.protocol.ProtocolManager;
 import com.google.inject.Inject;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
+import de.wintervillage.common.core.uuid.MojangFetcher;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.player.listener.PlayerJoinListener;
 import de.wintervillage.main.player.listener.PlayerQuitListener;
@@ -26,10 +27,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.Duration;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -177,6 +176,40 @@ public class PlayerHandler {
         return groups.stream()
                 .max(Comparator.comparingInt(group -> group.getWeight().orElse(0)))
                 .orElse(this.luckPerms.getGroupManager().getGroup("default"));
+    }
+
+    /**
+     * Performs a high-level asynchronous operation to retrieve a {@link UUID} by the given username
+     * <p>
+     * It first attempts to retrieve the UUID from LuckPerms's user manager. If the UUID is not found or,
+     * an error occurs, it falls back to Mojang's API to obtain the UUID. If Mojang successfully retrieves
+     * the UUID, the method then saves the player data to LuckPerm's user manager for future reference.
+     * <p>
+     * May be long-running due to network requests
+     *
+     * @param username {@link String} username to lookup
+     * @return {@link CompletableFuture} containing an {@link Optional} {@link UUID} of the player
+     */
+    public CompletableFuture<Optional<UUID>> lookupUniqueId(String username) {
+        return this.winterVillage.luckPerms.getUserManager().lookupUniqueId(username)
+                .thenApply(Optional::ofNullable)
+                .exceptionally(throwable -> Optional.empty())
+                .thenCompose(uuidOptional -> {
+                    if (uuidOptional.isPresent()) {
+                        // found uuid
+                        return CompletableFuture.completedFuture(uuidOptional);
+                    } else {
+                        // did not found uuid -> try to fetch from mojang & save to luckperms
+                        return new MojangFetcher().lookupUniqueId(username)
+                                .thenCompose(mojangUuidOptional -> {
+                                    if (mojangUuidOptional.isPresent()) {
+                                        UUID uuid = mojangUuidOptional.get();
+                                        return this.winterVillage.luckPerms.getUserManager().savePlayerData(uuid, username)
+                                                .thenApply(playerSaveResult -> Optional.of(uuid));
+                                    } else return CompletableFuture.completedFuture(Optional.empty());
+                                });
+                    }
+                });
     }
 
     /**
