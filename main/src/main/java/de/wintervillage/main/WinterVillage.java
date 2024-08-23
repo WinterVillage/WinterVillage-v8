@@ -203,6 +203,8 @@ public final class WinterVillage extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (this.plotHandler != null) this.plotHandler.terminate();
+
         // save data from the players, by blocking the main-thread and kicking them afterward to prevent data-loss
         Bukkit.getOnlinePlayers().forEach(player -> {
             this.playerDatabase.modify(player.getUniqueId(), winterVillagePlayer -> {
@@ -213,7 +215,6 @@ public final class WinterVillage extends JavaPlugin {
         });
 
         if (this.mongoClient != null) this.mongoClient.close();
-        if (this.plotHandler != null) this.plotHandler.terminate();
         if (this.playerHandler != null) this.playerHandler.terminate();
 
         this.eventManager.stop();
