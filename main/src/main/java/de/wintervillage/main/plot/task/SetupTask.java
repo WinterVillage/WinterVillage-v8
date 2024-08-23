@@ -52,6 +52,7 @@ public class SetupTask implements Runnable {
 
         if (boundingBox.getMinX() == 0 || boundingBox.getMinZ() == 0 || boundingBox.getMaxX() == 0 || boundingBox.getMaxZ() == 0)
             return;
+        if (!boundingBox.isDefined()) return;
 
         int minX = (int) boundingBox.getMinX();
         int minZ = (int) boundingBox.getMinZ();
