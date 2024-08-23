@@ -158,7 +158,7 @@ public final class WinterVillage extends JavaPlugin {
         if (luckPermsProvider != null) this.luckPerms = luckPermsProvider.getProvider();
 
         // inject handlers
-        Injector injector = Guice.createInjector(new WinterVillageModule(this, this.protocolManager, this.mongoDatabase, this.luckPerms));
+        Injector injector = Guice.createInjector(new WinterVillageModule(this.protocolManager, this.mongoDatabase, this.luckPerms));
         injector.injectMembers(this);
 
         // listener
