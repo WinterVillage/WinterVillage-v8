@@ -288,6 +288,7 @@ public class PlotCommand {
                         })
                 )
                 .then(Commands.literal("tp")
+                        .requires((source) -> source.getSender().hasPermission("wintervillage.plot.command.teleport"))
                         .then(Commands.argument("uuid", ArgumentTypes.uuid())
                                 .executes((source) -> {
                                     final Player player = (Player) source.getSource().getSender();
