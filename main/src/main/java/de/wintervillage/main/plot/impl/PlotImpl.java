@@ -98,6 +98,11 @@ public class PlotImpl implements Plot {
         this.members.add(uuid);
     }
 
+    @Override
+    public void removeMember(UUID uuid) {
+        this.members.remove(uuid);
+    }
+
     public Document toDocument() {
         return new Document("_id", toBinary(this.uniqueId))
                 .append("name", this.name)

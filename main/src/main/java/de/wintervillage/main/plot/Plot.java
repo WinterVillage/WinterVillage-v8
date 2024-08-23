@@ -63,4 +63,10 @@ public interface Plot {
      * @param uuid {@link UUID} member
      */
     void addMember(UUID uuid);
+
+    /**
+     * Removes a member from the plot
+     * @param uuid {@link UUID} member
+     */
+    void removeMember(UUID uuid);
 }
