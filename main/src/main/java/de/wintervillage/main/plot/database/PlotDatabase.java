@@ -77,15 +77,13 @@ public class PlotDatabase {
         return future;
     }
 
-    public CompletableFuture<Void> modify(UUID uniqueId, Consumer<Plot> consumer) {
+    public CompletableFuture<Plot> modify(UUID uniqueId, Consumer<Plot> consumer) {
         return this.plot(uniqueId)
                 .thenCompose(plot -> {
                     consumer.accept(plot);
-                    return this.insert(plot);
+                    return this.insert(plot).thenApply(v -> plot);
                 })
-                .exceptionallyCompose(throwable -> {
-                    throw new RuntimeException(throwable);
-                });
+                .exceptionallyCompose(throwable -> CompletableFuture.failedFuture(new RuntimeException(throwable)));
     }
 
     public CompletableFuture<Plot> plot(UUID uniqueId) {
