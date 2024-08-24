@@ -229,7 +229,7 @@ public class PlayerHandler {
                                     if (mojangUuidOptional.isPresent()) {
                                         UUID uuid = mojangUuidOptional.get();
                                         return this.winterVillage.luckPerms.getUserManager().savePlayerData(uuid, username)
-                                                .thenApply(playerSaveResult -> Optional.of(uuid));
+                                                .thenApplyAsync(playerSaveResult -> Optional.of(uuid));
                                     } else return CompletableFuture.completedFuture(Optional.empty());
                                 });
                     }
