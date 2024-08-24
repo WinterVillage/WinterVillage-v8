@@ -183,16 +183,19 @@ public class PlotHandler {
         CompletableFuture<User> ownerFuture = this.winterVillage.luckPerms.getUserManager().loadUser(plot.owner());
 
         List<CompletableFuture<User>> memberFutures = plot.members().stream()
-                .map(uuid -> this.winterVillage.luckPerms.getUserManager().loadUser(uuid))
+                .map(this.winterVillage.luckPerms.getUserManager()::loadUser)
                 .toList();
 
-        return CompletableFuture.allOf(ownerFuture, CompletableFuture.allOf(memberFutures.toArray(new CompletableFuture[0])))
-                .thenApply(v -> {
-                    User owner = ownerFuture.join();
-                    List<User> members = memberFutures.stream()
-                            .map(CompletableFuture::join)
-                            .toList();
-                    return new PlotUsers(owner, members);
+        CompletableFuture<List<User>> membersFuture = CompletableFuture
+                .allOf(memberFutures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> memberFutures.stream()
+                        .map(CompletableFuture::join)
+                        .collect(Collectors.toList())
+                );
+
+        return ownerFuture.thenCombine(membersFuture, PlotUsers::new)
+                .exceptionally(throwable -> {
+                    throw new RuntimeException("Could not load users for plot " + plot.uniqueId(), throwable);
                 });
     }
 
