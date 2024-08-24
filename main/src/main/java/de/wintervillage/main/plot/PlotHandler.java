@@ -22,7 +22,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +31,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class PlotHandler {
 
@@ -207,7 +207,15 @@ public class PlotHandler {
         return Component.join(JoinConfiguration.separator(separator), components);
     }
 
-    private Component formatUser(@NotNull User user) {
+    /**
+     * Format the user with the highest group color
+     *
+     * Note: User will be null if the user never joined the server
+     *
+     * @param user {@link User} to format
+     * @return {@link Component} with the highest group color
+     */
+    private Component formatUser(User user) {
         Group highestGroup = this.winterVillage.playerHandler.highestGroup(user);
         return MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + user.getUsername());
     }
