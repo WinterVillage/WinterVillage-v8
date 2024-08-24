@@ -12,6 +12,7 @@ import de.wintervillage.main.plot.task.BoundariesTask;
 import de.wintervillage.main.plot.task.SetupTask;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.model.group.Group;
@@ -219,6 +220,9 @@ public class PlotHandler {
      * @return {@link Component} with the highest group color
      */
     private Component formatUser(User user) {
+        if (user.getUsername() == null) return Component.text("unknown", NamedTextColor.RED)
+                .hoverEvent(HoverEvent.showText(Component.text("UUID: " + user.getUniqueId().toString(), NamedTextColor.RED)));
+
         Group highestGroup = this.winterVillage.playerHandler.highestGroup(user);
         return MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + user.getUsername());
     }
