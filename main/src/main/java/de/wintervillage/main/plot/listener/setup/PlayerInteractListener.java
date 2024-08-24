@@ -3,6 +3,7 @@ package de.wintervillage.main.plot.listener.setup;
 import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.common.paper.persistent.BoundingBoxDataType;
+import de.wintervillage.main.plot.Plot;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -30,14 +31,6 @@ public class PlayerInteractListener implements Listener {
         if (!player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)) return;
         event.setUseInteractedBlock(Event.Result.DENY);
 
-        if (this.winterVillage.plotHandler.byBounds(event.getClickedBlock().getLocation()) != null) {
-            player.sendMessage(Component.join(
-                    this.winterVillage.prefix,
-                    Component.translatable("wintervillage.plot.bounding-cannot-be-within-plot")
-            ));
-            return;
-        }
-
         BoundingBox2D boundingBox2D = player.getPersistentDataContainer().get(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType());
 
         if (event.getAction().isLeftClick()) {
@@ -48,6 +41,17 @@ public class PlayerInteractListener implements Listener {
         if (event.getAction().isRightClick()) {
             boundingBox2D.setMaxX(event.getClickedBlock().getX());
             boundingBox2D.setMaxZ(event.getClickedBlock().getZ());
+        }
+
+        boolean intersects = this.winterVillage.plotHandler.getPlotCache().stream()
+                .map(Plot::boundingBox)
+                .anyMatch(plot -> plot.intersects(boundingBox2D));
+        if (intersects) {
+            player.sendMessage(Component.join(
+                    this.winterVillage.prefix,
+                    Component.translatable("wintervillage.plot.bounding-cannot-be-within-plot")
+            ));
+            return;
         }
 
         player.sendMessage(Component.join(
