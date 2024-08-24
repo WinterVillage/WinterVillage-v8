@@ -164,8 +164,8 @@ public class PlayerHandler {
 
     /**
      * Gets the highest group of the given player
-     * <p>
-     * USE THIS METHOD ONLY FOR ONLINE-PLAYERS
+     *
+     * Note: This method should be used only for online-players
      *
      * @param player {@link Player} to get the group from
      * @return {@link Group} of the player
@@ -180,7 +180,7 @@ public class PlayerHandler {
     }
 
     /**
-     * Gets the highest group of the given player
+     * Gets the highest group of the given user
      *
      * @param user {@link User} to get the group from
      * @return {@link Group} containing the group of the player
@@ -190,6 +190,16 @@ public class PlayerHandler {
         return groups.stream()
                 .max(Comparator.comparingInt(group -> group.getWeight().orElse(0)))
                 .orElse(this.luckPerms.getGroupManager().getGroup("default"));
+    }
+
+    /**
+     * Gets the highest group of the given {@link UUID} asynchronously
+     *
+     * @param uniqueId {@link UUID} to get the group from
+     * @return {@link CompletableFuture} containing the {@link Group} of the player
+     */
+    public CompletableFuture<Group> highestGroup(UUID uniqueId) {
+        return this.winterVillage.luckPerms.getUserManager().loadUser(uniqueId).thenApply(this::highestGroup);
     }
 
     /**
