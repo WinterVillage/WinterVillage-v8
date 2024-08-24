@@ -200,7 +200,7 @@ public class PlotHandler {
     }
 
     public Component formatMembers(PlotUsers users) {
-        if (users.members().isEmpty()) return Component.text("-", NamedTextColor.DARK_GRAY);
+        if (users.members().isEmpty()) return Component.text("keine", NamedTextColor.RED);
 
         List<Component> components = users.members().stream()
                 .map(this::formatUser)
