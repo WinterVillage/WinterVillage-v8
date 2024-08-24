@@ -215,7 +215,7 @@ public class PlotCommand {
                         .then(Commands.argument("uniqueId", ArgumentTypes.uuid())
                                 .requires((source) -> source.getSender().hasPermission("wintervillage.plot.command.force_delete"))
                                 .executes((source) -> {
-                                    UUID uniqueId = ArgumentTypes.uuid().parse(new StringReader(source.getArgument("uniqueId", String.class)));
+                                    UUID uniqueId = source.getArgument("uniqueId", UUID.class);
                                     final Player player = (Player) source.getSource().getSender();
 
                                     Plot plot = this.winterVillage.plotHandler.byUniqueId(uniqueId);
