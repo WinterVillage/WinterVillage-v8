@@ -54,6 +54,17 @@ public class CreateSubCommand {
                                 return 0;
                             }
 
+                            boolean intersects = this.winterVillage.plotHandler.getPlotCache().stream()
+                                    .map(Plot::boundingBox)
+                                    .anyMatch(plot -> plot.intersects(boundingBox));
+                            if (intersects) {
+                                player.sendMessage(Component.join(
+                                        this.winterVillage.prefix,
+                                        Component.translatable("wintervillage.plot.bounding-cannot-intersect")
+                                ));
+                                return 0;
+                            }
+
                             boolean tooLarge = (!player.hasPermission("wintervillage.plot.width_bypass")
                                     && (boundingBox.getWidthX() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH
                                     || boundingBox.getWidthZ() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH));
