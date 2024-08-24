@@ -1,12 +1,12 @@
 package de.wintervillage.main.plot.commands;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.common.paper.persistent.BoundingBoxDataType;
 import de.wintervillage.main.plot.combined.CombinedUserPlot;
+import de.wintervillage.main.plot.combined.PlotUsers;
 import de.wintervillage.main.plot.task.BoundariesTask;
 import de.wintervillage.main.plot.task.SetupTask;
 import de.wintervillage.main.plot.Plot;
@@ -92,6 +92,37 @@ public class PlotCommand {
                         })
                 )
                 .then(Commands.literal("info")
+                        .then(Commands.argument("uniqueId", ArgumentTypes.uuid())
+                                .requires((source) -> source.getSender().hasPermission("wintervillage.plot.command.info_by_id"))
+                                .executes((source) -> {
+                                    final UUID uniqueId = source.getArgument("uniqueId", UUID.class);
+                                    final Player player = (Player) source.getSource().getSender();
+
+                                    Plot plot = this.winterVillage.plotHandler.byUniqueId(uniqueId);
+                                    if (plot == null) {
+                                        player.sendMessage(Component.join(
+                                                this.winterVillage.prefix,
+                                                Component.translatable("wintervillage.commands.plot.not-found-by-uniqueId", Component.text(uniqueId.toString()))
+                                        ));
+                                        return 0;
+                                    }
+
+                                    CompletableFuture<PlotUsers> usersFuture = this.winterVillage.plotHandler.lookupUsers(plot);
+                                    usersFuture.thenAccept(plotUsers -> {
+                                        Group highestGroup = this.winterVillage.playerHandler.highestGroup(plotUsers.owner());
+
+                                        player.sendMessage(Component.translatable(
+                                                "wintervillage.commands.plot.info",
+                                                Component.text(plot.name()), // <arg:0>
+                                                Component.text(plot.boundingBox().getWidthX() + "x" + plot.boundingBox().getWidthZ()), // <arg:1>
+                                                MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + plotUsers.owner().getUsername()), // <arg:2>
+                                                Component.text(plot.created().toString()), // <arg:3>
+                                                this.winterVillage.plotHandler.formatMembers(plotUsers) // <arg:4>
+                                        ));
+                                    });
+                                    return 1;
+                                })
+                        )
                         .executes((source) -> {
                             final Player player = (Player) source.getSource().getSender();
 
@@ -104,7 +135,19 @@ public class PlotCommand {
                                 return 0;
                             }
 
-                            // TODO: message
+                            CompletableFuture<PlotUsers> usersFuture = this.winterVillage.plotHandler.lookupUsers(plot);
+                            usersFuture.thenAccept(plotUsers -> {
+                                Group highestGroup = this.winterVillage.playerHandler.highestGroup(plotUsers.owner());
+
+                                player.sendMessage(Component.translatable(
+                                        "wintervillage.commands.plot.info",
+                                        Component.text(plot.name()), // <arg:0>
+                                        Component.text(plot.boundingBox().getWidthX() + "x" + plot.boundingBox().getWidthZ()), // <arg:1>
+                                        MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + plotUsers.owner().getUsername()), // <arg:2>
+                                        Component.text(plot.created().toString()), // <arg:3>
+                                        this.winterVillage.plotHandler.formatMembers(plotUsers) // <arg:4>
+                                ));
+                            });
                             return 1;
                         })
                 )
@@ -289,11 +332,11 @@ public class PlotCommand {
                 )
                 .then(Commands.literal("tp")
                         .requires((source) -> source.getSender().hasPermission("wintervillage.plot.command.teleport"))
-                        .then(Commands.argument("uuid", ArgumentTypes.uuid())
+                        .then(Commands.argument("uniqueId", ArgumentTypes.uuid())
                                 .executes((source) -> {
                                     final Player player = (Player) source.getSource().getSender();
 
-                                    final UUID uniqueId = source.getArgument("uuid", UUID.class);
+                                    final UUID uniqueId = source.getArgument("uniqueId", UUID.class);
                                     Plot plot = this.winterVillage.plotHandler.byUniqueId(uniqueId);
                                     if (plot == null) {
                                         player.sendMessage(Component.join(
@@ -556,6 +599,6 @@ public class PlotCommand {
                                             return 1;
                                         })))
                 );
-        commands.register(this.winterVillage.getPluginMeta(), builder.build(), "Manage your plots", List.of());
+        commands.register(this.winterVillage.getPluginMeta(), builder.build(), "Manage your plots", List.of("plot"));
     }
 }

@@ -2,6 +2,7 @@ package de.wintervillage.main.plot;
 
 import de.wintervillage.common.paper.item.ItemBuilder;
 import de.wintervillage.main.WinterVillage;
+import de.wintervillage.main.plot.combined.PlotUsers;
 import de.wintervillage.main.plot.listener.block.*;
 import de.wintervillage.main.plot.listener.entity.*;
 import de.wintervillage.main.plot.listener.misc.InventoryMoveItemListener;
@@ -10,7 +11,11 @@ import de.wintervillage.main.plot.listener.player.*;
 import de.wintervillage.main.plot.task.BoundariesTask;
 import de.wintervillage.main.plot.task.SetupTask;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.luckperms.api.model.group.Group;
+import net.luckperms.api.model.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,11 +25,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -60,8 +67,6 @@ public class PlotHandler {
 
         this.executorService = Executors.newSingleThreadScheduledExecutor();
         this.executorService.scheduleAtFixedRate(this::forceUpdate, 0, 30, TimeUnit.SECONDS);
-
-        // TODO: VehicleDestroyEvent
 
         // block
         new BlockBreakListener();
@@ -170,6 +175,39 @@ public class PlotHandler {
         Arrays.stream(player.getInventory().getContents())
                 .filter(item -> item != null && item.hasItemMeta() && item.getPersistentDataContainer().has(this.plotSetupKey))
                 .forEach(item -> player.getInventory().remove(item));
+    }
+
+    public CompletableFuture<PlotUsers> lookupUsers(Plot plot) {
+        CompletableFuture<User> ownerFuture = this.winterVillage.luckPerms.getUserManager().loadUser(plot.owner());
+
+        List<CompletableFuture<User>> memberFutures = plot.members().stream()
+                .map(uuid -> this.winterVillage.luckPerms.getUserManager().loadUser(uuid))
+                .toList();
+
+        return CompletableFuture.allOf(ownerFuture, CompletableFuture.allOf(memberFutures.toArray(new CompletableFuture[0])))
+                .thenApply(v -> {
+                    User owner = ownerFuture.join();
+                    List<User> members = memberFutures.stream()
+                            .map(CompletableFuture::join)
+                            .toList();
+                    return new PlotUsers(owner, members);
+                });
+    }
+
+    public Component formatMembers(PlotUsers users) {
+        if (users.members().isEmpty()) return Component.text("-", NamedTextColor.DARK_GRAY);
+
+        List<Component> components = users.members().stream()
+                .map(this::formatUser)
+                .toList();
+
+        Component separator = Component.text(", ", NamedTextColor.DARK_GRAY);
+        return Component.join(JoinConfiguration.separator(separator), components);
+    }
+
+    private Component formatUser(@NotNull User user) {
+        Group highestGroup = this.winterVillage.playerHandler.highestGroup(user);
+        return MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + user.getUsername());
     }
 
     public List<Plot> getPlotCache() {
