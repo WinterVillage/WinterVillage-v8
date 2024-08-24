@@ -42,6 +42,6 @@ public class PlayerInteractListener implements Listener {
         // cancel interactions with blocks in plots that the player is not a member of
         // event.setUseItemInHand(Event.Result.DENY);
         event.setUseInteractedBlock(Event.Result.DENY);
-        player.sendMessage(Component.text("You are not allowed to interact with this block", NamedTextColor.RED));
+        this.winterVillage.plotHandler.deny(player, clickedBlock.getLocation());
     }
 }

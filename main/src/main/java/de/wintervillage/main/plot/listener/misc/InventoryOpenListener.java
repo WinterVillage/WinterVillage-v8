@@ -2,8 +2,6 @@ package de.wintervillage.main.plot.listener.misc;
 
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.Plot;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
@@ -36,6 +34,6 @@ public class InventoryOpenListener implements Listener {
 
         // cancel open inventories of villagers in plots that the player is not a member of
         event.setCancelled(true);
-        player.sendMessage(Component.text("You are not allowed to open this inventory", NamedTextColor.RED));
+        this.winterVillage.plotHandler.deny(player, villager.getLocation());
     }
 }

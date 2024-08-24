@@ -2,8 +2,6 @@ package de.wintervillage.main.plot.listener.player;
 
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.Plot;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -33,6 +31,6 @@ public class PlayerInteractEntityListener implements Listener {
 
         // cancel interaction with entities in plots that the player is not a member of
         event.setCancelled(true);
-        player.sendMessage(Component.text("You are not allowed to interact with this entity", NamedTextColor.RED));
+        this.winterVillage.plotHandler.deny(player, event.getRightClicked().getLocation());
     }
 }

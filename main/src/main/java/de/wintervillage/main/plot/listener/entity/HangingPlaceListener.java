@@ -2,8 +2,6 @@ package de.wintervillage.main.plot.listener.entity;
 
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.Plot;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,6 +30,6 @@ public class HangingPlaceListener implements Listener {
 
         // cancel hanging entities in plots that the player is not a member of
         event.setCancelled(true);
-        event.getPlayer().sendMessage(Component.text("You are not allowed to hang an entity here", NamedTextColor.RED));
+        this.winterVillage.plotHandler.deny(event.getPlayer(), event.getBlock().getLocation());
     }
 }

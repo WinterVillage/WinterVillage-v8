@@ -16,10 +16,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -175,6 +172,11 @@ public class PlotHandler {
         Arrays.stream(player.getInventory().getContents())
                 .filter(item -> item != null && item.hasItemMeta() && item.getPersistentDataContainer().has(this.plotSetupKey))
                 .forEach(item -> player.getInventory().remove(item));
+    }
+
+    public void deny(Player player, Location location) {
+        Particle.DustOptions dustOptions = new Particle.DustOptions(Color.RED, 4);
+        player.spawnParticle(Particle.DUST, location.add(0.25, 0, 0.25), 10, 0, 0, 0, 0, dustOptions);
     }
 
     public CompletableFuture<PlotUsers> lookupUsers(Plot plot) {
