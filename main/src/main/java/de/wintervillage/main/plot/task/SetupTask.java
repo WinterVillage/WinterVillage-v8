@@ -1,11 +1,9 @@
-package de.wintervillage.main.plot;
+package de.wintervillage.main.plot.task;
 
 import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.common.paper.persistent.BoundingBoxDataType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -13,35 +11,38 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ParticleRectangle implements Runnable {
+public class SetupTask implements Runnable {
 
     private final WinterVillage winterVillage;
 
     private final Player player;
     private int taskId;
 
-    private static final Map<Integer, ParticleRectangle> RECTANGLES = new HashMap<>();
+    private static final Map<Integer, SetupTask> TASKS = new HashMap<>();
 
-    public ParticleRectangle(Player player) {
+    public SetupTask(Player player) {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.player = player;
     }
 
     public int start() {
         this.taskId = Bukkit.getScheduler().runTaskTimer(this.winterVillage, this, 0L, 10L).getTaskId();
-        RECTANGLES.put(this.taskId, this);
+        TASKS.put(this.taskId, this);
         return this.taskId;
     }
 
     public void stop() {
-        RECTANGLES.remove(this.taskId);
+        TASKS.remove(this.taskId);
         if (Bukkit.getScheduler().isCurrentlyRunning(this.taskId)) Bukkit.getScheduler().cancelTask(this.taskId);
     }
 
-    public static ParticleRectangle getRectangle(int taskId) {
-        return RECTANGLES.get(taskId);
+    public static SetupTask task(int taskId) {
+        return TASKS.get(taskId);
     }
 
+    /**
+     * Shows the player the area of the plot they have selected
+     */
     @Override
     public void run() {
         if (!this.player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)) return;
@@ -49,6 +50,7 @@ public class ParticleRectangle implements Runnable {
 
         if (boundingBox.getMinX() == 0 || boundingBox.getMinZ() == 0 || boundingBox.getMaxX() == 0 || boundingBox.getMaxZ() == 0)
             return;
+        if (!boundingBox.isDefined()) return;
 
         int minX = (int) boundingBox.getMinX();
         int minZ = (int) boundingBox.getMinZ();
@@ -69,10 +71,8 @@ public class ParticleRectangle implements Runnable {
         this.spawnAlongLine(maxX, minZ, maxX, maxZ, dustOptions); // RIGHT
 
         Component component = tooLarge
-                ? Component.text("✘ ", NamedTextColor.RED).decoration(TextDecoration.BOLD, true)
-                .append(Component.text("Selected area is too big ", NamedTextColor.RED))
-                .append(Component.text("✘", NamedTextColor.RED).decoration(TextDecoration.BOLD, true))
-                : Component.text("Selected area: " + boundingBox.getWidthX() + "x" + boundingBox.getWidthZ(), NamedTextColor.GREEN);
+                ? Component.translatable("wintervillage.plot.too-big")
+                : Component.translatable("wintervillage.plot.selected-area", Component.text(boundingBox.getWidthX()), Component.text(boundingBox.getWidthZ()));
 
         this.player.sendActionBar(component);
     }

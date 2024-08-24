@@ -14,6 +14,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import static de.wintervillage.common.core.database.UUIDConverter.toBinary;
+
 public class PlayerDatabase {
 
     private final MongoCollection<WinterVillagePlayerImpl> collection;
@@ -27,7 +29,7 @@ public class PlayerDatabase {
         CompletableFuture<Void> future = new CompletableFuture<>();
 
         this.collection.replaceOne(
-                        Filters.eq("_id", player.uniqueId().toString()),
+                        Filters.eq("_id", toBinary(player.uniqueId())),
                         (WinterVillagePlayerImpl) player,
                         new ReplaceOptions().upsert(true)
                 )
@@ -49,7 +51,9 @@ public class PlayerDatabase {
     public CompletableFuture<WinterVillagePlayer> player(UUID uniqueId) {
         CompletableFuture<WinterVillagePlayer> future = new CompletableFuture<>();
 
-        this.collection.find(Filters.eq("_id", uniqueId.toString()))
+        this.collection.find(
+                        Filters.eq("_id", toBinary(uniqueId))
+                )
                 .first()
                 .subscribe(new SubscriberHelpers.OperationSubscriber<WinterVillagePlayerImpl>() {
                     @Override

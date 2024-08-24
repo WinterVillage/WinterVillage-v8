@@ -1,17 +1,21 @@
 package de.wintervillage.main.plot.impl;
 
 import com.google.common.collect.ImmutableList;
+import de.wintervillage.common.core.database.UUIDConverter;
 import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.plot.Plot;
 import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
+import org.bson.types.Binary;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import static de.wintervillage.common.core.database.UUIDConverter.*;
 
 public class PlotImpl implements Plot {
 
@@ -94,14 +98,19 @@ public class PlotImpl implements Plot {
         this.members.add(uuid);
     }
 
+    @Override
+    public void removeMember(UUID uuid) {
+        this.members.remove(uuid);
+    }
+
     public Document toDocument() {
-        return new Document("_id", this.uniqueId.toString())
+        return new Document("_id", toBinary(this.uniqueId))
                 .append("name", this.name)
                 .append("created", this.created)
-                .append("owner", this.owner.toString())
+                .append("owner", toBinary(this.owner))
                 .append("boundingBox", this.BBtoDocument())
                 .append("members", this.members.stream()
-                        .map(UUID::toString)
+                        .map(UUIDConverter::toBinary)
                         .toList());
     }
 
@@ -115,14 +124,14 @@ public class PlotImpl implements Plot {
         );
 
         return new PlotImpl(
-                UUID.fromString(document.getString("_id")),
+                fromBytes(document.get("_id", Binary.class).getData()),
                 document.getString("name"),
                 document.getDate("created"),
-                UUID.fromString(document.getString("owner")),
+                fromBytes(document.get("owner", Binary.class).getData()),
                 boundingBox,
-                new ArrayList<>(document.getList("members", String.class)
+                new ArrayList<>(document.getList("members", Binary.class)
                         .stream()
-                        .map(UUID::fromString)
+                        .map(binary -> fromBytes(binary.getData()))
                         .toList())
         );
     }

@@ -6,7 +6,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.mongodb.reactivestreams.client.MongoDatabase;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
-import de.wintervillage.common.paper.player.PlayerHandler;
+import de.wintervillage.main.player.PlayerHandler;
 import de.wintervillage.main.calendar.CalendarHandler;
 import de.wintervillage.main.calendar.database.CalendarDatabase;
 import de.wintervillage.main.economy.EconomyManager;
@@ -15,18 +15,22 @@ import de.wintervillage.main.event.EventManager;
 import de.wintervillage.main.plot.PlotHandler;
 import de.wintervillage.main.plot.database.PlotDatabase;
 import de.wintervillage.main.specialitems.SpecialItems;
-import org.bukkit.plugin.java.JavaPlugin;
+import net.luckperms.api.LuckPerms;
 
 public class WinterVillageModule extends AbstractModule {
 
-    private final JavaPlugin javaPlugin;
     private final ProtocolManager protocolManager;
     private final MongoDatabase mongoDatabase;
+    private final LuckPerms luckPerms;
 
-    public WinterVillageModule(JavaPlugin javaPlugin, ProtocolManager protocolManager, MongoDatabase mongoDatabase) {
-        this.javaPlugin = javaPlugin;
+    public WinterVillageModule(
+            ProtocolManager protocolManager,
+            MongoDatabase mongoDatabase,
+            LuckPerms luckPerms
+    ) {
         this.protocolManager = protocolManager;
         this.mongoDatabase = mongoDatabase;
+        this.luckPerms = luckPerms;
     }
 
     @Override
@@ -52,12 +56,12 @@ public class WinterVillageModule extends AbstractModule {
     }
 
     @Provides
-    public JavaPlugin provideJavaPlugin() {
-        return this.javaPlugin;
+    public ProtocolManager provideProtocolManager() {
+        return this.protocolManager;
     }
 
     @Provides
-    public ProtocolManager provideProtocolManager() {
-        return this.protocolManager;
+    public LuckPerms provideLuckPerms() {
+        return this.luckPerms;
     }
 }

@@ -4,6 +4,8 @@ import de.wintervillage.common.paper.item.ItemBuilder;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.calendar.CalendarDay;
 import de.wintervillage.main.calendar.CalendarInventory;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
@@ -17,6 +19,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,7 +51,12 @@ public class InventoryClickListener implements Listener {
         ItemStack clicked = event.getCurrentItem();
 
         if (!this.winterVillage.calendarHandler.withinRange()) {
-            event.getWhoClicked().sendMessage(Component.text("Not available"));
+            String formatted = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(this.winterVillage.calendarHandler.startDate);
+
+            event.getWhoClicked().sendMessage(Component.join(
+                    this.winterVillage.prefix,
+                    Component.translatable("wintervillage.calendar.not-available", Component.text(formatted))
+            ));
             return;
         }
 
@@ -57,13 +66,21 @@ public class InventoryClickListener implements Listener {
         Optional<CalendarDay> calendarDay = this.winterVillage.calendarHandler.byDay(day);
 
         if (!calendarDay.isPresent() || !this.winterVillage.calendarHandler.obtainable(day)) {
-            event.getWhoClicked().sendMessage(Component.text("Unable to open"));
+            String formatted = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.of(2024, 12, day));
+
+            event.getWhoClicked().sendMessage(Component.join(
+                    this.winterVillage.prefix,
+                    Component.translatable("wintervillage.calendar.door-not-available-yet", Component.text(formatted))
+            ));
             return;
         }
 
         List<UUID> opened = calendarDay.get().opened();
         if (opened.contains(event.getWhoClicked().getUniqueId())) {
-            event.getWhoClicked().sendMessage(Component.text("Already opened"));
+            event.getWhoClicked().sendMessage(Component.join(
+                    this.winterVillage.prefix,
+                    Component.translatable("wintervillage.calendar.day-already-redeemed")
+            ));
             return;
         }
 
@@ -81,11 +98,17 @@ public class InventoryClickListener implements Listener {
                             .persistentDataContainer(pdc -> pdc.set(this.winterVillage.calendarKey, PersistentDataType.INTEGER, day))
                             .build());
 
-                    event.getWhoClicked().sendMessage(Component.text("Opened", NamedTextColor.GREEN));
-                    // TODO: sound
+                    event.getWhoClicked().sendMessage(Component.join(
+                            this.winterVillage.prefix,
+                            Component.translatable("wintervillage.calendar.day-redeemed", Component.text(day))
+                    ));
+                    ((Player) event.getWhoClicked()).playSound(Sound.sound(Key.key("entity.player.levelup"), Sound.Source.PLAYER, 2.0f, 0.4f));
                 })
                 .exceptionally((t) -> {
-                    event.getWhoClicked().sendMessage(Component.text("Could not open: " + t.getMessage()));
+                    event.getWhoClicked().sendMessage(Component.join(
+                            this.winterVillage.prefix,
+                            Component.translatable("wintervillage.calendar.could-not-redeem", Component.text(t.getMessage()))
+                    ));
                     return null;
                 });
     }

@@ -1,6 +1,7 @@
-package de.wintervillage.common.paper.player.listener;
+package de.wintervillage.main.player.listener;
 
-import de.wintervillage.common.paper.player.PlayerHandler;
+import de.wintervillage.main.WinterVillage;
+import de.wintervillage.main.player.PlayerHandler;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -10,14 +11,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class PlayerJoinListener implements Listener {
 
-    private final JavaPlugin javaPlugin;
     private final PlayerHandler playerHandler;
 
-    public PlayerJoinListener(JavaPlugin javaPlugin, PlayerHandler playerHandler) {
-        this.javaPlugin = javaPlugin;
+    public PlayerJoinListener(PlayerHandler playerHandler) {
+        WinterVillage winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.playerHandler = playerHandler;
 
-        this.javaPlugin.getServer().getPluginManager().registerEvents(this, this.javaPlugin);
+        winterVillage.getServer().getPluginManager().registerEvents(this, winterVillage);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

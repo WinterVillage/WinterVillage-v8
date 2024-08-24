@@ -24,7 +24,7 @@ public class InventoryCommand {
                                 .executes((source) -> {
                                     Player player = source.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(source.getSource()).get(0);
 
-                                    ((Player) source.getSource().getExecutor()).openInventory(player.getInventory());
+                                    ((Player) source.getSource().getSender()).openInventory(player.getInventory());
                                     return 1;
                                 })
                         )
@@ -34,7 +34,7 @@ public class InventoryCommand {
                                 .executes((source) -> {
                                     Player player = source.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(source.getSource()).get(0);
 
-                                    ((Player) source.getSource().getExecutor()).openInventory(player.getEnderChest());
+                                    ((Player) source.getSource().getSender()).openInventory(player.getEnderChest());
                                     return 1;
                                 })
                         )
