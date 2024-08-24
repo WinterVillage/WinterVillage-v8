@@ -31,25 +31,25 @@ public class PlayerInteractListener implements Listener {
         if (!player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)) return;
         event.setUseInteractedBlock(Event.Result.DENY);
 
-        BoundingBox2D boundingBox2D = player.getPersistentDataContainer().get(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType());
+        BoundingBox2D boundingBox = player.getPersistentDataContainer().get(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType());
 
         if (event.getAction().isLeftClick()) {
-            boundingBox2D.setMinX(event.getClickedBlock().getX());
-            boundingBox2D.setMinZ(event.getClickedBlock().getZ());
+            boundingBox.setMinX(event.getClickedBlock().getX());
+            boundingBox.setMinZ(event.getClickedBlock().getZ());
         }
 
         if (event.getAction().isRightClick()) {
-            boundingBox2D.setMaxX(event.getClickedBlock().getX());
-            boundingBox2D.setMaxZ(event.getClickedBlock().getZ());
+            boundingBox.setMaxX(event.getClickedBlock().getX());
+            boundingBox.setMaxZ(event.getClickedBlock().getZ());
         }
 
         boolean intersects = this.winterVillage.plotHandler.getPlotCache().stream()
                 .map(Plot::boundingBox)
-                .anyMatch(plot -> plot.intersects(boundingBox2D));
+                .anyMatch(plot -> plot.intersects(boundingBox));
         if (intersects) {
             player.sendMessage(Component.join(
                     this.winterVillage.prefix,
-                    Component.translatable("wintervillage.plot.bounding-cannot-be-within-plot")
+                    Component.translatable("wintervillage.plot.bounding-cannot-intersect")
             ));
             return;
         }
@@ -62,6 +62,6 @@ public class PlayerInteractListener implements Listener {
                 )
         ));
 
-        player.getPersistentDataContainer().set(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType(), boundingBox2D);
+        player.getPersistentDataContainer().set(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType(), boundingBox);
     }
 }
