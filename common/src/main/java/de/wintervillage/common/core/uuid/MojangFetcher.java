@@ -33,6 +33,24 @@ public class MojangFetcher {
         this(HttpClient.newHttpClient());
     }
 
+    public CompletableFuture<Optional<String>> lookupUsername(UUID uniqueId) {
+        CompletableFuture<HttpResponse<InputStream>> future = this.httpClient.sendAsync(HttpRequest.newBuilder()
+                .uri(URI.create("https://api.mojang.com/users/profiles/minecraft/" + uniqueId.toString().toString()))
+                .header("Accept", "application/json")
+                .timeout(Duration.ofSeconds(5))
+                .build(), HttpResponse.BodyHandlers.ofInputStream());
+        return future.thenApply((HttpResponse<InputStream> response) -> {
+            int statusCode = response.statusCode();
+
+            if (statusCode == 200) {
+                JsonObject jsonObject = this.readJson(response);
+
+                String name = jsonObject.get("name").getAsString();
+                return Optional.of(name);
+            } else return Optional.empty();
+        });
+    }
+
     public CompletableFuture<Optional<UUID>> lookupUniqueId(String username) {
         CompletableFuture<HttpResponse<InputStream>> future = this.httpClient.sendAsync(HttpRequest.newBuilder()
                 .uri(URI.create("https://api.mojang.com/users/profiles/minecraft/" + username))
