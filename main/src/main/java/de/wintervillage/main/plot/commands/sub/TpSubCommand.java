@@ -50,7 +50,7 @@ public class TpSubCommand {
                             Location location = new Location(
                                     Bukkit.getWorld("world"),
                                     plot.boundingBox().getCenterX(),
-                                    highestBlockAt,
+                                    highestBlockAt + 1,
                                     plot.boundingBox().getCenterZ()
                             );
 
