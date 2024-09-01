@@ -3,6 +3,7 @@ package de.wintervillage.common.core.player;
 import de.wintervillage.common.core.player.data.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -18,6 +19,10 @@ public interface WinterVillagePlayer {
     BigDecimal money();
 
     void money(@NotNull BigDecimal money);
+
+    int deaths();
+
+    void deaths(@Range(from = 0, to = Integer.MAX_VALUE) int deaths);
 
     @Nullable
     BanInformation banInformation();

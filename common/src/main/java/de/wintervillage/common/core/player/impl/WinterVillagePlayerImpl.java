@@ -9,6 +9,7 @@ import org.bson.types.Binary;
 import org.bson.types.Decimal128;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -24,6 +25,9 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
     @BsonProperty("money")
     private @NotNull BigDecimal money;
+
+    @BsonProperty("deaths")
+    private int deaths;
 
     @BsonProperty("banInformation")
     private @Nullable BanInformation banInformation;
@@ -43,6 +47,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     public WinterVillagePlayerImpl(@NotNull UUID uniqueId) {
         this.uniqueId = uniqueId;
         this.money = BigDecimal.ZERO;
+        this.deaths = 0;
 
         this.playerInformation = new PlayerInformation();
     }
@@ -60,6 +65,16 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     @Override
     public void money(@NotNull BigDecimal money) {
         this.money = money;
+    }
+
+    @Override
+    public int deaths() {
+        return this.deaths;
+    }
+
+    @Override
+    public void deaths(@Range(from = 0, to = Integer.MAX_VALUE) int deaths) {
+        this.deaths = deaths;
     }
 
     public @Nullable BanInformation banInformation() {
@@ -116,6 +131,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
         document.put("_id", toBinary(this.uniqueId));
         document.put("money", this.money);
+        document.put("deaths", this.deaths);
 
         if (this.banInformation != null)
             document.put("banInformation", this.banInformation.toDocument());
@@ -138,6 +154,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
         WinterVillagePlayerImpl player = new WinterVillagePlayerImpl(uniqueId);
         player.money(Optional.ofNullable(document.get("money", Decimal128.class).bigDecimalValue()).orElse(BigDecimal.ZERO));
+        player.deaths(Optional.ofNullable(document.get("deaths", Integer.class)).orElse(0));
         player.banInformation(Optional.ofNullable(document.get("banInformation", Document.class))
                 .filter(doc -> !doc.isEmpty())
                 .map(BanInformation::fromDocument)
@@ -164,6 +181,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         return "WinterVillagePlayerImpl{" +
                 "uniqueId=" + this.uniqueId +
                 ", money=" + this.money +
+                ", deaths=" + this.deaths +
                 ", banInformation=" + this.banInformation +
                 ", muteInformation=" + this.muteInformation +
                 ", playerInformation=" + this.playerInformation +
