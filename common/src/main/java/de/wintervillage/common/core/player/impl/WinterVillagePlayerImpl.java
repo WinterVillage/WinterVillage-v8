@@ -44,14 +44,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         this.uniqueId = uniqueId;
         this.money = BigDecimal.ZERO;
 
-        this.playerInformation = new PlayerInformation(
-                Inventory.generateDefault(),
-                EnderChest.generateDefault(),
-                PotionEffects.generateDefault(),
-                Advancements.generateDefault(),
-                Generic.generateDefault(),
-                Statistics.generateDefault()
-        );
+        this.playerInformation = new PlayerInformation();
     }
 
     @Override
