@@ -14,10 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Display;
-import org.bukkit.entity.Interaction;
-import org.bukkit.entity.ItemDisplay;
-import org.bukkit.entity.TextDisplay;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -236,14 +233,12 @@ public class ShopImpl implements Shop {
         WinterVillage winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
 
         this.location.getWorld().getNearbyEntities(this.location, 1.5, 1.5, 1.5).stream()
-                .filter(entity -> entity instanceof Display)
-                .map(entity -> (Display) entity)
-                .filter(display -> {
-                    PersistentDataContainer container = display.getPersistentDataContainer();
+                .filter(entity -> {
+                    PersistentDataContainer container = entity.getPersistentDataContainer();
                     return container.has(winterVillage.shopHandler.shopKey, PersistentDataType.STRING)
                             && container.get(winterVillage.shopHandler.shopKey, PersistentDataType.STRING).equals(this._id.toString());
                 })
-                .forEach(Display::remove);
+                .forEach(Entity::remove);
     }
 
     @Override
