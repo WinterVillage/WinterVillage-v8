@@ -12,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class ShopHandler {
 
@@ -31,6 +32,12 @@ public class ShopHandler {
         new SignChangeListener();
 
         // this.forceUpdate();
+    }
+
+    public Optional<Shop> byUniqueId(UUID uniqueId) {
+        return this.shops.stream()
+                .filter(shop -> shop.uniqueId().equals(uniqueId))
+                .findFirst();
     }
 
     public Optional<Shop> byLocation(Location location) {
