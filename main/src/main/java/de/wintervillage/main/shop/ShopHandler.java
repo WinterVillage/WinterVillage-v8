@@ -46,9 +46,10 @@ public class ShopHandler {
 
     public Optional<Shop> byLocation(Location location) {
         return this.shops.stream()
-                .filter(shop -> shop.location().equals(location) && location.getNearbyEntities(1.5, 1.5, 1.5).stream()
-                            .anyMatch(entity -> entity.getPersistentDataContainer().has(this.shopKey, PersistentDataType.STRING)
-                                    && entity.getPersistentDataContainer().get(this.shopKey, PersistentDataType.STRING).equals(shop.uniqueId().toString())))
+                .filter(shop -> shop.location().distance(location) < .5
+                        || location.getNearbyEntities(.5, .5, .5).stream()
+                        .anyMatch(entity -> entity.getPersistentDataContainer().has(this.shopKey, PersistentDataType.STRING)
+                                && entity.getPersistentDataContainer().get(this.shopKey, PersistentDataType.STRING).equals(shop.uniqueId().toString())))
                 .findFirst();
     }
 
