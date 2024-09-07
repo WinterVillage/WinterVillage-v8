@@ -188,7 +188,7 @@ public class ShopImpl implements Shop {
             container.set(winterVillage.shopHandler.shopKey, PersistentDataType.STRING, this._id.toString());
         });
 
-        TextDisplay textDisplay = this.location.getWorld().spawn(spawnLocation.clone().add(0, .75, 0), TextDisplay.class, display -> {
+        TextDisplay textDisplay = this.location.getWorld().spawn(spawnLocation.clone().add(0, .5, 0), TextDisplay.class, display -> {
             display.setInvulnerable(true);
             display.setNoPhysics(true);
             display.setDisplayWidth(100f);
