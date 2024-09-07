@@ -2,6 +2,8 @@ package de.wintervillage.main.shop;
 
 import com.google.inject.Inject;
 import de.wintervillage.main.WinterVillage;
+import de.wintervillage.main.shop.listener.InventoryCloseListener;
+import de.wintervillage.main.shop.listener.PlayerInteractEntityListener;
 import de.wintervillage.main.shop.listener.SignChangeListener;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -29,6 +31,8 @@ public class ShopHandler {
 
         this.shopKey = new NamespacedKey("wintervillage", "shop_id");
 
+        new InventoryCloseListener();
+        new PlayerInteractEntityListener();
         new SignChangeListener();
 
         // this.forceUpdate();
