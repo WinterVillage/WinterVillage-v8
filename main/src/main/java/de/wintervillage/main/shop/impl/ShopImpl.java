@@ -185,7 +185,7 @@ public class ShopImpl implements Shop {
             container.set(winterVillage.shopHandler.shopKey, PersistentDataType.STRING, this._id.toString());
         });
 
-        TextDisplay textDisplay = this.location.getWorld().spawn(spawnLocation.clone().add(0, .5, 0), TextDisplay.class, display -> {
+        this.location.getWorld().spawn(spawnLocation.clone().add(0, .5, 0), TextDisplay.class, display -> {
             display.setInvulnerable(true);
             display.setNoPhysics(true);
             display.setDisplayWidth(100f);
@@ -208,24 +208,13 @@ public class ShopImpl implements Shop {
         Interaction hitboxItem = this.location.getWorld().spawn(spawnLocation, Interaction.class, interaction -> {
             interaction.setInvulnerable(true);
             interaction.setInteractionWidth(1f);
-            interaction.setInteractionHeight(.5f);
+            interaction.setInteractionHeight(1.5f);
             interaction.setResponsive(true);
 
             PersistentDataContainer container = interaction.getPersistentDataContainer();
             container.set(winterVillage.shopHandler.shopKey, PersistentDataType.STRING, this._id.toString());
         });
         itemDisplay.addPassenger(hitboxItem);
-
-        Interaction hitboxText = this.location.getWorld().spawn(spawnLocation, Interaction.class, interaction -> {
-            interaction.setInvulnerable(true);
-            interaction.setInteractionWidth(1.5f);
-            interaction.setInteractionHeight(.5f);
-            interaction.setResponsive(true);
-
-            PersistentDataContainer container = interaction.getPersistentDataContainer();
-            container.set(winterVillage.shopHandler.shopKey, PersistentDataType.STRING, this._id.toString());
-        });
-        textDisplay.addPassenger(hitboxText);
     }
 
     @Override
