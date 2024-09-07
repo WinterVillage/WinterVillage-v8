@@ -2,6 +2,7 @@ package de.wintervillage.main.shop;
 
 import com.google.inject.Inject;
 import de.wintervillage.main.WinterVillage;
+import de.wintervillage.main.shop.listener.InventoryClickListener;
 import de.wintervillage.main.shop.listener.InventoryCloseListener;
 import de.wintervillage.main.shop.listener.PlayerInteractEntityListener;
 import de.wintervillage.main.shop.listener.SignChangeListener;
@@ -27,15 +28,17 @@ public class ShopHandler {
 
     private final List<Shop> shops;
 
-    public final NamespacedKey shopKey;
+    public final NamespacedKey shopKey, amountKey;
 
     @Inject
     public ShopHandler() {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.shops = new ArrayList<>();
 
-        this.shopKey = new NamespacedKey("wintervillage", "shop_id");
+        this.shopKey = new NamespacedKey("wintervillage", "shop/unique-id");
+        this.amountKey = new NamespacedKey("wintervillage", "shop/incremet_decrement_amount");
 
+        new InventoryClickListener();
         new InventoryCloseListener();
         new PlayerInteractEntityListener();
         new SignChangeListener();

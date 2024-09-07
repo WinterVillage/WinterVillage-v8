@@ -2,6 +2,7 @@ package de.wintervillage.main.shop.listener;
 
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.shop.Shop;
+import de.wintervillage.main.shop.inventory.BuyingInventory;
 import de.wintervillage.main.shop.inventory.EditingInventory;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -16,6 +17,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,6 +57,18 @@ public class PlayerInteractEntityListener implements Listener {
             ));
             return;
         }
+
+        if (shop.amount().compareTo(BigDecimal.ZERO) <= 0) {
+            player.sendMessage(Component.join(
+                    this.winterVillage.prefix,
+                    Component.translatable("wintervillage.shop.shop-is-empty")
+            ));
+            return;
+        }
+
+        // open inventory
+        BuyingInventory inventory = new BuyingInventory(shop);
+        player.openInventory(inventory.getInventory());
     }
 
     private void handleAsOwner(PlayerInteractEntityEvent event, Shop shop) {
