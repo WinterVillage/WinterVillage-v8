@@ -8,8 +8,13 @@ import de.wintervillage.main.shop.listener.SignChangeListener;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Interaction;
+import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +41,25 @@ public class ShopHandler {
         new SignChangeListener();
 
         // this.forceUpdate();
+    }
+
+    public Optional<Shop> raytrace(Player player) {
+        Location startLocation = player.getEyeLocation().clone();
+        Vector direction = startLocation.getDirection().normalize();
+
+        List<Entity> nearby = player.getNearbyEntities(10.0d, 10.0d, 10.0d);
+
+        for (double i = 0; i <= 10.0d; i += .1) {
+            Vector point = startLocation.toVector().add(direction.clone().multiply(i));
+
+            for (Entity entity : nearby) {
+                if (!(entity instanceof Interaction)) continue;
+                BoundingBox boundingBox = entity.getBoundingBox();
+                if (boundingBox.contains(point)) return this.byLocation(point.toLocation(entity.getWorld()));
+            }
+        }
+
+        return Optional.empty();
     }
 
     public Optional<Shop> byUniqueId(UUID uniqueId) {
