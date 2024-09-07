@@ -1,7 +1,8 @@
 plugins {
     `java-library`
 
-    id ("com.github.johnrengelman.shadow") version "7.0.0"
+    // shadow
+    id("io.github.goooler.shadow") version "8.1.7"
 }
 
 java {
