@@ -12,6 +12,7 @@ import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
 import de.wintervillage.common.core.translation.MiniMessageTranslator;
+import de.wintervillage.main.listener.WorldLoadListener;
 import de.wintervillage.main.player.PlayerHandler;
 import de.wintervillage.main.antifreezle.AntiFreezle;
 import de.wintervillage.common.core.config.Document;
@@ -35,6 +36,10 @@ import de.wintervillage.main.plot.commands.PlotCommand;
 import de.wintervillage.main.plot.PlotHandler;
 import de.wintervillage.main.plot.database.PlotDatabase;
 import de.wintervillage.main.plot.codec.PlotCodecProvider;
+import de.wintervillage.main.shop.ShopHandler;
+import de.wintervillage.main.shop.codec.ShopCodecProvider;
+import de.wintervillage.main.shop.commands.ShopCommand;
+import de.wintervillage.main.shop.database.ShopDatabase;
 import de.wintervillage.main.specialitems.SpecialItems;
 import de.wintervillage.main.specialitems.commands.CMD_Disenchant;
 import de.wintervillage.main.specialitems.commands.CMD_SpecialItem;
@@ -69,11 +74,13 @@ public final class WinterVillage extends JavaPlugin {
     public @Inject PlotDatabase plotDatabase;
     public @Inject CalendarDatabase calendarDatabase;
     public @Inject PlayerDatabase playerDatabase;
+    public @Inject ShopDatabase shopDatabase;
 
     // handlers
     public @Inject PlotHandler plotHandler;
     public @Inject CalendarHandler calendarHandler;
     public @Inject PlayerHandler playerHandler;
+    public @Inject ShopHandler shopHandler;
     public @Inject ShopManager shopManager;
     public @Inject EconomyManager economyManager;
     public @Inject SpecialItems specialItems;
@@ -136,7 +143,8 @@ public final class WinterVillage extends JavaPlugin {
                     MongoClientSettings.getDefaultCodecRegistry(),
                     CodecRegistries.fromProviders(new PlotCodecProvider()),
                     CodecRegistries.fromProviders(new CalenderDayCodecProvider()),
-                    CodecRegistries.fromProviders(new PlayerCodecProvider())
+                    CodecRegistries.fromProviders(new PlayerCodecProvider()),
+                    CodecRegistries.fromProviders(new ShopCodecProvider())
             );
 
             this.mongoClient = MongoClients.create(
@@ -164,6 +172,7 @@ public final class WinterVillage extends JavaPlugin {
         // listener
         new AsyncChatListener();
         new PlayerMoveListener();
+        new WorldLoadListener();
 
         // commands
         final LifecycleEventManager<Plugin> lifecycleEventManager = this.getLifecycleManager();
@@ -174,6 +183,7 @@ public final class WinterVillage extends JavaPlugin {
             new FreezeCommand(command);
             new InventoryCommand(command);
             new PlotCommand(command);
+            new ShopCommand(command);
 
             new TestCommand(command);
 
@@ -216,6 +226,7 @@ public final class WinterVillage extends JavaPlugin {
 
         if (this.mongoClient != null) this.mongoClient.close();
         if (this.playerHandler != null) this.playerHandler.terminate();
+        if (this.shopHandler != null) this.shopHandler.terminate();
 
         this.eventManager.stop();
     }
