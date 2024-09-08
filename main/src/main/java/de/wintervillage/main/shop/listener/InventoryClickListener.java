@@ -61,15 +61,25 @@ public class InventoryClickListener implements Listener {
 
                 CompletableFuture<Shop> shopFuture = this.winterVillage.shopDatabase.modify(
                         buyingInventory.getShop().uniqueId(),
-                        builder -> builder.amount(buyingInventory.getShop().amount().subtract(BigDecimal.valueOf(buyingInventory.getBuyingAmount())))
+                        builder -> {
+                            if (builder.amount().compareTo(BigDecimal.valueOf(buyingInventory.getBuyingAmount())) < 0)
+                                throw new IllegalArgumentException("Shop has not enough items");
+
+                            builder.amount(builder.amount().subtract(BigDecimal.valueOf(buyingInventory.getBuyingAmount())));
+                        }
                 );
                 CompletableFuture<WinterVillagePlayer> buyerFuture = this.winterVillage.playerDatabase.modify(
                         player.getUniqueId(),
-                        builder -> builder.money(builder.money().subtract(buyingInventory.getShop().price().multiply(BigDecimal.valueOf(buyingInventory.getBuyingAmount()))))
+                        builder -> {
+                            BigDecimal money = builder.money();
+                            if (money.compareTo(finalPrice) < 0) throw new IllegalArgumentException("Not enough money");
+
+                            builder.money(money.subtract(finalPrice));
+                        }
                 );
                 CompletableFuture<WinterVillagePlayer> sellerFuture = this.winterVillage.playerDatabase.modify(
                         buyingInventory.getShop().owner(),
-                        builder -> builder.money(builder.money().add(buyingInventory.getShop().price().multiply(BigDecimal.valueOf(buyingInventory.getBuyingAmount()))))
+                        builder -> builder.money(builder.money().add(finalPrice))
                 );
 
                 CompletableFuture<Void> combined = CompletableFuture.allOf(shopFuture, buyerFuture/**, sellerFuture*/);
