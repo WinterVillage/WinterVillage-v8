@@ -90,13 +90,15 @@ public class SignChangeListener implements Listener {
 
         this.winterVillage.shopDatabase.insert(shop)
                 .thenAccept(_ -> {
-                    this.winterVillage.shopHandler.forceUpdate();
+                    Bukkit.getScheduler().runTask(this.winterVillage, () -> {
+                        this.winterVillage.shopHandler.addShop(shop);
+                        shop.setupInformation();
+                    }); // avoid asynchronous entity add
+
                     player.sendMessage(Component.join(
                             this.winterVillage.prefix,
                             Component.translatable("wintervillage.shop.created", Component.text(validated.name))
                     ));
-
-                    Bukkit.getScheduler().runTask(this.winterVillage, shop::setupInformation); // avoid asynchronous entity add
                 })
                 .exceptionally(throwable -> {
                     player.sendMessage(Component.text("An error occurred while creating the shop : " + throwable.getMessage()));
