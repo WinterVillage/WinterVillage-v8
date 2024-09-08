@@ -95,12 +95,11 @@ public class InventoryClickListener implements Listener {
 
                                 for (int i = 0; i < buyingInventory.getBuyingAmount(); i++) player.getInventory().addItem(buyingInventory.getShop().item());
 
-                                // TODO: fix item translation name
                                 player.sendMessage(Component.join(
                                         this.winterVillage.prefix,
                                         Component.translatable("wintervillage.shop.item-bought",
                                                 Component.text(buyingInventory.getBuyingAmount()),
-                                                Component.translatable(buyingInventory.getShop().item().getType().getKey().toString()),
+                                                Component.translatable(buyingInventory.getShop().item().getType().getItemTranslationKey()),
                                                 Component.text("" + buyingInventory.getShop().price().multiply(BigDecimal.valueOf(buyingInventory.getBuyingAmount()))))
                                 ));
                             });
