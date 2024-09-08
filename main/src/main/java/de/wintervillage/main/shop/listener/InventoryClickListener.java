@@ -94,7 +94,9 @@ public class InventoryClickListener implements Listener {
                         .exceptionally(throwable -> {
                             player.sendMessage(Component.join(
                                     this.winterVillage.prefix,
-                                    Component.translatable("wintervillage.shop.item-buy-failed", throwable.getMessage())
+                                    Component.translatable("wintervillage.shop.item-buy-failed",
+                                            Component.text(throwable.getMessage())
+                                    )
                             ));
                             return null;
                         });
