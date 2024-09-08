@@ -87,7 +87,7 @@ public class PlayerDatabase {
                         consumer.accept(player);
                         return this.insert(player).thenApply(v -> player);
                     }
-                    throw new RuntimeException(throwable);
+                    throw new RuntimeException("An error occurred while modifying " + uniqueId.toString() + ": " + throwable.getMessage());
                 });
     }
 }
