@@ -49,6 +49,8 @@ public class InventoryClickListener implements Listener {
 
             // buy item
             if (itemStack.getType() == Material.KNOWLEDGE_BOOK) {
+                BigDecimal finalPrice = buyingInventory.getShop().price().multiply(BigDecimal.valueOf(buyingInventory.getBuyingAmount()));
+
                 // last check if shop has enough items
                 if (BigDecimal.valueOf(buyingInventory.getBuyingAmount()).compareTo(buyingInventory.getShop().amount()) > 0) {
                     player.playSound(Sound.sound(Key.key("entity.pillager.ambient"), Sound.Source.HOSTILE, 2f, 0.6f));
