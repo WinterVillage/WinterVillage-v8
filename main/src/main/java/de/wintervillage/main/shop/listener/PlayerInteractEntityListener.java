@@ -106,7 +106,9 @@ public class PlayerInteractEntityListener implements Listener {
                     .exceptionally(throwable -> {
                         player.sendMessage(Component.join(
                                 this.winterVillage.prefix,
-                                Component.translatable("wintervillage.shop.item-set-failed", throwable.getMessage())
+                                Component.translatable("wintervillage.shop.item-set-failed",
+                                        Component.text(throwable.getMessage())
+                                )
                         ));
                         return null;
                     });

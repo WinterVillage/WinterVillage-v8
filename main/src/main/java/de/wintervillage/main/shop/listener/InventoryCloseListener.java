@@ -45,7 +45,9 @@ public class InventoryCloseListener implements Listener {
                 .exceptionally(throwable -> {
                     player.sendMessage(Component.join(
                             this.winterVillage.prefix,
-                            Component.translatable("wintervillage.shop.updating-failed", throwable.getMessage())
+                            Component.translatable("wintervillage.shop.updating-failed",
+                                    Component.text(throwable.getMessage())
+                            )
                     ));
                     return null;
                 });
