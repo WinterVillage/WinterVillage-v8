@@ -87,8 +87,10 @@ public class InventoryClickListener implements Listener {
                 CompletableFuture<Void> combined = CompletableFuture.allOf(shopFuture, buyerFuture/**, sellerFuture*/);
                 combined.thenAccept(_ -> {
                             Bukkit.getScheduler().runTask(winterVillage, () -> {
-                                // TODO: fix TextDisplay not being updated
-                                buyingInventory.getShop().amount().subtract(BigDecimal.valueOf(buyingInventory.getBuyingAmount()));
+                                BigDecimal amount = buyingInventory.getShop().amount();
+                                amount = amount.subtract(BigDecimal.valueOf(buyingInventory.getBuyingAmount()));
+
+                                buyingInventory.getShop().amount(amount);
                                 buyingInventory.getShop().updateInformation();
 
                                 for (int i = 0; i < buyingInventory.getBuyingAmount(); i++) player.getInventory().addItem(buyingInventory.getShop().item());
