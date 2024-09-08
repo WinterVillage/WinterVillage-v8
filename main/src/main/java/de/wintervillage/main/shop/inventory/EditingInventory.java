@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +31,9 @@ public class EditingInventory implements InventoryHolder {
 
         int amount = shop.amount().setScale(0, RoundingMode.DOWN).intValueExact();
         for (int i = 0; i < amount; i++) {
-            this.inventory.addItem(shop.item());
+            ItemStack itemStack = shop.item().clone();
+            itemStack.setAmount(1);
+            this.inventory.addItem(itemStack);
         }
     }
 
