@@ -84,7 +84,7 @@ public class InventoryClickListener implements Listener {
                         builder -> builder.money(builder.money().add(finalPrice))
                 );
 
-                CompletableFuture<Void> combined = CompletableFuture.allOf(shopFuture, buyerFuture/**, sellerFuture*/);
+                CompletableFuture<Void> combined = CompletableFuture.allOf(buyerFuture, shopFuture, sellerFuture);
                 combined.thenAccept(_ -> {
                             Bukkit.getScheduler().runTask(winterVillage, () -> {
                                 BigDecimal amount = buyingInventory.getShop().amount();
