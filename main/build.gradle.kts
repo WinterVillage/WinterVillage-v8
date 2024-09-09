@@ -35,6 +35,9 @@ dependencies {
 
     // protocollib
     compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
+
+    // triumphgui
+    implementation("dev.triumphteam:triumph-gui:3.1.10")
 }
 
 tasks {
@@ -46,6 +49,8 @@ tasks {
     shadowJar {
         archiveBaseName.set("wintervillage")
         archiveClassifier.set("")
+
+        relocate("dev.triumphteam.gui", "de.wintervillage.main.gui")
 
         manifest {
             attributes["paperweight-mappings-namespace"] = "mojang"
