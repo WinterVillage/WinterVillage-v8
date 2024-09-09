@@ -33,7 +33,7 @@ public class ShopHandler {
         this.shops = new ArrayList<>();
 
         this.shopKey = new NamespacedKey("wintervillage", "shop/unique-id");
-        this.amountKey = new NamespacedKey("wintervillage", "shop/incremet_decrement_amount");
+        this.amountKey = new NamespacedKey("wintervillage", "shop/increment_decrement_amount");
 
         new InventoryClickListener();
         new PlayerInteractEntityListener();
