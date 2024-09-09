@@ -2,10 +2,7 @@ package de.wintervillage.main.shop;
 
 import com.google.inject.Inject;
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.shop.listener.InventoryClickListener;
-import de.wintervillage.main.shop.listener.InventoryCloseListener;
-import de.wintervillage.main.shop.listener.PlayerInteractEntityListener;
-import de.wintervillage.main.shop.listener.SignChangeListener;
+import de.wintervillage.main.shop.listener.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -39,7 +36,6 @@ public class ShopHandler {
         this.amountKey = new NamespacedKey("wintervillage", "shop/incremet_decrement_amount");
 
         new InventoryClickListener();
-        new InventoryCloseListener();
         new PlayerInteractEntityListener();
         new SignChangeListener();
 
