@@ -1,0 +1,17 @@
+name: WinterVillage-Main
+version: 8.0-SNAPSHOT
+main: de.wintervillage.main.WinterVillage
+author: Eagler, Voldechse
+api-version: 1.21
+load: STARTUP
+bootstrapper: de.wintervillage.main.WinterVillageBootstrap
+loader: de.wintervillage.main.WinterVillagePluginLoader
+dependencies:
+  server:
+    ProtocolLib:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    LuckPerms:
+      load: BEFORE
+      required: true

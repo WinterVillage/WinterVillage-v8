@@ -25,7 +25,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
 
     // async mongodb
-    implementation("org.mongodb:mongodb-driver-reactivestreams:5.1.0")
+    compileOnly("org.mongodb:mongodb-driver-reactivestreams:5.1.0")
 
     // google guice
     implementation("com.google.inject:guice:7.0.0")
@@ -46,5 +46,9 @@ tasks {
     shadowJar {
         archiveBaseName.set("wintervillage")
         archiveClassifier.set("")
+
+        manifest {
+            attributes["paperweight-mappings-namespace"] = "mojang"
+        }
     }
 }
