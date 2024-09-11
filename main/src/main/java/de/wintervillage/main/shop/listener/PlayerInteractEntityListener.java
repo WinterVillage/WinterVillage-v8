@@ -95,8 +95,10 @@ public class PlayerInteractEntityListener implements Listener {
             // set item
             this.winterVillage.shopDatabase.modify(shop.uniqueId(), builder -> builder.item(player.getInventory().getItemInMainHand()))
                     .thenAccept(action -> {
-                        shop.item(player.getInventory().getItemInMainHand());
-                        Bukkit.getScheduler().runTask(this.winterVillage, shop::updateInformation);
+                        Bukkit.getScheduler().runTask(this.winterVillage, () -> {
+                            shop.item(player.getInventory().getItemInMainHand());
+                            shop.updateInformation();
+                        });
 
                         player.sendMessage(Component.join(
                                 this.winterVillage.prefix,
