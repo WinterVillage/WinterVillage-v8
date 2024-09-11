@@ -68,7 +68,7 @@ public class PlayerInteractEntityListener implements Listener {
 
         // open inventory
         BuyingInventory inventory = new BuyingInventory(shop);
-        player.openInventory(inventory.getInventory());
+        inventory.getGui().open(player);
     }
 
     private void handleAsOwner(PlayerInteractEntityEvent event, Shop shop) {
