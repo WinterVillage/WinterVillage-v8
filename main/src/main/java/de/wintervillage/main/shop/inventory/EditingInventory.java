@@ -30,7 +30,7 @@ public class EditingInventory {
     private final WinterVillage winterVillage;
     private final @NotNull Shop shop;
 
-    private Gui gui;
+    private final Gui gui;
 
     public EditingInventory(@NotNull Shop shop) {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
