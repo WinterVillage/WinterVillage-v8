@@ -35,7 +35,6 @@ public class ShopHandler {
         this.shopKey = new NamespacedKey("wintervillage", "shop/unique-id");
         this.amountKey = new NamespacedKey("wintervillage", "shop/increment_decrement_amount");
 
-        new InventoryClickListener();
         new PlayerInteractEntityListener();
         new SignChangeListener();
 
