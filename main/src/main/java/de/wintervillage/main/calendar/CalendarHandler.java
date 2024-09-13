@@ -2,8 +2,6 @@ package de.wintervillage.main.calendar;
 
 import com.google.inject.Inject;
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.calendar.listener.InventoryClickListener;
-import de.wintervillage.main.calendar.listener.InventoryDragListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.time.LocalDate;
@@ -27,10 +25,6 @@ public class CalendarHandler {
 
         this.startDate = LocalDate.of(2024, Month.DECEMBER, 12);
         this.endDate = LocalDate.of(2025, Month.JANUARY, 6); // TODO: set to project end date
-
-
-        new InventoryClickListener();
-        new InventoryDragListener();
 
         this.forceUpdate();
     }
