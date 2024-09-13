@@ -7,6 +7,7 @@ import de.wintervillage.main.calendar.listener.InventoryDragListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,8 +25,9 @@ public class CalendarHandler {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.days = new ArrayList<>();
 
-        this.startDate = LocalDate.of(2024, 12, 1);
-        this.endDate = LocalDate.of(2025, 1, 6); // TODO: set to project end date
+        this.startDate = LocalDate.of(2024, Month.DECEMBER, 12);
+        this.endDate = LocalDate.of(2025, Month.JANUARY, 6); // TODO: set to project end date
+
 
         new InventoryClickListener();
         new InventoryDragListener();
@@ -76,7 +78,7 @@ public class CalendarHandler {
         if (!this.withinRange()) return false;
         LocalDate current = LocalDate.now();
 
-        LocalDate doorDate = LocalDate.of(2024, 12, day);
+        LocalDate doorDate = LocalDate.of(2024, Month.DECEMBER, day);
         return !current.isBefore(doorDate);
     }
 }
