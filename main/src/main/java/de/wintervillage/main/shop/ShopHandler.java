@@ -97,6 +97,10 @@ public class ShopHandler {
         this.shops.add(shop);
     }
 
+    public void removeShop(Shop shop) {
+        this.shops.remove(shop);
+    }
+
     public List<Shop> shops() {
         return new ArrayList<>(this.shops);
     }

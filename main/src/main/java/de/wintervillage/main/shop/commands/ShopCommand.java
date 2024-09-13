@@ -1,13 +1,12 @@
 package de.wintervillage.main.shop.commands;
 
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.shop.Shop;
+import de.wintervillage.main.shop.commands.sub.ChangePriceSubCommand;
+import de.wintervillage.main.shop.commands.sub.DeleteSubCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
@@ -15,7 +14,9 @@ import java.util.List;
 public class ShopCommand {
 
     /**
-     * /shop create <name> <price> | Starts the setup and gives the player an axe to select the corners
+     * /shop delete (uniqueId) | Deletes a shop
+     * /shop changePrice <newPrice> (uniqueId) | Changes the price of a shop
+     *
      */
 
     public ShopCommand(Commands commands) {
@@ -23,15 +24,8 @@ public class ShopCommand {
 
         final LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("shop")
                 .requires((source) -> source.getSender() instanceof Player)
-                .then(Commands.literal("refresh")
-                        .requires((source) -> source.getSender().hasPermission("wintervillage.command.shop.refresh"))
-                        .executes((source) -> {
-                            final Player player = (Player) source.getSource().getSender();
-
-                            winterVillage.shopHandler.shops().forEach(Shop::updateInformation);
-
-                            return Command.SINGLE_SUCCESS;
-                        }));
+                .then(new DeleteSubCommand().build())
+                .then(new ChangePriceSubCommand().build());
         commands.register(winterVillage.getPluginMeta(), builder.build(), "Manage shops", List.of());
     }
 }
