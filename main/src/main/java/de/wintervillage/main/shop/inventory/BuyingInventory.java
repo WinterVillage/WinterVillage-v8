@@ -4,6 +4,7 @@ import de.wintervillage.common.core.player.WinterVillagePlayer;
 import de.wintervillage.common.paper.item.ItemBuilder;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.shop.Shop;
+import de.wintervillage.main.shop.data.ShopStatistics;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import net.kyori.adventure.key.Key;
@@ -124,6 +125,10 @@ public class BuyingInventory {
             Player player = (Player) event.getWhoClicked();
             BigDecimal finalPrice = this.shop.price().multiply(BigDecimal.valueOf(this.buyingAmount));
 
+            ShopStatistics statistics = new ShopStatistics();
+            statistics.earned(shop.statistics().earned().add(finalPrice));
+            statistics.sold(shop.statistics().sold().add(BigDecimal.valueOf(this.buyingAmount)));
+
             CompletableFuture<Shop> shopFuture = this.winterVillage.shopDatabase.modify(
                     this.shop.uniqueId(),
                     builder -> {
@@ -131,6 +136,7 @@ public class BuyingInventory {
                             throw new IllegalArgumentException("Shop has not enough items");
 
                         builder.amount(builder.amount().subtract(BigDecimal.valueOf(this.buyingAmount)));
+                        builder.statistics(statistics);
                     }
             );
             CompletableFuture<WinterVillagePlayer> buyerFuture = this.winterVillage.playerDatabase.modify(
@@ -153,6 +159,7 @@ public class BuyingInventory {
                             BigDecimal amount = this.shop.amount();
                             amount = amount.subtract(BigDecimal.valueOf(this.buyingAmount));
 
+                            this.shop.statistics(statistics);
                             this.shop.amount(amount);
                             this.shop.updateInformation();
 
