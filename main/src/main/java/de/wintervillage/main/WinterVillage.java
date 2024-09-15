@@ -26,9 +26,6 @@ import de.wintervillage.main.commands.FreezeCommand;
 import de.wintervillage.main.commands.InventoryCommand;
 import de.wintervillage.main.commands.TestCommand;
 import de.wintervillage.main.death.DeathManager;
-import de.wintervillage.main.economy.EconomyManager;
-import de.wintervillage.main.economy.commands.CMD_Transfer;
-import de.wintervillage.main.economy.shop.ShopManager;
 import de.wintervillage.main.event.EventManager;
 import de.wintervillage.main.listener.AsyncChatListener;
 import de.wintervillage.main.listener.PlayerMoveListener;
@@ -83,8 +80,6 @@ public final class WinterVillage extends JavaPlugin {
     public @Inject CalendarHandler calendarHandler;
     public @Inject PlayerHandler playerHandler;
     public @Inject ShopHandler shopHandler;
-    public @Inject ShopManager shopManager;
-    public @Inject EconomyManager economyManager;
     public @Inject SpecialItems specialItems;
     public @Inject EventManager eventManager;
     public @Inject DeathManager deathManager;
@@ -188,9 +183,6 @@ public final class WinterVillage extends JavaPlugin {
             new ShopCommand(command);
 
             new TestCommand(command);
-
-            //Economy-System TODO: proxy
-            new CMD_Transfer(command);
 
             //SpecialItems
             new CMD_Disenchant(command);

@@ -1,8 +1,7 @@
 package de.wintervillage.main.death.listener;
 
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.economy.utils.ItemUtils;
-import net.kyori.adventure.text.Component;
+import de.wintervillage.main.specialitems.utils.ItemUtils;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
