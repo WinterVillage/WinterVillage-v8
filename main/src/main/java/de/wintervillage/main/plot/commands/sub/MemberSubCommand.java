@@ -106,7 +106,9 @@ public class MemberSubCommand {
                                             .exceptionally(throwable -> {
                                                 player.sendMessage(Component.join(
                                                         this.winterVillage.prefix,
-                                                        Component.translatable("wintervillage.commands.plot.failed-to-update", throwable.getMessage())
+                                                        Component.translatable("wintervillage.commands.plot.failed-to-update",
+                                                                Component.text(throwable.getMessage())
+                                                        )
                                                 ));
                                                 return null;
                                             });
@@ -175,7 +177,9 @@ public class MemberSubCommand {
                                             .exceptionally(throwable -> {
                                                 player.sendMessage(Component.join(
                                                         this.winterVillage.prefix,
-                                                        Component.translatable("wintervillage.commands.plot.failed-to-update", throwable.getMessage())
+                                                        Component.translatable("wintervillage.commands.plot.failed-to-update",
+                                                                Component.text(throwable.getMessage())
+                                                        )
                                                 ));
                                                 return null;
                                             });

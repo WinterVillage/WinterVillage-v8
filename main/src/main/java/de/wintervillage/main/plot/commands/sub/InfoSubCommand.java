@@ -14,6 +14,7 @@ import net.luckperms.api.model.group.Group;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.text.SimpleDateFormat;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -46,12 +47,14 @@ public class InfoSubCommand {
                             usersFuture.thenAccept(plotUsers -> {
                                 Group highestGroup = this.winterVillage.playerHandler.highestGroup(plotUsers.owner());
 
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy, HH:mm:ss");
+
                                 player.sendMessage(Component.translatable(
                                         "wintervillage.commands.plot.info",
                                         Component.text(plot.name()), // <arg:0>
                                         Component.text(plot.boundingBox().getWidthX() + "x" + plot.boundingBox().getWidthZ()), // <arg:1>
                                         MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + plotUsers.owner().getUsername()), // <arg:2>
-                                        Component.text(plot.created().toString()), // <arg:3>
+                                        Component.text(dateFormat.format(plot.created())), // <arg:3>
                                         this.winterVillage.plotHandler.formatMembers(plotUsers) // <arg:4>
                                 ));
                             });
@@ -75,12 +78,14 @@ public class InfoSubCommand {
                     usersFuture.thenAccept(plotUsers -> {
                         Group highestGroup = this.winterVillage.playerHandler.highestGroup(plotUsers.owner());
 
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy, HH:mm:ss");
+
                         player.sendMessage(Component.translatable(
                                 "wintervillage.commands.plot.info",
                                 Component.text(plot.name()), // <arg:0>
                                 Component.text(plot.boundingBox().getWidthX() + "x" + plot.boundingBox().getWidthZ()), // <arg:1>
                                 MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + plotUsers.owner().getUsername()), // <arg:2>
-                                Component.text(plot.created().toString()), // <arg:3>
+                                Component.text(dateFormat.format(plot.created())), // <arg:3>
                                 this.winterVillage.plotHandler.formatMembers(plotUsers) // <arg:4>
                         ));
                     });

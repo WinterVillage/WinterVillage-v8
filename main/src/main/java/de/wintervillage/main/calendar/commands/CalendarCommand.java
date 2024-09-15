@@ -94,7 +94,7 @@ public class CalendarCommand {
                     }
 
                     CalendarInventory inventory = new CalendarInventory(player);
-                    player.openInventory(inventory.getInventory());
+                    inventory.getGui().open(player);
                     player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 1.6f);
 
                     return 1;

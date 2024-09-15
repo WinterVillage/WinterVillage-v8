@@ -177,7 +177,7 @@ public class PlotHandler {
 
     public void deny(Player player, Location location) {
         Particle.DustOptions dustOptions = new Particle.DustOptions(Color.RED, 4);
-        player.spawnParticle(Particle.DUST, location.add(0.25, 0, 0.25), 10, 0, 0, 0, 0, dustOptions);
+        player.spawnParticle(Particle.DUST, location.add(0.5, 0, 0.5), 10, 0, 0, 0, 0, dustOptions);
     }
 
     public CompletableFuture<PlotUsers> lookupUsers(Plot plot) {

@@ -25,7 +25,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
 
     // async mongodb
-    implementation("org.mongodb:mongodb-driver-reactivestreams:5.1.0")
+    compileOnly("org.mongodb:mongodb-driver-reactivestreams:5.1.0")
 
     // google guice
     implementation("com.google.inject:guice:7.0.0")
@@ -35,6 +35,9 @@ dependencies {
 
     // protocollib
     compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
+
+    // triumphgui
+    implementation("dev.triumphteam:triumph-gui:3.1.10")
 }
 
 tasks {
@@ -46,5 +49,11 @@ tasks {
     shadowJar {
         archiveBaseName.set("wintervillage")
         archiveClassifier.set("")
+
+        relocate("dev.triumphteam.gui", "de.wintervillage.main.gui")
+
+        manifest {
+            attributes["paperweight-mappings-namespace"] = "mojang"
+        }
     }
 }

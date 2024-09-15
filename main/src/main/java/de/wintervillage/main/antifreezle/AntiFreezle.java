@@ -5,7 +5,7 @@ import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.antifreezle.listener.ListenerAF_BlockBreakBuild;
 import de.wintervillage.main.antifreezle.listener.ListenerAF_InventoryClick;
 import de.wintervillage.main.antifreezle.listener.ListenerAF_PlayerQuit;
-import de.wintervillage.main.economy.utils.ItemUtils;
+import de.wintervillage.main.specialitems.utils.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;

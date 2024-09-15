@@ -1,7 +1,6 @@
 package de.wintervillage.main.specialitems.utils;
 
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.economy.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;

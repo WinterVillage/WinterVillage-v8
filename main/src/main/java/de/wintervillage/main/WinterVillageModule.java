@@ -9,11 +9,11 @@ import de.wintervillage.common.core.player.database.PlayerDatabase;
 import de.wintervillage.main.player.PlayerHandler;
 import de.wintervillage.main.calendar.CalendarHandler;
 import de.wintervillage.main.calendar.database.CalendarDatabase;
-import de.wintervillage.main.economy.EconomyManager;
-import de.wintervillage.main.economy.shop.ShopManager;
 import de.wintervillage.main.event.EventManager;
 import de.wintervillage.main.plot.PlotHandler;
 import de.wintervillage.main.plot.database.PlotDatabase;
+import de.wintervillage.main.shop.ShopHandler;
+import de.wintervillage.main.shop.database.ShopDatabase;
 import de.wintervillage.main.specialitems.SpecialItems;
 import net.luckperms.api.LuckPerms;
 
@@ -39,13 +39,13 @@ public class WinterVillageModule extends AbstractModule {
         this.bind(PlotDatabase.class).in(Singleton.class);
         this.bind(CalendarDatabase.class).in(Singleton.class);
         this.bind(PlayerDatabase.class).in(Singleton.class);
+        this.bind(ShopDatabase.class).in(Singleton.class);
 
         // managers
         this.bind(PlotHandler.class).in(Singleton.class);
         this.bind(CalendarHandler.class).in(Singleton.class);
         this.bind(PlayerHandler.class).in(Singleton.class);
-        this.bind(ShopManager.class).in(Singleton.class);
-        this.bind(EconomyManager.class).in(Singleton.class);
+        this.bind(ShopHandler.class).in(Singleton.class);
         this.bind(SpecialItems.class).in(Singleton.class);
         this.bind(EventManager.class).in(Singleton.class);
     }

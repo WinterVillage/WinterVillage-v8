@@ -37,7 +37,7 @@ public class FreezeCommand {
                             return 1;
                         })
                 )
-                .then(Commands.argument("player", ArgumentTypes.players())
+                .then(Commands.argument("player", ArgumentTypes.player())
                         .executes((source) -> {
                             Player player = source.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(source.getSource()).getFirst();
                             Group highestGroup = this.winterVillage.playerHandler.highestGroup(player);

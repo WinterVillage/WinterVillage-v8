@@ -1,9 +1,7 @@
-package de.wintervillage.main.economy.utils;
+package de.wintervillage.main.specialitems.utils;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -26,22 +24,4 @@ public class ItemUtils {
 
         return item;
     }
-
-    public static String itemStackToYaml(ItemStack itemStack){
-        YamlConfiguration config = new YamlConfiguration();
-        config.set("item", itemStack);
-        return config.saveToString();
-    }
-
-    public static ItemStack itemStackFromYaml(String yaml){
-        YamlConfiguration config = new YamlConfiguration();
-        try {
-            config.loadFromString(yaml);
-            return config.getItemStack("item");
-        } catch (InvalidConfigurationException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
 }

@@ -27,6 +27,17 @@ public class PlayerInformation {
     private Generic generic;
     private Statistics statistics;
 
+    public PlayerInformation() {
+        this(
+                Inventory.generateDefault(),
+                EnderChest.generateDefault(),
+                PotionEffects.generateDefault(),
+                Advancements.generateDefault(),
+                Generic.generateDefault(),
+                Statistics.generateDefault()
+        );
+    }
+
     public PlayerInformation(
             Inventory inventory,
             EnderChest enderChest,

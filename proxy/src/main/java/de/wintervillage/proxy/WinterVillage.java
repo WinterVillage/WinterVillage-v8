@@ -18,6 +18,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import de.wintervillage.common.core.config.Document;
 import de.wintervillage.common.core.player.codec.PlayerCodecProvider;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
+import de.wintervillage.proxy.player.PlayerChatListener;
 import de.wintervillage.proxy.player.PreLoginListener;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -74,6 +75,7 @@ public final class WinterVillage {
         Injector injector = Guice.createInjector(new WinterVillageModule(this.mongoDatabase));
         this.playerDatabase = injector.getInstance(PlayerDatabase.class);
 
+        this.proxyServer.getEventManager().register(this, new PlayerChatListener(this));
         this.proxyServer.getEventManager().register(this, new PreLoginListener(this));
     }
 

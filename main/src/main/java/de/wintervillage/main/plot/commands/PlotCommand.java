@@ -13,16 +13,16 @@ import java.util.List;
 public class PlotCommand {
 
     /**
-     * /gs setup | Starts the setup and gives the player an axe to select the corners
-     * /gs info (uuid) | Gives information about the plot the player is standing on
-     * /gs showBorders | Shows the border of every plot
-     * /gs listAll | Lists all plots
-     * /gs create <name> | Creates a plot with the name
-     * /gs delete (uuid) | Deletes the plot with the name
-     * /gs tp <uuid> | Teleports to the plot with the uniqueId
-     * /gs owner <player> | Sets the owner of the plot
-     * /gs member <player> add | Adds a player to the plot
-     * /gs member <player> remove | Removes a player from the plot
+     * /gs setup                    | Starts the setup and gives the player an axe to select the corners
+     * /gs info (uuid)              | Gives information about the plot the player is standing on
+     * /gs showBorders              | Shows the border of every plot
+     * /gs listAll                  | Lists all plots
+     * /gs create <name>            | Creates a plot with the name
+     * /gs delete (uuid)            | Deletes the plot with the name
+     * /gs tp <uuid>                | Teleports to the plot with the uniqueId
+     * /gs owner <player>           | Sets the owner of the plot
+     * /gs member <player> add      | Adds a player to the plot
+     * /gs member <player> remove   | Removes a player from the plot
      */
 
     public PlotCommand(Commands commands) {

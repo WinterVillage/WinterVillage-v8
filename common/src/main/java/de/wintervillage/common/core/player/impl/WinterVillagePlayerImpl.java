@@ -2,7 +2,6 @@ package de.wintervillage.common.core.player.impl;
 
 import de.wintervillage.common.core.player.WinterVillagePlayer;
 import de.wintervillage.common.core.player.data.*;
-import de.wintervillage.common.paper.models.*;
 import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
@@ -10,8 +9,10 @@ import org.bson.types.Binary;
 import org.bson.types.Decimal128;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 import static de.wintervillage.common.core.database.UUIDConverter.fromBytes;
@@ -24,6 +25,9 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
     @BsonProperty("money")
     private @NotNull BigDecimal money;
+
+    @BsonProperty("deaths")
+    private int deaths;
 
     @BsonProperty("banInformation")
     private @Nullable BanInformation banInformation;
@@ -43,15 +47,9 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     public WinterVillagePlayerImpl(@NotNull UUID uniqueId) {
         this.uniqueId = uniqueId;
         this.money = BigDecimal.ZERO;
+        this.deaths = 0;
 
-        this.playerInformation = new PlayerInformation(
-                Inventory.generateDefault(),
-                EnderChest.generateDefault(),
-                PotionEffects.generateDefault(),
-                Advancements.generateDefault(),
-                Generic.generateDefault(),
-                Statistics.generateDefault()
-        );
+        this.playerInformation = new PlayerInformation();
     }
 
     @Override
@@ -67,6 +65,16 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     @Override
     public void money(@NotNull BigDecimal money) {
         this.money = money;
+    }
+
+    @Override
+    public int deaths() {
+        return this.deaths;
+    }
+
+    @Override
+    public void deaths(@Range(from = 0, to = Integer.MAX_VALUE) int deaths) {
+        this.deaths = deaths;
     }
 
     public @Nullable BanInformation banInformation() {
@@ -123,6 +131,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
         document.put("_id", toBinary(this.uniqueId));
         document.put("money", this.money);
+        document.put("deaths", this.deaths);
 
         if (this.banInformation != null)
             document.put("banInformation", this.banInformation.toDocument());
@@ -142,32 +151,27 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
     public static WinterVillagePlayerImpl fromDocument(Document document) {
         UUID uniqueId = fromBytes(document.get("_id", Binary.class).getData());
-        BigDecimal money = document.get("money", Decimal128.class).bigDecimalValue();
 
         WinterVillagePlayerImpl player = new WinterVillagePlayerImpl(uniqueId);
-        player.money = money;
-
-        if (document.containsKey("banInformation") && !document.get("banInformation", Document.class).isEmpty()) {
-            Document banDocument = document.get("banInformation", Document.class);
-            player.banInformation = BanInformation.fromDocument(banDocument);
-        }
-
-        if (document.containsKey("muteInformation") && !document.get("muteInformation", Document.class).isEmpty()) {
-            Document muteDocument = document.get("muteInformation", Document.class);
-            player.muteInformation = MuteInformation.fromDocument(muteDocument);
-        }
-
-        player.playerInformation = PlayerInformation.fromDocument(document.get("playerInformation", Document.class));
-
-        if (document.containsKey("wildcardInformation") && !document.get("wildcardInformation", Document.class).isEmpty()) {
-            Document wildcardDocument = document.get("wildcardInformation", Document.class);
-            player.wildcardInformation = WildcardInformation.fromDocument(wildcardDocument);
-        }
-
-        if (document.containsKey("whitelistInformation") && !document.get("whitelistInformation", Document.class).isEmpty()) {
-            Document whitelistDocument = document.get("whitelistInformation", Document.class);
-            player.whitelistInformation = WhitelistInformation.fromDocument(whitelistDocument);
-        }
+        player.money(Optional.ofNullable(document.get("money", Decimal128.class).bigDecimalValue()).orElse(BigDecimal.ZERO));
+        player.deaths(Optional.ofNullable(document.get("deaths", Integer.class)).orElse(0));
+        player.banInformation(Optional.ofNullable(document.get("banInformation", Document.class))
+                .filter(doc -> !doc.isEmpty())
+                .map(BanInformation::fromDocument)
+                .orElse(null));
+        player.muteInformation(Optional.ofNullable(document.get("muteInformation", Document.class))
+                .filter(doc -> !doc.isEmpty())
+                .map(MuteInformation::fromDocument)
+                .orElse(null));
+        player.playerInformation(PlayerInformation.fromDocument(document.get("playerInformation", Document.class)));
+        player.wildcardInformation(Optional.ofNullable(document.get("wildcardInformation", Document.class))
+                .filter(doc -> !doc.isEmpty())
+                .map(WildcardInformation::fromDocument)
+                .orElse(null));
+        player.whitelistInformation(Optional.ofNullable(document.get("whitelistInformation", Document.class))
+                .filter(doc -> !doc.isEmpty())
+                .map(WhitelistInformation::fromDocument)
+                .orElse(null));
 
         return player;
     }
@@ -177,6 +181,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         return "WinterVillagePlayerImpl{" +
                 "uniqueId=" + this.uniqueId +
                 ", money=" + this.money +
+                ", deaths=" + this.deaths +
                 ", banInformation=" + this.banInformation +
                 ", muteInformation=" + this.muteInformation +
                 ", playerInformation=" + this.playerInformation +

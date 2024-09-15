@@ -22,7 +22,7 @@ public class InventoryCommand {
                 .then(Commands.literal("normal")
                         .then(Commands.argument("player", ArgumentTypes.player())
                                 .executes((source) -> {
-                                    Player player = source.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(source.getSource()).get(0);
+                                    Player player = source.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(source.getSource()).getFirst();
 
                                     ((Player) source.getSource().getSender()).openInventory(player.getInventory());
                                     return 1;
@@ -32,7 +32,7 @@ public class InventoryCommand {
                 .then(Commands.literal("enderchest")
                         .then(Commands.argument("player", ArgumentTypes.player())
                                 .executes((source) -> {
-                                    Player player = source.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(source.getSource()).get(0);
+                                    Player player = source.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(source.getSource()).getFirst();
 
                                     ((Player) source.getSource().getSender()).openInventory(player.getEnderChest());
                                     return 1;

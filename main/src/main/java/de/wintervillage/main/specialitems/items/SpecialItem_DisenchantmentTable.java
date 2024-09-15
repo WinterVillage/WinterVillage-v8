@@ -1,6 +1,6 @@
 package de.wintervillage.main.specialitems.items;
 
-import de.wintervillage.main.economy.utils.ItemUtils;
+import de.wintervillage.main.specialitems.utils.ItemUtils;
 import de.wintervillage.main.specialitems.SpecialItem;
 import de.wintervillage.main.specialitems.SpecialItems;
 import de.wintervillage.main.specialitems.utils.EnchantmentUtils;

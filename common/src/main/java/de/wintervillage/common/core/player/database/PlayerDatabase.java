@@ -75,19 +75,19 @@ public class PlayerDatabase {
         return future;
     }
 
-    public CompletableFuture<Void> modify(UUID uniqueId, Consumer<WinterVillagePlayer> consumer) {
+    public CompletableFuture<WinterVillagePlayer> modify(UUID uniqueId, Consumer<WinterVillagePlayer> consumer) {
         return this.player(uniqueId)
                 .thenCompose(player -> {
                     consumer.accept(player);
-                    return this.insert(player);
+                    return this.insert(player).thenApply(v -> player);
                 })
                 .exceptionallyCompose(throwable -> {
                     if (throwable instanceof EntryNotFoundException) {
                         WinterVillagePlayer player = new WinterVillagePlayerImpl(uniqueId);
                         consumer.accept(player);
-                        return this.insert(player);
+                        return this.insert(player).thenApply(v -> player);
                     }
-                    throw new RuntimeException(throwable);
+                    throw new RuntimeException("An error occurred while modifying " + uniqueId.toString() + ": " + throwable.getMessage());
                 });
     }
 }

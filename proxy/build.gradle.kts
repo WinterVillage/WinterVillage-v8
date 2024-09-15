@@ -1,7 +1,8 @@
 plugins {
     `java-library`
 
-    id ("com.github.johnrengelman.shadow") version "7.0.0"
+    // shadow
+    id("io.github.goooler.shadow") version "8.1.7"
 }
 
 java {
@@ -31,6 +32,10 @@ dependencies {
 
     // luckperms
     compileOnly("net.luckperms:api:5.4")
+
+    // cloudnet
+    compileOnly("eu.cloudnetservice.cloudnet:bridge:4.0.0-RC10")
+    compileOnly("eu.cloudnetservice.cloudnet:platform-inject-api:4.0.0-RC10")
 }
 
 tasks {
@@ -42,6 +47,8 @@ tasks {
     shadowJar {
         archiveBaseName.set("wintervillage")
         archiveClassifier.set("")
+
+        relocate("eu.cloudnetservice.cloudnet", "eu.cloudnetservice.cloudnet")
     }
 }
 

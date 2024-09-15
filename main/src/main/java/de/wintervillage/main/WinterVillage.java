@@ -12,6 +12,7 @@ import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
 import de.wintervillage.common.core.translation.MiniMessageTranslator;
+import de.wintervillage.main.listener.WorldLoadListener;
 import de.wintervillage.main.player.PlayerHandler;
 import de.wintervillage.main.antifreezle.AntiFreezle;
 import de.wintervillage.common.core.config.Document;
@@ -25,9 +26,6 @@ import de.wintervillage.main.commands.FreezeCommand;
 import de.wintervillage.main.commands.InventoryCommand;
 import de.wintervillage.main.commands.TestCommand;
 import de.wintervillage.main.death.DeathManager;
-import de.wintervillage.main.economy.EconomyManager;
-import de.wintervillage.main.economy.commands.CMD_Transfer;
-import de.wintervillage.main.economy.shop.ShopManager;
 import de.wintervillage.main.event.EventManager;
 import de.wintervillage.main.listener.AsyncChatListener;
 import de.wintervillage.main.listener.PlayerMoveListener;
@@ -35,6 +33,10 @@ import de.wintervillage.main.plot.commands.PlotCommand;
 import de.wintervillage.main.plot.PlotHandler;
 import de.wintervillage.main.plot.database.PlotDatabase;
 import de.wintervillage.main.plot.codec.PlotCodecProvider;
+import de.wintervillage.main.shop.ShopHandler;
+import de.wintervillage.main.shop.codec.ShopCodecProvider;
+import de.wintervillage.main.shop.commands.ShopCommand;
+import de.wintervillage.main.shop.database.ShopDatabase;
 import de.wintervillage.main.specialitems.SpecialItems;
 import de.wintervillage.main.specialitems.commands.CMD_Disenchant;
 import de.wintervillage.main.specialitems.commands.CMD_SpecialItem;
@@ -56,8 +58,10 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -69,13 +73,13 @@ public final class WinterVillage extends JavaPlugin {
     public @Inject PlotDatabase plotDatabase;
     public @Inject CalendarDatabase calendarDatabase;
     public @Inject PlayerDatabase playerDatabase;
+    public @Inject ShopDatabase shopDatabase;
 
     // handlers
     public @Inject PlotHandler plotHandler;
     public @Inject CalendarHandler calendarHandler;
     public @Inject PlayerHandler playerHandler;
-    public @Inject ShopManager shopManager;
-    public @Inject EconomyManager economyManager;
+    public @Inject ShopHandler shopHandler;
     public @Inject SpecialItems specialItems;
     public @Inject EventManager eventManager;
     public @Inject DeathManager deathManager;
@@ -136,7 +140,8 @@ public final class WinterVillage extends JavaPlugin {
                     MongoClientSettings.getDefaultCodecRegistry(),
                     CodecRegistries.fromProviders(new PlotCodecProvider()),
                     CodecRegistries.fromProviders(new CalenderDayCodecProvider()),
-                    CodecRegistries.fromProviders(new PlayerCodecProvider())
+                    CodecRegistries.fromProviders(new PlayerCodecProvider()),
+                    CodecRegistries.fromProviders(new ShopCodecProvider())
             );
 
             this.mongoClient = MongoClients.create(
@@ -164,6 +169,7 @@ public final class WinterVillage extends JavaPlugin {
         // listener
         new AsyncChatListener();
         new PlayerMoveListener();
+        new WorldLoadListener();
 
         // commands
         final LifecycleEventManager<Plugin> lifecycleEventManager = this.getLifecycleManager();
@@ -174,11 +180,9 @@ public final class WinterVillage extends JavaPlugin {
             new FreezeCommand(command);
             new InventoryCommand(command);
             new PlotCommand(command);
+            new ShopCommand(command);
 
             new TestCommand(command);
-
-            //Economy-System TODO: proxy
-            new CMD_Transfer(command);
 
             //SpecialItems
             new CMD_Disenchant(command);
@@ -216,7 +220,18 @@ public final class WinterVillage extends JavaPlugin {
 
         if (this.mongoClient != null) this.mongoClient.close();
         if (this.playerHandler != null) this.playerHandler.terminate();
+        if (this.shopHandler != null) this.shopHandler.terminate();
 
         this.eventManager.stop();
+    }
+
+    public String formatBD(BigDecimal bigDecimal, boolean fractions) {
+        final NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.GERMANY);
+        if (fractions) {
+            numberFormat.setMaximumFractionDigits(2);
+            numberFormat.setMinimumFractionDigits(2);
+        }
+        numberFormat.setGroupingUsed(true);
+        return numberFormat.format(bigDecimal);
     }
 }

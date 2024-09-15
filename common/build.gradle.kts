@@ -25,7 +25,7 @@ dependencies {
     annotationProcessor("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
 
     // async mongodb
-    implementation("org.mongodb:mongodb-driver-reactivestreams:5.1.0")
+    compileOnly("org.mongodb:mongodb-driver-reactivestreams:5.1.0")
 
     // google guice
     compileOnly("com.google.inject:guice:7.0.0")
