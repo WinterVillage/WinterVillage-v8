@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -46,7 +47,7 @@ public class PlayerInteractEntityListener implements Listener {
         Shop shop = optional.get();
 
         if (shop.owner().equals(player.getUniqueId())) {
-            this.handleAsOwner(event, shop);
+            this.handleAsOwner(event, shop, player.getInventory().getItemInMainHand());
             return;
         }
 
@@ -71,7 +72,7 @@ public class PlayerInteractEntityListener implements Listener {
         inventory.getGui().open(player);
     }
 
-    private void handleAsOwner(PlayerInteractEntityEvent event, Shop shop) {
+    private void handleAsOwner(PlayerInteractEntityEvent event, Shop shop, ItemStack itemInHand) {
         Player player = event.getPlayer();
         if (shop.item() == null) {
             // set item - sneaking is required
@@ -93,7 +94,7 @@ public class PlayerInteractEntityListener implements Listener {
             }
 
             // set item
-            this.winterVillage.shopDatabase.modify(shop.uniqueId(), builder -> builder.item(player.getInventory().getItemInMainHand()))
+            this.winterVillage.shopDatabase.modify(shop.uniqueId(), builder -> builder.item(itemInHand))
                     .thenAccept(updatedShop -> {
                         Bukkit.getScheduler().runTask(this.winterVillage, () -> {
                             shop.item(updatedShop.item());
