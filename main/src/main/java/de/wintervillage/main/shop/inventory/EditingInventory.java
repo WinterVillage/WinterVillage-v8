@@ -63,9 +63,9 @@ public class EditingInventory {
                     .sum();
 
             this.winterVillage.shopDatabase.modify(this.shop.uniqueId(), builder -> builder.amount(BigDecimal.valueOf(newAmount)))
-                    .thenAccept(action -> {
+                    .thenAccept(updatedShop -> {
                         Bukkit.getScheduler().runTask(this.winterVillage, () -> {
-                            this.shop.amount(BigDecimal.valueOf(newAmount));
+                            this.shop.amount(updatedShop.amount());
                             this.shop.updateInformation();
                         });
 

@@ -48,7 +48,7 @@ public class ChangePriceSubCommand {
 
                                     Shop shop = optional.get();
                                     this.winterVillage.shopDatabase.modify(shop.uniqueId(), consumer -> consumer.price(newPrice))
-                                            .thenAccept((v) -> {
+                                            .thenAccept(updatedShop -> {
                                                 player.sendMessage(Component.join(
                                                         this.winterVillage.prefix,
                                                         Component.translatable("wintervillage.commands.shop.changed-price",
@@ -57,7 +57,7 @@ public class ChangePriceSubCommand {
                                                 ));
 
                                                 Bukkit.getScheduler().runTask(this.winterVillage, () -> {
-                                                    shop.price(newPrice);
+                                                    shop.price(updatedShop.price());
                                                     shop.updateInformation();
                                                 });
                                             })
@@ -88,7 +88,7 @@ public class ChangePriceSubCommand {
 
                             Shop shop = optional.get();
                             this.winterVillage.shopDatabase.modify(shop.uniqueId(), consumer -> consumer.price(newPrice))
-                                    .thenAccept((v) -> {
+                                    .thenAccept(updatedShop -> {
                                         player.sendMessage(Component.join(
                                                 this.winterVillage.prefix,
                                                 Component.translatable("wintervillage.commands.shop.changed-price",
@@ -97,7 +97,7 @@ public class ChangePriceSubCommand {
                                         ));
 
                                         Bukkit.getScheduler().runTask(this.winterVillage, () -> {
-                                            shop.price(newPrice);
+                                            shop.price(updatedShop.price());
                                             shop.updateInformation();
                                         });
                                     })
