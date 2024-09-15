@@ -64,7 +64,7 @@ public class ChangePriceSubCommand {
                                             .exceptionally(throwable -> {
                                                 player.sendMessage(Component.join(
                                                         this.winterVillage.prefix,
-                                                        Component.translatable("wintervillage.commands.shop.failed-to-delete",
+                                                        Component.translatable("wintervillage.commands.shop.failed-to-update",
                                                                 Component.text(throwable.getMessage())
                                                         )
                                                 ));
@@ -104,7 +104,7 @@ public class ChangePriceSubCommand {
                                     .exceptionally(throwable -> {
                                         player.sendMessage(Component.join(
                                                 this.winterVillage.prefix,
-                                                Component.translatable("wintervillage.commands.shop.failed-to-delete",
+                                                Component.translatable("wintervillage.commands.shop.failed-to-update",
                                                         Component.text(throwable.getMessage())
                                                 )
                                         ));
