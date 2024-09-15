@@ -12,6 +12,7 @@ import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
 import de.wintervillage.common.core.translation.MiniMessageTranslator;
+import de.wintervillage.main.listener.PlayerJoinListener;
 import de.wintervillage.main.listener.WorldLoadListener;
 import de.wintervillage.main.player.PlayerHandler;
 import de.wintervillage.main.antifreezle.AntiFreezle;
@@ -34,6 +35,7 @@ import de.wintervillage.main.plot.commands.PlotCommand;
 import de.wintervillage.main.plot.PlotHandler;
 import de.wintervillage.main.plot.database.PlotDatabase;
 import de.wintervillage.main.plot.codec.PlotCodecProvider;
+import de.wintervillage.main.scoreboard.ScoreboardHandler;
 import de.wintervillage.main.shop.ShopHandler;
 import de.wintervillage.main.shop.codec.ShopCodecProvider;
 import de.wintervillage.main.shop.commands.ShopCommand;
@@ -85,6 +87,7 @@ public final class WinterVillage extends JavaPlugin {
     public @Inject EventManager eventManager;
     public @Inject DeathManager deathManager;
     public @Inject AntiFreezle antiFreezle;
+    public @Inject ScoreboardHandler scoreboardHandler;
 
     // plugin dependencies
     public LuckPerms luckPerms;
@@ -169,6 +172,7 @@ public final class WinterVillage extends JavaPlugin {
 
         // listener
         new AsyncChatListener();
+        new PlayerJoinListener();
         new PlayerMoveListener();
         new WorldLoadListener();
 
