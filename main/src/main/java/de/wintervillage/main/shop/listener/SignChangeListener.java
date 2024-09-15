@@ -12,7 +12,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
-import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -108,7 +107,7 @@ public class SignChangeListener implements Listener {
 
     private BlockFace getBlockFace(Block sign) {
         BlockData blockData = sign.getBlockData();
-        if (blockData instanceof WallSign wallSign) return wallSign.getFacing();
+        if (blockData instanceof Directional directional) return directional.getFacing();
         return null;
     }
 
