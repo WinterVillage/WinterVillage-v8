@@ -195,10 +195,10 @@ public class ShopImpl implements Shop {
 
             display.text(Component.empty()
                     .append(Component.text("Verfügbar: ", NamedTextColor.WHITE)
-                            .append(Component.text(this.amount().toPlainString(), NamedTextColor.YELLOW)))
+                            .append(Component.text(winterVillage.formatBD(this.amount(), false), NamedTextColor.YELLOW)))
                     .append(Component.newline())
                     .append(Component.text("Preis: ", NamedTextColor.WHITE)
-                            .append(Component.text(this.price().toPlainString(), NamedTextColor.YELLOW)))
+                            .append(Component.text(winterVillage.formatBD(this.price(), true) + " $", NamedTextColor.YELLOW)))
             );
 
             PersistentDataContainer container = display.getPersistentDataContainer();
@@ -264,10 +264,10 @@ public class ShopImpl implements Shop {
                     if (display instanceof TextDisplay textDisplay) {
                         textDisplay.text(Component.empty()
                                 .append(Component.text("Verfügbar: ", NamedTextColor.WHITE)
-                                        .append(Component.text(this.amount().toPlainString(), NamedTextColor.YELLOW)))
+                                        .append(Component.text(winterVillage.formatBD(this.amount(), false), NamedTextColor.YELLOW)))
                                 .append(Component.newline())
                                 .append(Component.text("Preis: ", NamedTextColor.WHITE)
-                                        .append(Component.text(this.price().toPlainString(), NamedTextColor.YELLOW)))
+                                        .append(Component.text(winterVillage.formatBD(this.price(), true) + " $", NamedTextColor.YELLOW)))
                         );
                     }
                 });
