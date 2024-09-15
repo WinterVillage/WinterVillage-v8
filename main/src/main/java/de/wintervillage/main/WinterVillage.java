@@ -61,8 +61,10 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -229,5 +231,15 @@ public final class WinterVillage extends JavaPlugin {
         if (this.shopHandler != null) this.shopHandler.terminate();
 
         this.eventManager.stop();
+    }
+
+    public String formatBD(BigDecimal bigDecimal, boolean fractions) {
+        final NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.GERMANY);
+        if (fractions) {
+            numberFormat.setMaximumFractionDigits(2);
+            numberFormat.setMinimumFractionDigits(2);
+        }
+        numberFormat.setGroupingUsed(true);
+        return numberFormat.format(bigDecimal);
     }
 }

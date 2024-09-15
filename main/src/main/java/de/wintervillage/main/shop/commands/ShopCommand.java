@@ -5,6 +5,7 @@ import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.shop.commands.sub.ChangeOwnerSubCommand;
 import de.wintervillage.main.shop.commands.sub.ChangePriceSubCommand;
 import de.wintervillage.main.shop.commands.sub.DeleteSubCommand;
+import de.wintervillage.main.shop.commands.sub.InfoSubCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.entity.*;
@@ -27,6 +28,7 @@ public class ShopCommand {
 
         final LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("shop")
                 .requires((source) -> source.getSender() instanceof Player)
+                .then(new InfoSubCommand().build())
                 .then(new DeleteSubCommand().build())
                 .then(new ChangePriceSubCommand().build())
                 .then(new ChangeOwnerSubCommand().build());
