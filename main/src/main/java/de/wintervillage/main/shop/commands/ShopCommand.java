@@ -27,6 +27,7 @@ public class ShopCommand {
 
         final LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("shop")
                 .requires((source) -> source.getSender() instanceof Player)
+                .then(new InfoSubCommand().build())
                 .then(new DeleteSubCommand().build())
                 .then(new ChangePriceSubCommand().build())
                 .then(new ChangeOwnerSubCommand().build());
