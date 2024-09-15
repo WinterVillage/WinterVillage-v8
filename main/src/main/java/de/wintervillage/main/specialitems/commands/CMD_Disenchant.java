@@ -23,6 +23,7 @@ public class CMD_Disenchant {
 
     public void register(Commands commands){
         final LiteralArgumentBuilder<CommandSourceStack> builder_disenchant = Commands.literal("disenchant")
+                .requires((source) -> source.getSender().hasPermission("wintervillage.command.disenchant"))
                 .executes((source) -> {
                     if(!(source.getSource().getExecutor() instanceof Player player)){
                         source.getSource().getSender().sendMessage(this.winterVillage.PREFIX + "Dieser Command ist nur durch einen Spieler ausführbar.");

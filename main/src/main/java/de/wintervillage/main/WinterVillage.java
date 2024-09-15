@@ -18,6 +18,7 @@ import de.wintervillage.main.antifreezle.AntiFreezle;
 import de.wintervillage.common.core.config.Document;
 import de.wintervillage.common.core.player.codec.PlayerCodecProvider;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
+import de.wintervillage.main.antifreezle.commands.CMD_AntiFreezle;
 import de.wintervillage.main.calendar.CalendarHandler;
 import de.wintervillage.main.calendar.codec.CalenderDayCodecProvider;
 import de.wintervillage.main.calendar.commands.CalendarCommand;
@@ -190,6 +191,9 @@ public final class WinterVillage extends JavaPlugin {
 
             //AdventCalendar
             new CalendarCommand(command);
+
+            //AntiFreezle
+            new CMD_AntiFreezle(command);
         });
 
         // translations

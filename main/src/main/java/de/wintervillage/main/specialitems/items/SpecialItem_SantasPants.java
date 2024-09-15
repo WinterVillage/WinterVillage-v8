@@ -4,6 +4,7 @@ import de.wintervillage.main.event.events.PlayerUpdateEvent;
 import de.wintervillage.main.specialitems.SpecialItem;
 import de.wintervillage.main.specialitems.SpecialItems;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

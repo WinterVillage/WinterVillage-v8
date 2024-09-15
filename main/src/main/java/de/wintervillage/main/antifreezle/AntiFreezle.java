@@ -3,6 +3,7 @@ package de.wintervillage.main.antifreezle;
 import com.google.inject.Inject;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.antifreezle.listener.ListenerAF_BlockBreakBuild;
+import de.wintervillage.main.antifreezle.listener.ListenerAF_EntityDamage;
 import de.wintervillage.main.antifreezle.listener.ListenerAF_InventoryClick;
 import de.wintervillage.main.antifreezle.listener.ListenerAF_PlayerQuit;
 import de.wintervillage.main.specialitems.utils.ItemUtils;
@@ -103,12 +104,19 @@ public class AntiFreezle {
 
         //Heart-Taker -> Damages the Player by 1 heart
         anti_tools.add(ItemUtils.createItemStack(Material.RED_DYE, 1, "§c§lHeart-Taker"));
+
+        //Anvil-Smash -> Traps the player in fences and drops an anvil on him/her
+        anti_tools.add(ItemUtils.createItemStack(Material.ANVIL, 1, "§c§lAnvil-Smash"));
+
+        //Rocket-Boost -> Boost the player high into the air
+        anti_tools.add(ItemUtils.createItemStack(Material.FIREWORK_ROCKET, 1, "§c§lRocket-Boost"));
     }
 
     private void register_listener(){
         new ListenerAF_BlockBreakBuild(this.winterVillage);
         new ListenerAF_PlayerQuit(this.winterVillage);
         new ListenerAF_InventoryClick(this.winterVillage);
+        new ListenerAF_EntityDamage(this.winterVillage);
     }
 
 }

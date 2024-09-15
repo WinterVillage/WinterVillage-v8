@@ -27,6 +27,7 @@ public class CMD_SpecialItem {
 
     public void register(Commands commands){
         LiteralArgumentBuilder<CommandSourceStack> builder_specialitem = Commands.literal("specialitem")
+                .requires((source) -> source.getSender().hasPermission("wintervillage.command.specialitem"))
                 .then(
                         Commands.argument("special_item", new Argument_SpecialItem(this.winterVillage))
                                 .executes((source) -> {
