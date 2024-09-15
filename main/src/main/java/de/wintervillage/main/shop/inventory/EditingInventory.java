@@ -2,10 +2,10 @@ package de.wintervillage.main.shop.inventory;
 
 import com.google.common.base.Preconditions;
 import de.wintervillage.main.WinterVillage;
+import de.wintervillage.main.shop.CustomGuiItem;
 import de.wintervillage.main.shop.Shop;
 import dev.triumphteam.gui.components.util.ItemNbt;
 import dev.triumphteam.gui.guis.Gui;
-import dev.triumphteam.gui.guis.GuiItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -95,7 +95,7 @@ public class EditingInventory {
             ItemStack itemStack = shop.item().clone();
             itemStack.setAmount(stackAmount);
 
-            this.gui.addItem(new GuiItem(itemStack));
+            this.gui.addItem(new CustomGuiItem(itemStack));
 
             amount -= stackAmount;
         }
