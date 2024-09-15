@@ -37,8 +37,6 @@ public class ShopHandler {
 
         new PlayerInteractEntityListener();
         new SignChangeListener();
-
-        // this.forceUpdate();
     }
 
     public Optional<Shop> raytrace(Player player) {
