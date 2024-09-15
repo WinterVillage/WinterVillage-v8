@@ -9,9 +9,11 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.math.RoundingMode;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -51,6 +53,8 @@ public class DeleteSubCommand {
                                         ));
 
                                         Bukkit.getScheduler().runTask(this.winterVillage, () -> {
+                                            this.drop(shop);
+
                                             shop.removeInformation();
                                             this.winterVillage.shopHandler.removeShop(shop);
                                         });
@@ -88,6 +92,8 @@ public class DeleteSubCommand {
                                 ));
 
                                 Bukkit.getScheduler().runTask(this.winterVillage, () -> {
+                                    this.drop(shop);
+
                                     shop.removeInformation();
                                     this.winterVillage.shopHandler.removeShop(shop);
                                 });
@@ -103,5 +109,14 @@ public class DeleteSubCommand {
                             });
                     return Command.SINGLE_SUCCESS;
                 });
+    }
+
+    private void drop(Shop shop) {
+        if (shop.item() == null || shop.item().getType() == Material.AIR) return;
+
+        int quantity = shop.amount().setScale(0, RoundingMode.DOWN).intValue();
+        for (int i = 0; i < quantity; i++) {
+            shop.location().getWorld().dropItemNaturally(shop.location(), shop.item());
+        }
     }
 }
