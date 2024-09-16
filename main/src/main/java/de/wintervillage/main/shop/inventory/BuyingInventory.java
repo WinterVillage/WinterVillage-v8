@@ -76,6 +76,11 @@ public class BuyingInventory {
                 return;
             }
 
+            // new buyingAmount can not be more than 64
+            if(this.buyingAmount + amount > 64){
+                amount = 64 - this.buyingAmount;
+            }
+
             // adjust amount
             this.incrementOrDecrement(amount);
         });
@@ -173,6 +178,8 @@ public class BuyingInventory {
                                             Component.translatable(this.shop.item().getType().getItemTranslationKey()),
                                             Component.text("" + this.shop.price().multiply(BigDecimal.valueOf(this.buyingAmount))))
                             ));
+
+                            player.playSound(Sound.sound(Key.key("entity.player.levelup"), Sound.Source.PLAYER, 1f, 1f));
                         });
                     })
                     .exceptionally(throwable -> {
@@ -182,11 +189,20 @@ public class BuyingInventory {
                                         Component.text(throwable.getMessage())
                                 )
                         ));
+
+                        this.gui.close(player);
+
                         return null;
                     });
 
-            this.gui.close(player);
+            //this.gui.close(player);
         }));
+
+        for(int i = 0; i < this.gui.getInventory().getSize(); i++){
+            if(this.gui.getInventory().getItem(i) == null || this.gui.getInventory().getItem(i).getType() == Material.AIR){
+                this.gui.setItem(i, new GuiItem(ItemBuilder.from(Material.BLACK_STAINED_GLASS_PANE).build()));
+            }
+        }
     }
 
     private boolean isFree(Inventory inventory, int requiredSpace) {
@@ -220,6 +236,9 @@ public class BuyingInventory {
                             Component.text("Klicke, um zu kaufen", NamedTextColor.GRAY)
                     ));
         });
+
+        this.buyItem.setAmount(this.buyingAmount);
+
         this.gui.updateItem(4, 5, this.buyItem);
         this.gui.update();
     }
