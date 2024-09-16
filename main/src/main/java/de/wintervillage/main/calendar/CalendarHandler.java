@@ -23,8 +23,8 @@ public class CalendarHandler {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.days = new ArrayList<>();
 
-        this.startDate = LocalDate.of(2024, Month.DECEMBER, 12);
-        this.endDate = LocalDate.of(2025, Month.JANUARY, 6); // TODO: set to project end date
+        this.startDate = LocalDate.of(2024, Month.DECEMBER, 1);
+        this.endDate = LocalDate.of(2025, Month.JANUARY, 6);
 
         this.forceUpdate();
     }
