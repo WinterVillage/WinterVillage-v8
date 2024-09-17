@@ -203,15 +203,23 @@ public class BuyingInventory {
     }
 
     private boolean isFree(Inventory inventory, int requiredSpace) {
-        int free = 0;
-        for (ItemStack itemStack : inventory.getStorageContents()) {
-            if (itemStack == null || itemStack.getType() == Material.AIR)
-                free++;
+        int freeSpace = 0;
 
-            if (free >= requiredSpace)
-                return true;
+        ItemStack itemStack = this.shop.item();
+        int maxStackSize = itemStack.getMaxStackSize();
+
+        for (ItemStack currentItem : inventory.getStorageContents()) {
+            if (currentItem == null || currentItem.getType() == Material.AIR)
+                freeSpace += maxStackSize;
+            else if (currentItem.isSimilar(itemStack)) {
+                int spaceInSlot = maxStackSize - currentItem.getAmount();
+                freeSpace += spaceInSlot;
+            }
+
+            if (freeSpace >= requiredSpace) return true;
         }
-        return free >= requiredSpace;
+
+        return freeSpace >= requiredSpace;
     }
 
     public void incrementOrDecrement(int amount) {
