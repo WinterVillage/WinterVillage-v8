@@ -3,6 +3,7 @@ package de.wintervillage.main.shop.inventory;
 import de.wintervillage.common.core.player.WinterVillagePlayer;
 import de.wintervillage.common.paper.item.ItemBuilder;
 import de.wintervillage.main.WinterVillage;
+import de.wintervillage.main.shop.CustomGuiItem;
 import de.wintervillage.main.shop.Shop;
 import de.wintervillage.main.shop.data.ShopStatistics;
 import dev.triumphteam.gui.guis.Gui;
@@ -198,11 +199,7 @@ public class BuyingInventory {
             //this.gui.close(player);
         }));
 
-        for(int i = 0; i < this.gui.getInventory().getSize(); i++){
-            if(this.gui.getInventory().getItem(i) == null || this.gui.getInventory().getItem(i).getType() == Material.AIR){
-                this.gui.setItem(i, new GuiItem(ItemBuilder.from(Material.BLACK_STAINED_GLASS_PANE).build()));
-            }
-        }
+        this.gui.getFiller().fill(new CustomGuiItem(ItemBuilder.from(Material.GRAY_STAINED_GLASS_PANE).build()));
     }
 
     private boolean isFree(Inventory inventory, int requiredSpace) {
