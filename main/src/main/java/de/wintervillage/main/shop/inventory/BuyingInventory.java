@@ -163,29 +163,29 @@ public class BuyingInventory {
             );
 
             CompletableFuture<Void> combined = CompletableFuture.allOf(buyerFuture, shopFuture/**, sellerFuture*/);
-            combined.thenAccept(_ -> {
-                        Bukkit.getScheduler().runTask(winterVillage, () -> {
-                            BigDecimal amount = this.shop.amount();
-                            amount = amount.subtract(BigDecimal.valueOf(this.buyingAmount));
+            combined.thenAccept(_ -> Bukkit.getScheduler().runTask(this.winterVillage, () -> {
+                        BigDecimal amount = this.shop.amount();
+                        amount = amount.subtract(BigDecimal.valueOf(this.buyingAmount));
 
-                            this.shop.statistics(statistics);
-                            this.shop.amount(amount);
-                            this.shop.updateInformation();
+                        this.shop.statistics(statistics);
+                        this.shop.amount(amount);
+                        this.shop.updateInformation();
 
-                            for (int i = 0; i < this.buyingAmount; i++)
-                                player.getInventory().addItem(this.shop.item());
+                        for (int i = 0; i < this.buyingAmount; i++)
+                            player.getInventory().addItem(this.shop.item());
 
-                            player.sendMessage(Component.join(
-                                    this.winterVillage.prefix,
-                                    Component.translatable("wintervillage.shop.item-bought",
-                                            Component.text(this.buyingAmount),
-                                            Component.translatable(this.shop.item().getType().getItemTranslationKey()),
-                                            Component.text("" + this.shop.price().multiply(BigDecimal.valueOf(this.buyingAmount))))
-                            ));
+                        player.sendMessage(Component.join(
+                                this.winterVillage.prefix,
+                                Component.translatable("wintervillage.shop.item-bought",
+                                        Component.text(this.buyingAmount),
+                                        Component.translatable(this.shop.item().getType().getItemTranslationKey()),
+                                        Component.text(this.winterVillage.formatBD(this.price(), true))
+                                )
+                        ));
 
-                            player.playSound(Sound.sound(Key.key("entity.player.levelup"), Sound.Source.PLAYER, 1f, 1f));
-                        });
-                    })
+                        player.playSound(Sound.sound(Key.key("entity.player.levelup"), Sound.Source.PLAYER, 1f, 1f));
+
+                    }))
                     .exceptionally(throwable -> {
                         player.sendMessage(Component.join(
                                 this.winterVillage.prefix,
