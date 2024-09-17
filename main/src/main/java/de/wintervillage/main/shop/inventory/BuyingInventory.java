@@ -187,10 +187,12 @@ public class BuyingInventory {
 
                     }))
                     .exceptionally(throwable -> {
+                        String errorMessage = throwable.getCause() != null ? throwable.getCause().getMessage() : throwable.getMessage();
+
                         player.sendMessage(Component.join(
                                 this.winterVillage.prefix,
                                 Component.translatable("wintervillage.shop.item-buy-failed",
-                                        Component.text(throwable.getMessage())
+                                        Component.text(errorMessage)
                                 )
                         ));
 
