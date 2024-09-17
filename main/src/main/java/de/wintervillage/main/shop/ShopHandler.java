@@ -14,10 +14,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.BiConsumer;
 
 public class ShopHandler {
 
@@ -73,22 +71,30 @@ public class ShopHandler {
                 .findFirst();
     }
 
-    public void forceUpdate() {
+    public void forceUpdate(BiConsumer<Boolean, String> feedback) {
         this.winterVillage.shopDatabase.find()
                 .thenAccept(shops -> {
-                    this.shops.clear();
-                    this.shops.addAll(shops);
+                    Bukkit.getScheduler().runTask(this.winterVillage, () -> {
+                        if (!this.shops.isEmpty()) this.clearShops();
+                        this.loadShops(shops);
+                    });
 
-                    Bukkit.getScheduler().runTask(this.winterVillage, () -> shops.forEach(Shop::setupInformation));
+                    feedback.accept(true, "Shops loaded successfully.");
                 })
-                .exceptionally(t -> {
-                    this.winterVillage.getLogger().warning("Could not load shops: " + t.getMessage());
+                .exceptionally(throwable -> {
+                    feedback.accept(false, throwable.getMessage());
                     return null;
                 });
     }
 
-    public void terminate() {
+    public synchronized void clearShops() {
         this.shops.forEach(Shop::removeInformation);
+        this.shops.clear();
+    }
+
+    public synchronized void loadShops(Collection<Shop> shops) {
+        this.shops.addAll(shops);
+        shops.forEach(Shop::setupInformation);
     }
 
     public void addShop(Shop shop) {

@@ -228,7 +228,7 @@ public final class WinterVillage extends JavaPlugin {
 
         if (this.mongoClient != null) this.mongoClient.close();
         if (this.playerHandler != null) this.playerHandler.terminate();
-        if (this.shopHandler != null) this.shopHandler.terminate();
+        if (this.shopHandler != null) this.shopHandler.clearShops();
 
         this.eventManager.stop();
     }

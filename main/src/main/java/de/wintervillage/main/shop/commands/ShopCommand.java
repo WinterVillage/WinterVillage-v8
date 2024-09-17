@@ -13,6 +13,7 @@ import java.util.List;
 public class ShopCommand {
 
     /**
+     * /shop refresh                            | Reloads all shops into memory
      * /shop listAll                            | Lists all shops
      * /shop info (uniqueId)                    | Shows information about a shop
      * /shop delete (uniqueId)                  | Deletes a shop
@@ -25,6 +26,7 @@ public class ShopCommand {
 
         final LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("shop")
                 .requires((source) -> source.getSender() instanceof Player)
+                .then(new RefreshSubCommand().build())
                 .then(new ListAllSubCommand().build())
                 .then(new InfoSubCommand().build())
                 .then(new DeleteSubCommand().build())
