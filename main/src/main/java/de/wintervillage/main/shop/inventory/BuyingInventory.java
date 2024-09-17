@@ -57,33 +57,32 @@ public class BuyingInventory {
             PersistentDataContainer container = itemStack.getItemMeta().getPersistentDataContainer();
             if (!container.has(this.winterVillage.shopHandler.amountKey, PersistentDataType.INTEGER)) return;
 
-            int amount = container.get(this.winterVillage.shopHandler.amountKey, PersistentDataType.INTEGER);
+            int amountToChange = container.get(this.winterVillage.shopHandler.amountKey, PersistentDataType.INTEGER);
 
             // new buyingAmount can not be less than 1, or the inventory does not have enough space
-            if (this.buyingAmount + amount < 1
-                    || !this.isFree(player.getInventory(), this.buyingAmount + amount)) {
+            if (!this.isFree(player.getInventory(), this.buyingAmount + amountToChange)) {
                 player.playSound(Sound.sound(Key.key("entity.pillager.ambient"), Sound.Source.HOSTILE, 2f, 0.6f));
                 return;
             }
 
-            // check if shop has enough items
-            BigDecimal requestedAmount = BigDecimal.valueOf(this.buyingAmount + amount);
+            BigDecimal requestedAmount = BigDecimal.valueOf(this.buyingAmount + amountToChange);
+
+            // if requestedAmount > shop.amount(), then requestedAmount = shop.amount()
             if (requestedAmount.compareTo(this.shop.amount()) > 0) {
                 player.playSound(Sound.sound(Key.key("entity.pillager.ambient"), Sound.Source.HOSTILE, 2f, 0.6f));
-                player.sendMessage(Component.join(
-                        this.winterVillage.prefix,
-                        Component.translatable("wintervillage.shop.shop-is-empty")
-                ));
-                return;
+                requestedAmount = this.shop.amount();
             }
 
-            // new buyingAmount can not be more than 64
-            if(this.buyingAmount + amount > 64){
-                amount = 64 - this.buyingAmount;
+            // if requestedAmount < 1, then requestedAmount = 1
+            if (requestedAmount.compareTo(BigDecimal.ZERO) < 0) {
+                player.playSound(Sound.sound(Key.key("entity.pillager.ambient"), Sound.Source.HOSTILE, 2f, 0.6f));
+                requestedAmount = BigDecimal.ONE;
             }
+
+            // TODO: limit = 64 ?
 
             // adjust amount
-            this.incrementOrDecrement(amount);
+            this.incrementOrDecrement(requestedAmount.intValue());
         });
 
         // -
