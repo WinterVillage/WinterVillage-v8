@@ -116,11 +116,11 @@ public class BuyingInventory {
                                 .append(Component.text(this.buyingAmount, NamedTextColor.GREEN))
                                 .append(Component.text("x ", NamedTextColor.WHITE)),
                         Component.text("Preis pro Item: ", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
-                                .append(Component.text("" + shop.price(), NamedTextColor.YELLOW)),
+                                .append(Component.text(this.winterVillage.formatBD(this.shop.price(), true) + " $", NamedTextColor.YELLOW)),
                         Component.empty(),
                         Component.text("-----------------", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false),
                         Component.text("Du bezahlst: ", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
-                                .append(Component.text("" + shop.price().multiply(BigDecimal.valueOf(this.buyingAmount)), NamedTextColor.YELLOW)),
+                                .append(Component.text(this.winterVillage.formatBD(this.price(), true) + " $", NamedTextColor.YELLOW)),
                         Component.empty(),
                         Component.text("Klicke, um zu kaufen", NamedTextColor.GRAY)
                 )
@@ -128,7 +128,6 @@ public class BuyingInventory {
 
         this.gui.setItem(4, 5, new GuiItem(this.buyItem, event -> {
             Player player = (Player) event.getWhoClicked();
-            BigDecimal finalPrice = this.shop.price().multiply(BigDecimal.valueOf(this.buyingAmount));
 
             if (!this.isFree(player.getInventory(), this.buyingAmount)) {
                 player.playSound(Sound.sound(Key.key("entity.pillager.ambient"), Sound.Source.HOSTILE, 2f, 0.6f));
@@ -136,7 +135,7 @@ public class BuyingInventory {
             }
 
             ShopStatistics statistics = new ShopStatistics();
-            statistics.earned(shop.statistics().earned().add(finalPrice));
+            statistics.earned(shop.statistics().earned().add(this.price()));
             statistics.sold(shop.statistics().sold().add(BigDecimal.valueOf(this.buyingAmount)));
 
             CompletableFuture<Shop> shopFuture = this.winterVillage.shopDatabase.modify(
@@ -153,14 +152,14 @@ public class BuyingInventory {
                     player.getUniqueId(),
                     builder -> {
                         BigDecimal money = builder.money();
-                        if (money.compareTo(finalPrice) < 0) throw new IllegalArgumentException("Not enough money");
+                        if (money.compareTo(this.price()) < 0) throw new IllegalArgumentException("Not enough money");
 
-                        builder.money(money.subtract(finalPrice));
+                        builder.money(money.subtract(this.price()));
                     }
             );
             CompletableFuture<WinterVillagePlayer> sellerFuture = this.winterVillage.playerDatabase.modify(
                     this.shop.owner(),
-                    builder -> builder.money(builder.money().add(finalPrice))
+                    builder -> builder.money(builder.money().add(this.price()))
             );
 
             CompletableFuture<Void> combined = CompletableFuture.allOf(buyerFuture, shopFuture/**, sellerFuture*/);
@@ -203,6 +202,10 @@ public class BuyingInventory {
         this.gui.getFiller().fill(new CustomGuiItem(ItemBuilder.from(Material.GRAY_STAINED_GLASS_PANE).build()));
     }
 
+    private BigDecimal price() {
+        return this.shop.price().multiply(BigDecimal.valueOf(this.buyingAmount));
+    }
+
     private boolean isFree(Inventory inventory, int requiredSpace) {
         int freeSpace = 0;
 
@@ -223,21 +226,21 @@ public class BuyingInventory {
         return freeSpace >= requiredSpace;
     }
 
-    public void incrementOrDecrement(int amount) {
-        this.buyingAmount += amount;
+    private void incrementOrDecrement(int amount) {
+        this.buyingAmount = amount;
 
-        this.buyItem.editMeta(lore -> {
-            lore.lore(
+        this.buyItem.editMeta(meta -> {
+            meta.lore(
                     List.of(
                             Component.text("Du kaufst gerade ", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
                                     .append(Component.text(this.buyingAmount, NamedTextColor.GREEN))
                                     .append(Component.text("x ", NamedTextColor.WHITE)),
                             Component.text("Preis pro Item: ", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
-                                    .append(Component.text("" + shop.price(), NamedTextColor.YELLOW)),
+                                    .append(Component.text(this.winterVillage.formatBD(this.shop.price(), true) + " $", NamedTextColor.YELLOW)),
                             Component.empty(),
                             Component.text("-----------------", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false),
                             Component.text("Du bezahlst: ", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
-                                    .append(Component.text("" + shop.price().multiply(BigDecimal.valueOf(this.buyingAmount)), NamedTextColor.YELLOW)),
+                                    .append(Component.text(this.winterVillage.formatBD(this.price(), true) + " $", NamedTextColor.YELLOW)),
                             Component.empty(),
                             Component.text("Klicke, um zu kaufen", NamedTextColor.GRAY)
                     ));
