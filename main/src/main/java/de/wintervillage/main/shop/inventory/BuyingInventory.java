@@ -130,6 +130,11 @@ public class BuyingInventory {
             Player player = (Player) event.getWhoClicked();
             BigDecimal finalPrice = this.shop.price().multiply(BigDecimal.valueOf(this.buyingAmount));
 
+            if (!this.isFree(player.getInventory(), this.buyingAmount)) {
+                player.playSound(Sound.sound(Key.key("entity.pillager.ambient"), Sound.Source.HOSTILE, 2f, 0.6f));
+                return;
+            }
+
             ShopStatistics statistics = new ShopStatistics();
             statistics.earned(shop.statistics().earned().add(finalPrice));
             statistics.sold(shop.statistics().sold().add(BigDecimal.valueOf(this.buyingAmount)));
