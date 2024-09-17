@@ -196,11 +196,8 @@ public class BuyingInventory {
                         ));
 
                         this.gui.close(player);
-
                         return null;
                     });
-
-            //this.gui.close(player);
         }));
 
         this.gui.getFiller().fill(new CustomGuiItem(ItemBuilder.from(Material.GRAY_STAINED_GLASS_PANE).build()));
