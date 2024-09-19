@@ -34,7 +34,7 @@ public class BuyingInventory {
 
     private final Gui gui;
 
-    private final ItemStack confirmItem;
+    private final ItemStack showcaseItem, confirmItem;
 
     private int buyingAmount = 1;
 
@@ -47,6 +47,10 @@ public class BuyingInventory {
                 .disableAllInteractions()
                 .title(Component.text(shop.name(), NamedTextColor.BLUE).decorate(TextDecoration.BOLD))
                 .create();
+
+        this.showcaseItem = ItemBuilder.from(shop.item())
+                .amount(this.buyingAmount)
+                .build();
 
         this.gui.setDefaultClickAction(event -> {
             Player player = (Player) event.getWhoClicked();
@@ -96,7 +100,7 @@ public class BuyingInventory {
                 .build()));
 
         // showcase
-        this.gui.setItem(2, 5, new GuiItem(ItemBuilder.from(shop.item()).build()));
+        this.gui.setItem(2, 5, new GuiItem(this.showcaseItem));
 
         // +
         this.gui.setItem(2, 7, new GuiItem(ItemBuilder.from(Material.GREEN_STAINED_GLASS_PANE)
@@ -248,7 +252,9 @@ public class BuyingInventory {
                     ));
         });
 
-        this.buyItem.setAmount(this.buyingAmount);
+        // update showcase amount
+        this.showcaseItem.setAmount(this.buyingAmount);
+        this.gui.updateItem(2, 5, this.showcaseItem);
 
         this.gui.updateItem(4, 5, this.confirmItem);
         this.gui.update();
