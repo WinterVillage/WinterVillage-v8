@@ -12,6 +12,7 @@ import de.wintervillage.main.calendar.database.CalendarDatabase;
 import de.wintervillage.main.event.EventManager;
 import de.wintervillage.main.plot.PlotHandler;
 import de.wintervillage.main.plot.database.PlotDatabase;
+import de.wintervillage.main.scoreboard.ScoreboardHandler;
 import de.wintervillage.main.shop.ShopHandler;
 import de.wintervillage.main.shop.database.ShopDatabase;
 import de.wintervillage.main.specialitems.SpecialItems;
@@ -48,6 +49,7 @@ public class WinterVillageModule extends AbstractModule {
         this.bind(ShopHandler.class).in(Singleton.class);
         this.bind(SpecialItems.class).in(Singleton.class);
         this.bind(EventManager.class).in(Singleton.class);
+        this.bind(ScoreboardHandler.class).in(Singleton.class);
     }
 
     @Provides

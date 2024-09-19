@@ -88,7 +88,8 @@ public class ChangeOwnerSubCommand {
                                                                 MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + combined.owner().getUsername())
                                                         )
                                                 ));
-                                                this.winterVillage.shopHandler.forceUpdate();
+
+                                                shop.owner(updatedShop.get().shop().owner());
                                             })
                                     )
                                     .exceptionally(throwable -> {
