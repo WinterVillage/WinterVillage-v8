@@ -175,9 +175,7 @@ public class BuyingInventory {
                         this.shop.amount(amount);
                         this.shop.updateInformation();
 
-                        for (int i = 0; i < this.buyingAmount; i++)
-                            player.getInventory().addItem(this.shop.item());
-
+                        player.getInventory().addItem(this.showcaseItem);
                         player.sendMessage(Component.join(
                                 this.winterVillage.prefix,
                                 Component.translatable("wintervillage.shop.item-bought",
