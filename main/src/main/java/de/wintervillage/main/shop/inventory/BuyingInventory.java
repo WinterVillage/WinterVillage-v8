@@ -34,7 +34,7 @@ public class BuyingInventory {
 
     private final Gui gui;
 
-    private final ItemStack buyItem;
+    private final ItemStack confirmItem;
 
     private int buyingAmount = 1;
 
@@ -109,7 +109,7 @@ public class BuyingInventory {
                 .build()));
 
         // buy
-        this.buyItem = ItemBuilder.from(Material.KNOWLEDGE_BOOK)
+        this.confirmItem = ItemBuilder.from(Material.KNOWLEDGE_BOOK)
                 .name(Component.text("Kaufen", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false))
                 .lore(
                         Component.text("Du kaufst gerade ", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
@@ -126,7 +126,7 @@ public class BuyingInventory {
                 )
                 .build();
 
-        this.gui.setItem(4, 5, new GuiItem(this.buyItem, event -> {
+        this.gui.setItem(4, 5, new GuiItem(this.confirmItem, event -> {
             Player player = (Player) event.getWhoClicked();
 
             if (!this.isFree(player.getInventory(), this.buyingAmount)) {
@@ -231,7 +231,7 @@ public class BuyingInventory {
     private void incrementOrDecrement(int amount) {
         this.buyingAmount = amount;
 
-        this.buyItem.editMeta(meta -> {
+        this.confirmItem.editMeta(meta -> {
             meta.lore(
                     List.of(
                             Component.text("Du kaufst gerade ", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
@@ -250,7 +250,7 @@ public class BuyingInventory {
 
         this.buyItem.setAmount(this.buyingAmount);
 
-        this.gui.updateItem(4, 5, this.buyItem);
+        this.gui.updateItem(4, 5, this.confirmItem);
         this.gui.update();
     }
 
