@@ -1,30 +1,32 @@
-package de.wintervillage.proxy.player;
+package de.wintervillage.proxy.listener;
 
 import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
-import de.wintervillage.common.core.database.exception.EntryNotFoundException;
 import de.wintervillage.common.core.player.WinterVillagePlayer;
-import de.wintervillage.common.core.player.combined.CombinedPlayer;
-import de.wintervillage.common.core.player.impl.WinterVillagePlayerImpl;
 import de.wintervillage.proxy.WinterVillage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
 
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class PreLoginListener {
 
     private final WinterVillage plugin;
 
+    private final LuckPerms luckPerms;
+
     public PreLoginListener(WinterVillage plugin) {
         this.plugin = plugin;
+
+        this.luckPerms = LuckPermsProvider.get();
     }
 
     @Subscribe(order = PostOrder.LAST)
@@ -32,19 +34,7 @@ public class PreLoginListener {
         return EventTask.withContinuation(continuation -> {
             final UUID uniqueId = event.getUniqueId();
 
-            // load User (LuckPerms) and WinterVillagePlayer and combine them
-            CompletableFuture<User> userFuture = this.plugin.luckPerms.getUserManager().loadUser(uniqueId);
-            CompletableFuture<WinterVillagePlayer> playerFuture = this.plugin.playerDatabase.player(uniqueId)
-                    .exceptionally(throwable -> {
-                        if (throwable instanceof EntryNotFoundException) {
-                            WinterVillagePlayer player = new WinterVillagePlayerImpl(uniqueId);
-                            this.plugin.playerDatabase.insert(player);
-                            return player;
-                        }
-                        throw new RuntimeException(throwable);
-                    });
-
-            userFuture.thenCombine(playerFuture, CombinedPlayer::new)
+            this.plugin.playerHandler.combinedPlayer(uniqueId, null)
                     .thenAccept(combinedResult -> {
                         final User user = combinedResult.user();
                         final WinterVillagePlayer player = combinedResult.winterVillagePlayer();
@@ -52,7 +42,7 @@ public class PreLoginListener {
                         Collection<Group> groups = user.getInheritedGroups(user.getQueryOptions());
                         Group highestGroup = groups.stream()
                                 .max(Comparator.comparingInt(group -> group.getWeight().orElse(0)))
-                                .orElse(this.plugin.luckPerms.getGroupManager().getGroup("default"));
+                                .orElse(this.luckPerms.getGroupManager().getGroup("default"));
 
                         // Cancelled
                         // | If the player has an active banInformation and is not able to bypass it
@@ -93,8 +83,7 @@ public class PreLoginListener {
                         event.setResult(PreLoginEvent.PreLoginComponentResult.allowed());
                         continuation.resume();
                     });
-
-            // cloudnet checks maintenance permission afterward
         });
+        // cloudnet checks maintenance permission afterward
     }
 }

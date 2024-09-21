@@ -1,20 +1,16 @@
-package de.wintervillage.proxy.player;
+package de.wintervillage.proxy.listener;
 
 import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
-import de.wintervillage.common.core.database.exception.EntryNotFoundException;
 import de.wintervillage.common.core.player.WinterVillagePlayer;
-import de.wintervillage.common.core.player.combined.CombinedPlayer;
-import de.wintervillage.common.core.player.impl.WinterVillagePlayerImpl;
 import de.wintervillage.proxy.WinterVillage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.model.user.User;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class PlayerChatListener {
 
@@ -29,19 +25,7 @@ public class PlayerChatListener {
         return EventTask.withContinuation(continuation -> {
             final UUID uniqueId = event.getPlayer().getUniqueId();
 
-            // load User (LuckPerms) and WinterVillagePlayer and combine them
-            CompletableFuture<User> userFuture = this.plugin.luckPerms.getUserManager().loadUser(uniqueId);
-            CompletableFuture<WinterVillagePlayer> playerFuture = this.plugin.playerDatabase.player(uniqueId)
-                    .exceptionally(throwable -> {
-                        if (throwable instanceof EntryNotFoundException) {
-                            WinterVillagePlayer player = new WinterVillagePlayerImpl(uniqueId);
-                            this.plugin.playerDatabase.insert(player);
-                            return player;
-                        }
-                        throw new RuntimeException(throwable);
-                    });
-
-            userFuture.thenCombine(playerFuture, CombinedPlayer::new)
+            this.plugin.playerHandler.combinedPlayer(uniqueId, null)
                     .thenAccept(combinedResult -> {
                         final User user = combinedResult.user();
                         final WinterVillagePlayer winterVillagePlayer = combinedResult.winterVillagePlayer();

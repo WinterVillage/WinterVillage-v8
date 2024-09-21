@@ -18,10 +18,9 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import de.wintervillage.common.core.config.Document;
 import de.wintervillage.common.core.player.codec.PlayerCodecProvider;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
-import de.wintervillage.proxy.player.PlayerChatListener;
-import de.wintervillage.proxy.player.PreLoginListener;
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.LuckPermsProvider;
+import de.wintervillage.proxy.listener.PlayerChatListener;
+import de.wintervillage.proxy.listener.PreLoginListener;
+import de.wintervillage.proxy.player.PlayerHandler;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.slf4j.Logger;
@@ -48,8 +47,7 @@ public final class WinterVillage {
     private final Path dataDirectory;
 
     public PlayerDatabase playerDatabase;
-
-    public LuckPerms luckPerms;
+    public PlayerHandler playerHandler;
 
     // configs
     public Document databaseDocument;
@@ -72,9 +70,11 @@ public final class WinterVillage {
     public void onProxyInitialization(final ProxyInitializeEvent event) {
         this.luckpermsSupport();
 
-        Injector injector = Guice.createInjector(new WinterVillageModule(this.mongoDatabase));
+        Injector injector = Guice.createInjector(new WinterVillageModule(this, this.mongoDatabase));
         this.playerDatabase = injector.getInstance(PlayerDatabase.class);
+        this.playerHandler = injector.getInstance(PlayerHandler.class);
 
+        // listener
         this.proxyServer.getEventManager().register(this, new PlayerChatListener(this));
         this.proxyServer.getEventManager().register(this, new PreLoginListener(this));
     }
@@ -131,7 +131,7 @@ public final class WinterVillage {
         if (!this.proxyServer.getPluginManager().getPlugin("luckperms").isPresent()) return;
 
         try {
-            this.luckPerms = LuckPermsProvider.get();
+
         } catch (Exception e) {
             this.logger.error("Failed to load LuckPerms service", e);
         }
