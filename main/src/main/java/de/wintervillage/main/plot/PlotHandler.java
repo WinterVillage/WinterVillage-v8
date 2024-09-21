@@ -96,6 +96,7 @@ public class PlotHandler {
         new PlayerInteractAtEntityListener(); // the client may send PlayerInteractEntityEvent in addition, thanks mojang
         new PlayerInteractEntityListener();
         new PlayerQuitListener();
+        new PlayerTNTListener();
 
         // setup
         new de.wintervillage.main.plot.listener.setup.PlayerInteractListener();
