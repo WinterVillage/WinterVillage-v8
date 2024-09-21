@@ -18,9 +18,17 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import de.wintervillage.common.core.config.Document;
 import de.wintervillage.common.core.player.codec.PlayerCodecProvider;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
+import de.wintervillage.common.core.translation.MiniMessageTranslator;
+import de.wintervillage.proxy.commands.punish.PunishCommand;
 import de.wintervillage.proxy.listener.PlayerChatListener;
 import de.wintervillage.proxy.listener.PreLoginListener;
 import de.wintervillage.proxy.player.PlayerHandler;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.translation.GlobalTranslator;
+import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.slf4j.Logger;
@@ -29,6 +37,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
 @Plugin(
@@ -56,6 +66,14 @@ public final class WinterVillage {
     public MongoClient mongoClient;
     public MongoDatabase mongoDatabase;
 
+    /**
+     * Usage: {@link Component#join(JoinConfiguration.Builder, ComponentLike...)} to send a message with prefix
+     */
+    public final JoinConfiguration prefix = JoinConfiguration.builder()
+            .prefix(Component.translatable("wintervillage.prefix"))
+            .separator(Component.empty())
+            .build();
+
     @Inject
     public WinterVillage(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory) {
         this.proxyServer = proxyServer;
@@ -77,6 +95,18 @@ public final class WinterVillage {
         // listener
         this.proxyServer.getEventManager().register(this, new PlayerChatListener(this));
         this.proxyServer.getEventManager().register(this, new PreLoginListener(this));
+
+        // translations
+        MiniMessageTranslator translator = new MiniMessageTranslator(Key.key("wintervillage", "translations"));
+
+        ResourceBundle bundleGerman = ResourceBundle.getBundle("Bundle", Locale.GERMANY, UTF8ResourceBundleControl.get());
+        ResourceBundle bundleEnglish = ResourceBundle.getBundle("Bundle", Locale.US, UTF8ResourceBundleControl.get());
+
+        translator.registerAll(Locale.US, bundleEnglish, true);
+        translator.registerAll(Locale.GERMANY, bundleGerman, true);
+        translator.defaultLocale(Locale.GERMANY);
+
+        GlobalTranslator.translator().addSource(translator);
     }
 
     private void resolveConfig() {
