@@ -9,6 +9,9 @@ import com.mongodb.ServerAddress;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
+import com.velocitypowered.api.command.BrigadierCommand;
+import com.velocitypowered.api.command.CommandManager;
+import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Dependency;
@@ -47,7 +50,8 @@ import java.util.concurrent.TimeUnit;
         version = "8-SNAPSHOT",
         authors = {"Voldechse"},
         dependencies = {
-                @Dependency(id = "luckperms", optional = false)
+                @Dependency(id = "luckperms", optional = false),
+                @Dependency(id = "cloudnet-bridge", optional = false)
         }
 )
 public final class WinterVillage {
@@ -95,6 +99,15 @@ public final class WinterVillage {
         // listener
         this.proxyServer.getEventManager().register(this, new PlayerChatListener(this));
         this.proxyServer.getEventManager().register(this, new PreLoginListener(this));
+
+        // commands
+        CommandManager commandManager = this.proxyServer.getCommandManager();
+        CommandMeta punishMeta = commandManager.metaBuilder("punish")
+                .plugin(this)
+                .build();
+
+        BrigadierCommand punishCommand = new PunishCommand(this).create();
+        commandManager.register(punishMeta, punishCommand);
 
         // translations
         MiniMessageTranslator translator = new MiniMessageTranslator(Key.key("wintervillage", "translations"));
