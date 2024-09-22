@@ -40,7 +40,7 @@ public class KickSubCommand {
                             this.playerManager.onlinePlayers().names().forEach(builder::suggest);
                             return builder.buildFuture();
                         })
-                        .then(BrigadierCommand.requiredArgumentBuilder("reason", StringArgumentType.string())
+                        .then(BrigadierCommand.requiredArgumentBuilder("reason", StringArgumentType.greedyString())
                                 .executes(context -> {
                                     String reason = context.getArgument("reason", String.class);
                                     this.handle(context, reason);
@@ -70,8 +70,7 @@ public class KickSubCommand {
                     if (context.getSource() instanceof Player player) {
                         return this.winterVillage.playerHandler.combinedPlayer(player.getUniqueId(), player.getUsername())
                                 .thenApply(punisher -> new PlayerPair(punishedPlayer, punisher));
-                    } else
-                        return CompletableFuture.completedFuture(new PlayerPair(punishedPlayer, null));
+                    } else return CompletableFuture.completedFuture(new PlayerPair(punishedPlayer, null));
                 })
                 .thenAccept(playerPair -> {
                     if (!this.isPunishable(context.getSource(), playerPair, playerName)) return;
