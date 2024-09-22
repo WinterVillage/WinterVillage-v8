@@ -1,61 +1,64 @@
 package de.wintervillage.common.core.player.data;
 
 import org.bson.Document;
-import org.jetbrains.annotations.Nullable;
+import org.bson.types.Binary;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Date;
 import java.util.UUID;
+
+import static de.wintervillage.common.core.database.UUIDConverter.fromBytes;
+import static de.wintervillage.common.core.database.UUIDConverter.toBinary;
 
 public class MuteInformation {
 
-    private @Nullable UUID from;
+    private @NotNull UUID from;
     private String reason;
-    private Date created, expiring;
+    private long created, expiring;
 
     public MuteInformation() { }
 
-    public MuteInformation(@Nullable UUID from, String reason, Date created, Date expiring) {
+    public MuteInformation(@NotNull UUID from, String reason, long created, long expiring) {
         this.from = from;
         this.reason = reason;
         this.created = created;
         this.expiring = expiring;
     }
 
-    public @Nullable UUID from() {
-        return from;
+    public @NotNull UUID from() {
+        return this.from;
     }
 
-    public void from(@Nullable UUID from) {
+    public void from(@NotNull UUID from) {
         this.from = from;
     }
 
     public String reason() {
-        return reason;
+        return this.reason;
     }
 
     public void reason(String reason) {
         this.reason = reason;
     }
 
-    public Date created() {
-        return created;
+    public long created() {
+        return this.created;
     }
 
-    public void created(Date created) {
+    public void created(long created) {
         this.created = created;
     }
 
-    public Date expiring() {
-        return expiring;
+    public long expiring() {
+        return this.expiring;
     }
 
-    public void expiring(Date expiring) {
+    public void expiring(long expiring) {
         this.expiring = expiring;
     }
 
     public Document toDocument() {
         return new Document()
-                .append("from", this.from().toString())
+                .append("from", toBinary(this.from))
                 .append("reason", this.reason())
                 .append("created", this.created())
                 .append("expiring", this.expiring());
@@ -63,10 +66,10 @@ public class MuteInformation {
 
     public static MuteInformation fromDocument(Document document) {
         return new MuteInformation(
-                UUID.fromString(document.getString("from")),
+                fromBytes(document.get("from", Binary.class).getData()),
                 document.getString("reason"),
-                document.getDate("created"),
-                document.getDate("expiring")
+                document.getLong("created"),
+                document.getLong("expiring")
         );
     }
 

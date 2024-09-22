@@ -1,18 +1,21 @@
 package de.wintervillage.common.core.player.data;
 
 import org.bson.Document;
+import org.bson.types.Binary;
 
-import java.util.Date;
 import java.util.UUID;
+
+import static de.wintervillage.common.core.database.UUIDConverter.fromBytes;
+import static de.wintervillage.common.core.database.UUIDConverter.toBinary;
 
 public class WhitelistInformation {
 
     private UUID from;
-    private Date whitelisted;
+    private long whitelisted;
 
     public WhitelistInformation() { }
 
-    public WhitelistInformation(UUID from, Date whitelisted) {
+    public WhitelistInformation(UUID from, long whitelisted) {
         this.from = from;
         this.whitelisted = whitelisted;
     }
@@ -25,23 +28,23 @@ public class WhitelistInformation {
         this.from = from;
     }
 
-    public Date whitelisted() {
+    public long whitelisted() {
         return this.whitelisted;
     }
 
-    public void whitelisted(Date whitelisted) {
+    public void whitelisted(long whitelisted) {
         this.whitelisted = whitelisted;
     }
 
     public Document toDocument() {
-        return new Document("from", this.from().toString())
+        return new Document("from", toBinary(this.from))
                 .append("whitelisted", this.whitelisted());
     }
 
     public static WhitelistInformation fromDocument(Document document) {
         return new WhitelistInformation(
-                UUID.fromString(document.getString("from")),
-                document.getDate("whitelisted")
+                fromBytes(document.get("from", Binary.class).getData()),
+                document.getLong("whitelisted")
         );
     }
 
