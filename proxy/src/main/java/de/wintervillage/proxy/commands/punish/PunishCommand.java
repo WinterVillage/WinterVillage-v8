@@ -6,6 +6,7 @@ import com.velocitypowered.api.command.CommandSource;
 import de.wintervillage.proxy.WinterVillage;
 import de.wintervillage.proxy.commands.punish.sub.BanSubCommand;
 import de.wintervillage.proxy.commands.punish.sub.KickSubCommand;
+import de.wintervillage.proxy.commands.punish.sub.MuteSubCommand;
 
 public class PunishCommand {
 
@@ -28,6 +29,7 @@ public class PunishCommand {
                 .requires(source -> source.hasPermission("wintervillage.proxy.command.punish"))
                 .then(BrigadierCommand.literalArgumentBuilder("ban").redirect(new BanSubCommand(this.winterVillage).create()))
                 .then(BrigadierCommand.literalArgumentBuilder("kick").redirect(new KickSubCommand(this.winterVillage).create()))
+                .then(BrigadierCommand.literalArgumentBuilder("mute").redirect(new MuteSubCommand(this.winterVillage).create()))
                 .build();
         return new BrigadierCommand(node);
     }
