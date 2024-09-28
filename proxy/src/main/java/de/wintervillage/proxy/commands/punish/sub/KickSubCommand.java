@@ -55,7 +55,7 @@ public class KickSubCommand {
     }
 
     private void kick(CombinedPlayer punished, String reason) {
-        if (reason == null)
+        if (reason == null || reason.isEmpty())
             this.playerManager.playerExecutor(punished.user().getUniqueId()).kick(Component.translatable("wintervillage.punish.kicked.no-reason"));
         else
             this.playerManager.playerExecutor(punished.user().getUniqueId()).kick(Component.translatable("wintervillage.punish.kicked.reason", Component.text(reason)));
