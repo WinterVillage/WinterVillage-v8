@@ -19,7 +19,7 @@ public class PlayerChatListener {
         this.plugin = plugin;
     }
 
-    @Subscribe(order = PostOrder.LAST)
+    @Subscribe(order = PostOrder.CUSTOM, priority = Short.MAX_VALUE)
     public EventTask execute(PlayerChatEvent event) {
         return EventTask.withContinuation(continuation -> {
             final UUID uniqueId = event.getPlayer().getUniqueId();
