@@ -24,7 +24,7 @@ public class PlayerChatListener {
         return EventTask.withContinuation(continuation -> {
             final UUID uniqueId = event.getPlayer().getUniqueId();
 
-            this.plugin.playerHandler.combinedPlayer(uniqueId, null)
+            this.plugin.playerHandler.combinedPlayer(uniqueId, event.getPlayer().getUsername())
                     .thenAccept(combinedResult -> {
                         final User user = combinedResult.user();
                         final WinterVillagePlayer winterVillagePlayer = combinedResult.winterVillagePlayer();
@@ -40,7 +40,7 @@ public class PlayerChatListener {
                             return;
                         }
 
-                        // TODO: pass through messages in "event" server, sync messages
+                        // TODO: sync?
                         event.setResult(PlayerChatEvent.ChatResult.allowed());
                         continuation.resume();
                     });
