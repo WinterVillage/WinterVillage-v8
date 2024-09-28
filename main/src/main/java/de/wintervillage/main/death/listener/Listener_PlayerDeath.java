@@ -37,6 +37,12 @@ public class Listener_PlayerDeath implements Listener {
             event.deathMessage(this.winterVillage.PREFIX.append(MiniMessage.miniMessage().deserialize("Der Spieler <color:red>" + PlainTextComponentSerializer.plainText().serialize(player.displayName()) + "<color:white> ist gestorben.")).decoration(TextDecoration.ITALIC, false));
         }
 
+        this.winterVillage.playerDatabase.modify(player.getUniqueId(), builder -> builder.deaths(builder.deaths() + 1))
+                .exceptionally(throwable -> {
+                    this.winterVillage.getLogger().warning("Could not update deaths for player " + player.getName() + " (" + player.getUniqueId() + ")");
+                    return null;
+                });
+
         Block block_chest = player.getLocation().getBlock();
         block_chest.setType(Material.CHEST);
 
