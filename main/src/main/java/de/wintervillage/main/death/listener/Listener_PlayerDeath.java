@@ -10,24 +10,24 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class Listener_PlayerDeath implements Listener {
 
-    private WinterVillage winterVillage;
+    private final WinterVillage winterVillage;
 
     public Listener_PlayerDeath(WinterVillage winterVillage){
         this.winterVillage = winterVillage;
         this.winterVillage.getServer().getPluginManager().registerEvents(this, this.winterVillage);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDeath(PlayerDeathEvent event){
         Player player = event.getPlayer();
 
