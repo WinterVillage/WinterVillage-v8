@@ -96,7 +96,7 @@ public class BanSubCommand {
 
                     context.getSource().sendMessage(Component.join(
                             this.winterVillage.prefix,
-                            Component.translatable("wintervillage.commands.punish.punished-ban",
+                            Component.translatable("wintervillage.command.punish.punished-ban",
                                     MiniMessage.miniMessage().deserialize(punished.user().getCachedData().getMetaData().getMetaValue("color") + playerName)
                             )
                     ));
@@ -104,7 +104,7 @@ public class BanSubCommand {
                 .exceptionally(throwable -> {
                     context.getSource().sendMessage(Component.join(
                             this.winterVillage.prefix,
-                            Component.translatable("wintervillage.commands.punish.could-not-punish")
+                            Component.translatable("wintervillage.command.punish.error.punish-failed")
                     ));
                     return null;
                 });
@@ -121,7 +121,7 @@ public class BanSubCommand {
             if (punishedGroup.getWeight().getAsInt() > punisherGroup.getWeight().getAsInt()) {
                 context.sendMessage(Component.join(
                         this.winterVillage.prefix,
-                        Component.translatable("wintervillage.commands.punish.group-weight-too-low",
+                        Component.translatable("wintervillage.command.punish.group-weight-too-low",
                                 MiniMessage.miniMessage().deserialize(punishedGroup.getCachedData().getMetaData().getMetaValue("color") + playerName)
                         )
                 ));

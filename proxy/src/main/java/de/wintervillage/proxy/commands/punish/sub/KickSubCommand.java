@@ -78,7 +78,7 @@ public class KickSubCommand {
                     this.kick(playerPair.first(), reason);
                     context.getSource().sendMessage(Component.join(
                             this.winterVillage.prefix,
-                            Component.translatable("wintervillage.commands.punish.punished-kick",
+                            Component.translatable("wintervillage.command.punish.punished-kick",
                                     MiniMessage.miniMessage().deserialize(playerPair.first().user().getCachedData().getMetaData().getMetaValue("color") + playerName)
                             )
                     ));
@@ -103,7 +103,7 @@ public class KickSubCommand {
             if (punishedGroup.getWeight().getAsInt() > punisherGroup.getWeight().getAsInt()) {
                 context.sendMessage(Component.join(
                         this.winterVillage.prefix,
-                        Component.translatable("wintervillage.commands.punish.group-weight-too-low",
+                        Component.translatable("wintervillage.command.punish.group-weight-too-low",
                                 MiniMessage.miniMessage().deserialize(punishedGroup.getCachedData().getMetaData().getMetaValue("color") + playerName)
                         )
                 ));

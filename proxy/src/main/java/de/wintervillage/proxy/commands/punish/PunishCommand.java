@@ -4,9 +4,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import de.wintervillage.proxy.WinterVillage;
-import de.wintervillage.proxy.commands.punish.sub.BanSubCommand;
-import de.wintervillage.proxy.commands.punish.sub.KickSubCommand;
-import de.wintervillage.proxy.commands.punish.sub.MuteSubCommand;
+import de.wintervillage.proxy.commands.punish.sub.*;
 
 public class PunishCommand {
 
@@ -30,6 +28,8 @@ public class PunishCommand {
                 .then(BrigadierCommand.literalArgumentBuilder("ban").redirect(new BanSubCommand(this.winterVillage).create()))
                 .then(BrigadierCommand.literalArgumentBuilder("kick").redirect(new KickSubCommand(this.winterVillage).create()))
                 .then(BrigadierCommand.literalArgumentBuilder("mute").redirect(new MuteSubCommand(this.winterVillage).create()))
+                .then(BrigadierCommand.literalArgumentBuilder("unban").redirect(new UnbanSubCommand(this.winterVillage).create()))
+                .then(BrigadierCommand.literalArgumentBuilder("unmute").redirect(new UnmuteSubCommand(this.winterVillage).create()))
                 .build();
         return new BrigadierCommand(node);
     }
