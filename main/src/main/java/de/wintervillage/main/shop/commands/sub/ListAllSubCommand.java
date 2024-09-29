@@ -42,12 +42,13 @@ public class ListAllSubCommand {
                                     Group highestGroup = this.winterVillage.playerHandler.highestGroup(user);
 
                                     player.sendMessage(Component.translatable("wintervillage.commands.shop.listAll.shop-info",
-                                            Component.text(shop.name(), NamedTextColor.BLUE),
+                                            Component.text(shop.name(), NamedTextColor.BLUE)
+                                                    .clickEvent(ClickEvent.runCommand("/shop info " + shop.uniqueId().toString())),
                                             MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + user.getUsername()),
                                             Component.text("[Delete]", NamedTextColor.RED)
                                                     .clickEvent(ClickEvent.runCommand("/shop delete " + shop.uniqueId().toString())),
-                                            Component.text("[Info]", NamedTextColor.GRAY)
-                                                    .clickEvent(ClickEvent.runCommand("/shop info " + shop.uniqueId().toString()))
+                                            Component.text("[Teleport]", NamedTextColor.GREEN)
+                                                    .clickEvent(ClickEvent.runCommand("/shop tp " + shop.uniqueId().toString()))
                                     ));
                                 });
                     });

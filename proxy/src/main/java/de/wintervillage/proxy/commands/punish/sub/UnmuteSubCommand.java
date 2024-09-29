@@ -1,0 +1,94 @@
+package de.wintervillage.proxy.commands.punish.sub;
+
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.velocitypowered.api.command.BrigadierCommand;
+import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.proxy.Player;
+import de.wintervillage.common.core.player.combined.CombinedPlayer;
+import de.wintervillage.proxy.WinterVillage;
+import de.wintervillage.proxy.combined.PlayerPair;
+import eu.cloudnetservice.driver.inject.InjectionLayer;
+import eu.cloudnetservice.driver.registry.ServiceRegistry;
+import eu.cloudnetservice.modules.bridge.player.PlayerManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+
+import java.util.concurrent.CompletableFuture;
+
+public class UnmuteSubCommand {
+
+    private final WinterVillage winterVillage;
+
+    private final PlayerManager playerManager;
+
+    public UnmuteSubCommand(WinterVillage winterVillage) {
+        this.winterVillage = winterVillage;
+
+        ServiceRegistry serviceRegistry = InjectionLayer.ext().instance(ServiceRegistry.class);
+        this.playerManager = serviceRegistry.firstProvider(PlayerManager.class);
+    }
+
+    public LiteralCommandNode<CommandSource> create() {
+        LiteralCommandNode<CommandSource> node = BrigadierCommand.literalArgumentBuilder("unmute")
+                .then(BrigadierCommand.requiredArgumentBuilder("playerName", StringArgumentType.word())
+                        .suggests((context, builder) -> {
+                            this.playerManager.onlinePlayers().names().forEach(builder::suggest);
+                            return builder.buildFuture();
+                        })
+                        .executes(context -> {
+                            this.handle(context);
+                            return Command.SINGLE_SUCCESS;
+                        }))
+                .build();
+        return new BrigadierCommand(node).getNode();
+    }
+
+    private void handle(CommandContext<CommandSource> context) {
+        String playerName = context.getArgument("playerName", String.class);
+
+        this.winterVillage.playerHandler.lookupUniqueId(playerName)
+                .thenCompose(uniqueId -> this.winterVillage.playerHandler.combinedPlayer(uniqueId, playerName)) // loads the player that gets punished
+                .thenCompose(punishedPlayer -> {
+                    if (context.getSource() instanceof Player player) {
+                        return this.winterVillage.playerHandler.combinedPlayer(player.getUniqueId(), player.getUsername())
+                                .thenApply(punisher -> new PlayerPair(punishedPlayer, punisher));
+                    } else return CompletableFuture.completedFuture(new PlayerPair(punishedPlayer, null));
+                })
+                .exceptionally(throwable -> {
+                    context.getSource().sendMessage(Component.join(
+                            this.winterVillage.prefix,
+                            Component.translatable("wintervillage.commands.player-not-found")
+                    ));
+                    return null;
+                })
+                .thenCompose(playerPair -> {
+                    CombinedPlayer punished = playerPair.first();
+
+                    if (punished.winterVillagePlayer().muteInformation() == null) {
+                        context.getSource().sendMessage(Component.join(
+                                this.winterVillage.prefix,
+                            Component.translatable("wintervillage.command.punish.error.removal-failed",
+                                    MiniMessage.miniMessage().deserialize(punished.user().getCachedData().getMetaData().getMetaValue("color") + playerName)
+                            )
+                        ));
+                        return CompletableFuture.completedFuture(null);
+                    }
+
+                    return this.winterVillage.playerDatabase.modify(punished.winterVillagePlayer().uniqueId(), builder -> builder.muteInformation(null))
+                            .thenApply(_ -> playerPair.first()); // return CombinedPlayer first
+                })
+                .thenAccept(punished -> {
+                    if (punished == null) return;
+
+                    context.getSource().sendMessage(Component.join(
+                            this.winterVillage.prefix,
+                            Component.translatable("wintervillage.command.punish.punished-unmute",
+                                    MiniMessage.miniMessage().deserialize(punished.user().getCachedData().getMetaData().getMetaValue("color") + playerName)
+                            )
+                    ));
+                });
+    }
+}
