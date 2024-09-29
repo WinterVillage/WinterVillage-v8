@@ -45,6 +45,8 @@ public class CancelSetupListener implements Listener {
         ItemStack itemStack = event.getItemDrop().getItemStack();
         if (!itemStack.isSimilar(this.winterVillage.plotHandler.SETUP_ITEM)) return;
 
+        event.getItemDrop().remove();
+
         if (this.winterVillage.plotHandler.stopTasks(player))
             player.sendMessage(Component.join(
                     this.winterVillage.prefix,
