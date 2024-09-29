@@ -2,12 +2,14 @@ package de.wintervillage.common.paper.util;
 
 import com.google.common.base.Preconditions;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -62,6 +64,31 @@ public final class InventoryModifications {
         return false;
     }
 
+    public static boolean placesWrongItem(final InventoryClickEvent event, final NamespacedKey key) {
+        final Inventory inventory = event.getInventory();
+        final Inventory clickedInventory = event.getClickedInventory();
+        final InventoryAction action = event.getAction();
+
+        // shift click on item in player inventory
+        if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY
+                && clickedInventory != null && clickedInventory.getType() == InventoryType.PLAYER
+                && inventory.getType() != clickedInventory.getType()) {
+            ItemStack moving = event.getCurrentItem();
+            if (moving == null || hasKey(moving, key))
+                return true;
+        }
+
+        // normal click on gui empty slot with item on cursor
+        if (ITEM_PLACE_ACTIONS.contains(action)
+                && (clickedInventory == null || clickedInventory.getType() != InventoryType.PLAYER)
+                && inventory.getType() != InventoryType.PLAYER) {
+            ItemStack cursor = event.getCursor();
+            return (hasKey(cursor, key));
+        }
+
+        return false;
+    }
+
     public static boolean placesWrongItem(final InventoryClickEvent event, final ItemStack itemStack) {
         return isPlacingItem(event, itemStack, true);
     }
@@ -87,6 +114,23 @@ public final class InventoryModifications {
         return !compare || !hotBarItem.isSimilar(itemStack);
     }
 
+    public static boolean swapsWrongItem(final InventoryClickEvent event, final NamespacedKey key) {
+        final Inventory inventory = event.getInventory();
+        final Inventory clickedInventory = event.getClickedInventory();
+        final InventoryAction action = event.getAction();
+
+        boolean isSwapping = ITEM_SWAP_ACTIONS.contains(action)
+                && (clickedInventory == null || clickedInventory.getType() != InventoryType.PLAYER)
+                && inventory.getType() != InventoryType.PLAYER;
+        if (!isSwapping) return false;
+
+        if (event.getHotbarButton() == -1) return false;
+        ItemStack hotBarItem = event.getWhoClicked().getInventory().getItem(event.getHotbarButton());
+        if (hotBarItem == null || hotBarItem.getType() == Material.AIR) return false;
+
+        return hasKey(hotBarItem, key);
+    }
+
     public static boolean swapsWrongItem(final InventoryClickEvent event, final ItemStack itemStack) {
         return isSwappingItem(event, itemStack, true);
     }
@@ -109,8 +153,24 @@ public final class InventoryModifications {
         ItemStack droppedItem = event.getCurrentItem();
         if (droppedItem == null) return true;
 
-
         return !compare || !droppedItem.isSimilar(itemStack);
+    }
+
+    public static boolean dropsWrongItem(final InventoryClickEvent event,final NamespacedKey key) {
+        Preconditions.checkNotNull(event, "event cannot be null");
+
+        final Inventory inventory = event.getInventory();
+        final Inventory clickedInventory = event.getClickedInventory();
+        final InventoryAction action = event.getAction();
+
+        boolean isDropping = ITEM_DROP_ACTIONS.contains(action)
+                && (clickedInventory != null || inventory.getType() != InventoryType.PLAYER);
+        if (!isDropping) return false;
+
+        ItemStack droppedItem = event.getCurrentItem();
+        if (droppedItem == null) return true;
+
+        return hasKey(droppedItem, key);
     }
 
     public static boolean dropsWrongItem(final InventoryClickEvent event, final ItemStack itemStack) {
@@ -119,6 +179,23 @@ public final class InventoryModifications {
 
     public static boolean dropsWrongItem(final InventoryClickEvent event) {
         return isDroppingItem(event, null, false);
+    }
+
+    public static boolean otherWrongEvent(final InventoryClickEvent event, final NamespacedKey key) {
+        Preconditions.checkNotNull(event, "event cannot be null");
+
+        final Inventory inventory = event.getInventory();
+        final Inventory clickedInventory = event.getClickedInventory();
+        final InventoryAction action = event.getAction();
+
+        boolean isOther = (action == InventoryAction.CLONE_STACK || action == InventoryAction.UNKNOWN)
+                && (clickedInventory != null || inventory.getType() != InventoryType.PLAYER);
+        if (!isOther) return false;
+
+        ItemStack involvedItem = event.getCurrentItem();
+        if (involvedItem == null) return true;
+
+        return hasKey(involvedItem, key);
     }
 
     private static boolean otherWrongEvent(final InventoryClickEvent event, final ItemStack itemStack, boolean compare) {
@@ -156,12 +233,29 @@ public final class InventoryModifications {
         return !compare || draggedItem == null || !draggedItem.isSimilar(itemStack);
     }
 
+    public static boolean dragsWrong(final InventoryDragEvent event, final NamespacedKey key) {
+        final int topSlots = event.getView().getTopInventory().getSize();
+        ItemStack draggedItem = event.getOldCursor();
+
+        boolean isDraggingInTopInventory = event.getRawSlots().stream().anyMatch(slot -> slot < topSlots);
+        if (!isDraggingInTopInventory) return false;
+
+        return hasKey(draggedItem, key);
+    }
+
     public static boolean dragsWrong(final InventoryDragEvent event, final ItemStack itemStack) {
         return isDraggingItem(event, itemStack, true);
     }
 
     public static boolean dragsWrong(final InventoryDragEvent event) {
         return isDraggingItem(event, null, false);
+    }
+
+    private static boolean hasKey(final ItemStack itemStack, final NamespacedKey key) {
+        if (itemStack == null || itemStack.getType() == Material.AIR || key == null) return false;
+
+        PersistentDataContainer container = itemStack.getItemMeta().getPersistentDataContainer();
+        return container.has(key);
     }
 
     /**

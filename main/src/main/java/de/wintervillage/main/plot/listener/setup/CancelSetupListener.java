@@ -7,10 +7,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import static de.wintervillage.common.paper.util.InventoryModifications.*;
 
 public class CancelSetupListener implements Listener {
 
@@ -52,5 +55,26 @@ public class CancelSetupListener implements Listener {
                     this.winterVillage.prefix,
                     Component.translatable("wintervillage.plot.setup-cancelled")
             ));
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void execute(InventoryClickEvent event) {
+        Player player = (Player) event.getWhoClicked();
+
+
+        if (dropsWrongItem(event, this.winterVillage.plotHandler.plotSetupKey)
+                || placesWrongItem(event, this.winterVillage.plotHandler.plotSetupKey)
+                || swapsWrongItem(event, this.winterVillage.plotHandler.plotSetupKey)
+                || otherWrongEvent(event, this.winterVillage.plotHandler.plotSetupKey)) {
+            if (!this.winterVillage.plotHandler.stopTasks(player)) return;
+
+            event.setCurrentItem(null);
+            event.setCursor(null);
+
+            player.sendMessage(Component.join(
+                    this.winterVillage.prefix,
+                    Component.translatable("wintervillage.plot.setup-cancelled")
+            ));
+        }
     }
 }
