@@ -31,7 +31,8 @@ public class ShopCommand {
                 .then(new InfoSubCommand().build())
                 .then(new DeleteSubCommand().build())
                 .then(new ChangePriceSubCommand().build())
-                .then(new ChangeOwnerSubCommand().build());
+                .then(new ChangeOwnerSubCommand().build())
+                .then(new TpSubCommand().build());
         commands.register(winterVillage.getPluginMeta(), builder.build(), "Manage shops", List.of());
     }
 }
