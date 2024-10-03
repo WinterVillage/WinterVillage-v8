@@ -41,6 +41,10 @@ dependencies {
 
     // custom block data
     implementation("com.jeff-media:custom-block-data:2.2.3")
+
+    // cloudnet
+    compileOnly("eu.cloudnetservice.cloudnet:bridge:4.0.0-RC10")
+    compileOnly("eu.cloudnetservice.cloudnet:platform-inject-api:4.0.0-RC10")
 }
 
 tasks {
