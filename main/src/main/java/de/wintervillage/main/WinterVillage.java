@@ -14,7 +14,6 @@ import com.mongodb.reactivestreams.client.MongoDatabase;
 import de.wintervillage.common.core.translation.MiniMessageTranslator;
 import de.wintervillage.main.commands.home.HomeCommand;
 import de.wintervillage.main.commands.home.SetHomeCommand;
-import de.wintervillage.main.listener.PlayerJoinListener;
 import de.wintervillage.main.listener.WorldLoadListener;
 import de.wintervillage.main.player.PlayerHandler;
 import de.wintervillage.main.antifreezle.AntiFreezle;
@@ -173,7 +172,6 @@ public final class WinterVillage extends JavaPlugin {
 
         // listener
         new AsyncChatListener();
-        new PlayerJoinListener();
         new PlayerMoveListener();
         new WorldLoadListener();
 

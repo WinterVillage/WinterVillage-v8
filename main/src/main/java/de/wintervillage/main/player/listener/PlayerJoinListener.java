@@ -30,8 +30,14 @@ public class PlayerJoinListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void execute(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
+
+        // player data being loaded
         this.playerHandler.apply(player, player.getUniqueId());
 
+        // scoreboard
+        this.winterVillage.scoreboardHandler.playerList(player);
+
+        // handle pending home requests
         PENDING_HOME_REQUESTS.computeIfPresent(player.getUniqueId(), (uuid, homeInformation) -> {
             player.teleportAsync(
                     new Location(
