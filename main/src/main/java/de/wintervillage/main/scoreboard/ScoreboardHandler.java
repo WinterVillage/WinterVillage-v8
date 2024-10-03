@@ -60,6 +60,10 @@ public class ScoreboardHandler {
         return this.scoreboards.computeIfAbsent(uniqueId, _ -> Bukkit.getScoreboardManager().getNewScoreboard());
     }
 
+    public boolean removeScoreboard(UUID uniqueId) {
+        return this.scoreboards.remove(uniqueId) != null;
+    }
+
     private String teamName(@NotNull Group group) {
         if (group == null) return "0_default";
         return group.getWeight().getAsInt() + "_" + group.getName().toLowerCase();

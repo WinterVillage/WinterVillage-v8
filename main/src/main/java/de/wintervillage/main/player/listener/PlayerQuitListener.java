@@ -11,18 +11,22 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class PlayerQuitListener implements Listener {
 
+    private final WinterVillage winterVillage;
     private final PlayerHandler playerHandler;
 
     public PlayerQuitListener(PlayerHandler playerHandler) {
-        WinterVillage winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
+        this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.playerHandler = playerHandler;
 
-        winterVillage.getServer().getPluginManager().registerEvents(this, winterVillage);
+        this.winterVillage.getServer().getPluginManager().registerEvents(this, winterVillage);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST) // HIGHEST, so every listener can modify the player before he's being saved
     public void execute(PlayerQuitEvent event) {
         final Player player = event.getPlayer();
+
+        // delete scoreboard data
+        this.winterVillage.scoreboardHandler.removeScoreboard(player.getUniqueId());
 
         // Skipping saving the player because he's still being loaded
         if (player.getPersistentDataContainer().has(this.playerHandler.applyingKey)) {
@@ -30,6 +34,7 @@ public class PlayerQuitListener implements Listener {
             return;
         }
 
+        // save player
         this.playerHandler.save(player);
     }
 }
