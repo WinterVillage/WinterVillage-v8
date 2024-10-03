@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
 import de.wintervillage.common.core.uuid.MojangFetcher;
 import de.wintervillage.main.WinterVillage;
+import de.wintervillage.main.player.listener.HomeRequest;
 import de.wintervillage.main.player.listener.PlayerJoinListener;
 import de.wintervillage.main.player.listener.PlayerQuitListener;
 import de.wintervillage.main.player.listener.packet.AdvancementPacketListener;
@@ -60,6 +61,10 @@ public class PlayerHandler {
 
         protocolManager.addPacketListener(new AdvancementPacketListener(this.winterVillage, this));
 
+        // cloudnet
+        new HomeRequest();
+
+        // bukkit
         new PlayerJoinListener(this);
         new PlayerQuitListener(this);
     }
