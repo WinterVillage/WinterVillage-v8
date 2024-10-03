@@ -100,6 +100,7 @@ public class PlayerHandler {
         player.setGameMode(GameMode.SURVIVAL);
 
         player.setFireTicks(0);
+        player.setFallDistance(0);
 
         player.setExp(0.0f);
         player.setLevel(0);
