@@ -25,9 +25,9 @@ public class PlayerChatListener {
             final UUID uniqueId = event.getPlayer().getUniqueId();
 
             this.plugin.playerHandler.combinedPlayer(uniqueId, event.getPlayer().getUsername())
-                    .thenAccept(combinedResult -> {
-                        final User user = combinedResult.user();
-                        final WinterVillagePlayer winterVillagePlayer = combinedResult.winterVillagePlayer();
+                    .thenAccept(pair -> {
+                        final User user = pair.first();
+                        final WinterVillagePlayer winterVillagePlayer = pair.second();
 
                         // Cancelled
                         // | If the player has an active muteInformation and is not able to bypass it

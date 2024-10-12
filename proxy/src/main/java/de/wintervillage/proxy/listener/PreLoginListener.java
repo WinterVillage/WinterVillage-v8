@@ -35,9 +35,9 @@ public class PreLoginListener {
             final UUID uniqueId = event.getUniqueId();
 
             this.plugin.playerHandler.combinedPlayer(uniqueId, null)
-                    .thenAccept(combinedResult -> {
-                        final User user = combinedResult.user();
-                        final WinterVillagePlayer player = combinedResult.winterVillagePlayer();
+                    .thenAccept(pair -> {
+                        final User user = pair.first();
+                        final WinterVillagePlayer player = pair.second();
 
                         Collection<Group> groups = user.getInheritedGroups(user.getQueryOptions());
                         Group highestGroup = groups.stream()

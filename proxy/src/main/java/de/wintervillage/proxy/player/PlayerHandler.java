@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import com.velocitypowered.api.proxy.Player;
 import de.wintervillage.common.core.database.exception.EntryNotFoundException;
 import de.wintervillage.common.core.player.WinterVillagePlayer;
-import de.wintervillage.common.core.player.combined.CombinedPlayer;
 import de.wintervillage.common.core.player.impl.WinterVillagePlayerImpl;
+import de.wintervillage.common.core.type.Pair;
 import de.wintervillage.common.core.uuid.MojangFetcher;
 import de.wintervillage.proxy.WinterVillage;
 import net.luckperms.api.LuckPerms;
@@ -100,7 +100,7 @@ public class PlayerHandler {
                 });
     }
 
-    public CompletableFuture<CombinedPlayer> combinedPlayer(@NotNull UUID uniqueId, @Nullable String username) {
+    public CompletableFuture<Pair<User, WinterVillagePlayer>> combinedPlayer(@NotNull UUID uniqueId, @Nullable String username) {
         CompletableFuture<User> userFuture = this.luckPerms.getUserManager().loadUser(uniqueId, username);
         CompletableFuture<WinterVillagePlayer> playerFuture = this.winterVillage.playerDatabase.player(uniqueId)
                 .exceptionally(throwable -> {
@@ -111,6 +111,6 @@ public class PlayerHandler {
                     }
                     throw new RuntimeException(throwable);
                 });
-        return userFuture.thenCombine(playerFuture, CombinedPlayer::new);
+        return userFuture.thenCombine(playerFuture, Pair::of);
     }
 }
