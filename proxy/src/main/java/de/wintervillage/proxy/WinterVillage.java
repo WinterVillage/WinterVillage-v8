@@ -9,9 +9,7 @@ import com.mongodb.ServerAddress;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
-import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandManager;
-import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Dependency;
@@ -22,6 +20,7 @@ import de.wintervillage.common.core.config.Document;
 import de.wintervillage.common.core.player.codec.PlayerCodecProvider;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
 import de.wintervillage.common.core.translation.MiniMessageTranslator;
+import de.wintervillage.proxy.commands.TransferCommand;
 import de.wintervillage.proxy.commands.punish.PunishCommand;
 import de.wintervillage.proxy.listener.PlayerChatListener;
 import de.wintervillage.proxy.listener.PreLoginListener;
@@ -56,8 +55,10 @@ import java.util.concurrent.TimeUnit;
 )
 public final class WinterVillage {
 
-    private @Inject final ProxyServer proxyServer;
-    private @Inject final Logger logger;
+    private @Inject
+    final ProxyServer proxyServer;
+    private @Inject
+    final Logger logger;
     private final Path dataDirectory;
 
     public PlayerDatabase playerDatabase;
@@ -92,9 +93,9 @@ public final class WinterVillage {
     public void onProxyInitialization(final ProxyInitializeEvent event) {
         this.luckpermsSupport();
 
-        Injector injector = Guice.createInjector(new WinterVillageModule(this, this.mongoDatabase));
-        this.playerDatabase = injector.getInstance(PlayerDatabase.class);
-        this.playerHandler = injector.getInstance(PlayerHandler.class);
+        Injector moduleInjector = Guice.createInjector(new WinterVillageModule(this, this.mongoDatabase));
+        this.playerDatabase = moduleInjector.getInstance(PlayerDatabase.class);
+        this.playerHandler = moduleInjector.getInstance(PlayerHandler.class);
 
         // listener
         this.proxyServer.getEventManager().register(this, new PlayerChatListener(this));
@@ -102,12 +103,14 @@ public final class WinterVillage {
 
         // commands
         CommandManager commandManager = this.proxyServer.getCommandManager();
-        CommandMeta punishMeta = commandManager.metaBuilder("punish")
-                .plugin(this)
-                .build();
-
-        BrigadierCommand punishCommand = new PunishCommand(this).create();
-        commandManager.register(punishMeta, punishCommand);
+        commandManager.register(
+                commandManager.metaBuilder("punish").plugin(this).build(),
+                new PunishCommand(this).create()
+        );
+        commandManager.register(
+                commandManager.metaBuilder("transfer").plugin(this).build(),
+                new TransferCommand(this).create()
+        );
 
         // translations
         MiniMessageTranslator translator = new MiniMessageTranslator(Key.key("wintervillage", "translations"));
