@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
 import de.wintervillage.common.core.uuid.MojangFetcher;
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.player.listener.HomeRequest;
+import de.wintervillage.main.player.listener.cloudnet.CloudNetChannelMessageListener;
 import de.wintervillage.main.player.listener.PlayerJoinListener;
 import de.wintervillage.main.player.listener.PlayerQuitListener;
 import de.wintervillage.main.player.listener.luckperms.UserRecalculation;
@@ -15,10 +15,7 @@ import net.kyori.adventure.title.Title;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
+import org.bukkit.*;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
@@ -40,6 +37,8 @@ public class PlayerHandler {
     private final WinterVillage winterVillage;
     private final PlayerDatabase playerDatabase;
     private final LuckPerms luckPerms;
+
+    public final CloudNetChannelMessageListener channelMessageListener;
 
     private final ScheduledExecutorService executorService;
 
@@ -66,7 +65,7 @@ public class PlayerHandler {
         new UserRecalculation();
 
         // cloudnet
-        new HomeRequest();
+        this.channelMessageListener = new CloudNetChannelMessageListener();
 
         // bukkit
         new PlayerJoinListener();

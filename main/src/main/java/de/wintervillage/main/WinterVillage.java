@@ -12,6 +12,7 @@ import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
 import de.wintervillage.common.core.translation.MiniMessageTranslator;
+import de.wintervillage.main.commands.FarmweltCommand;
 import de.wintervillage.main.commands.home.HomeCommand;
 import de.wintervillage.main.commands.home.SetHomeCommand;
 import de.wintervillage.main.listener.WorldLoadListener;
@@ -181,6 +182,7 @@ public final class WinterVillage extends JavaPlugin {
             final Commands command = event.registrar();
 
             //General-System
+            new FarmweltCommand(command);
             new FreezeCommand(command);
             new InventoryCommand(command);
             new PlotCommand(command);

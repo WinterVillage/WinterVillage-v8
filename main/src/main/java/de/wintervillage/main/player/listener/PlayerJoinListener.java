@@ -9,10 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import static de.wintervillage.main.player.listener.HomeRequest.PENDING_HOME_REQUESTS;
 
 public class PlayerJoinListener implements Listener {
 
@@ -38,21 +35,7 @@ public class PlayerJoinListener implements Listener {
         // scoreboard
         this.winterVillage.scoreboardHandler.playerList();
 
-        // handle pending home requests
-        PENDING_HOME_REQUESTS.computeIfPresent(player.getUniqueId(), (uuid, homeInformation) -> {
-            player.teleportAsync(
-                    new Location(
-                            Bukkit.getWorld(homeInformation.world()),
-                            homeInformation.x(),
-                            homeInformation.y(),
-                            homeInformation.z()),
-                    PlayerTeleportEvent.TeleportCause.PLUGIN
-            );
-            player.sendMessage(Component.join(
-                    this.winterVillage.prefix,
-                    Component.translatable("wintervillage.command.home.teleported")
-            ));
-            return PENDING_HOME_REQUESTS.remove(uuid);
-        });
+        // handle pending home & farmwelt teleportation requests
+        this.winterVillage.playerHandler.channelMessageListener.processRequest(player);
     }
 }
