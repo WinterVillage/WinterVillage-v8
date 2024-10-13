@@ -8,6 +8,7 @@ import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.player.listener.HomeRequest;
 import de.wintervillage.main.player.listener.PlayerJoinListener;
 import de.wintervillage.main.player.listener.PlayerQuitListener;
+import de.wintervillage.main.player.listener.luckperms.UserRecalculation;
 import de.wintervillage.main.player.listener.packet.AdvancementPacketListener;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
@@ -60,6 +61,9 @@ public class PlayerHandler {
         this.applyingKey = new NamespacedKey("wintervillage", "playerhandler/applying_player_information");
 
         protocolManager.addPacketListener(new AdvancementPacketListener(this.winterVillage, this));
+
+        // luckperms
+        new UserRecalculation();
 
         // cloudnet
         new HomeRequest();
