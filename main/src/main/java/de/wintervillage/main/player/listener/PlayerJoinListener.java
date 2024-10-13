@@ -35,7 +35,7 @@ public class PlayerJoinListener implements Listener {
         this.playerHandler.apply(player, player.getUniqueId());
 
         // scoreboard
-        this.winterVillage.scoreboardHandler.playerList(player);
+        this.winterVillage.scoreboardHandler.playerList();
 
         // handle pending home requests
         PENDING_HOME_REQUESTS.computeIfPresent(player.getUniqueId(), (uuid, homeInformation) -> {
