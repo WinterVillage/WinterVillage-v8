@@ -44,6 +44,9 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     @BsonProperty("whitelistInformation")
     private @Nullable WhitelistInformation whitelistInformation;
 
+    @BsonProperty("homeInformation")
+    private @Nullable HomeInformation homeInformation;
+
     public WinterVillagePlayerImpl(@NotNull UUID uniqueId) {
         this.uniqueId = uniqueId;
         this.money = BigDecimal.ZERO;
@@ -126,6 +129,16 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         this.whitelistInformation = whitelistInformation;
     }
 
+    @Override
+    public @Nullable HomeInformation homeInformation() {
+        return this.homeInformation;
+    }
+
+    @Override
+    public void homeInformation(@Nullable HomeInformation homeInformation) {
+        this.homeInformation = homeInformation;
+    }
+
     public Document toDocument() {
         Document document = new Document();
 
@@ -145,6 +158,9 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
         if (this.whitelistInformation != null)
             document.put("whitelistInformation", this.whitelistInformation.toDocument());
+
+        if (this.homeInformation != null)
+            document.put("homeInformation", this.homeInformation.toDocument());
 
         return document;
     }
@@ -172,6 +188,10 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
                 .filter(doc -> !doc.isEmpty())
                 .map(WhitelistInformation::fromDocument)
                 .orElse(null));
+        player.homeInformation(Optional.ofNullable(document.get("homeInformation", Document.class))
+                .filter(doc -> !doc.isEmpty())
+                .map(HomeInformation::fromDocument)
+                .orElse(null));
 
         return player;
     }
@@ -187,6 +207,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
                 ", playerInformation=" + this.playerInformation +
                 ", wildcardInformation=" + this.wildcardInformation +
                 ", whitelistInformation=" + this.whitelistInformation +
+                ", homeInformation=" + this.homeInformation +
                 '}';
     }
 }

@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface WinterVillagePlayer {
 
-    // TODO: HomeInformation; TransactionInformation
+    // TODO: TransactionInformation
 
     @NotNull
     UUID uniqueId();
@@ -48,4 +48,9 @@ public interface WinterVillagePlayer {
     WhitelistInformation whitelistInformation();
 
     void whitelistInformation(@Nullable WhitelistInformation whitelistInformation);
+
+    @Nullable
+    HomeInformation homeInformation();
+
+    void homeInformation(@Nullable HomeInformation homeInformation);
 }

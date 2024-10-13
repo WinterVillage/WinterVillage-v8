@@ -8,16 +8,16 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import de.wintervillage.common.core.player.WinterVillagePlayer;
-import de.wintervillage.common.core.player.combined.CombinedPlayer;
 import de.wintervillage.common.core.player.data.MuteInformation;
+import de.wintervillage.common.core.type.Pair;
 import de.wintervillage.proxy.WinterVillage;
-import de.wintervillage.proxy.combined.PlayerPair;
 import eu.cloudnetservice.driver.inject.InjectionLayer;
 import eu.cloudnetservice.driver.registry.ServiceRegistry;
 import eu.cloudnetservice.modules.bridge.player.PlayerManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.model.group.Group;
+import net.luckperms.api.model.user.User;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
@@ -62,8 +62,8 @@ public class MuteSubCommand {
                 .thenCompose(punishedPlayer -> {
                     if (context.getSource() instanceof Player player) {
                         return this.winterVillage.playerHandler.combinedPlayer(player.getUniqueId(), player.getUsername())
-                                .thenApply(punisher -> new PlayerPair(punishedPlayer, punisher));
-                    } else return CompletableFuture.completedFuture(new PlayerPair(punishedPlayer, null));
+                                .thenApply(punisher -> Pair.of(punishedPlayer, punisher));
+                    } else return CompletableFuture.completedFuture(Pair.of(punishedPlayer, null));
                 })
                 .exceptionally(throwable -> {
                     context.getSource().sendMessage(Component.join(
@@ -72,11 +72,11 @@ public class MuteSubCommand {
                     ));
                     return null;
                 })
-                .thenCompose(playerPair -> {
-                    if (!this.isPunishable(context.getSource(), playerPair, playerName))
+                .thenCompose(pair -> {
+                    if (!this.isPunishable(context.getSource(), pair, playerName))
                         return CompletableFuture.completedFuture(null);
 
-                    WinterVillagePlayer punished = playerPair.first().winterVillagePlayer();
+                    WinterVillagePlayer punished = pair.first().second();
                     MuteInformation muteInformation = new MuteInformation(
                             (context.getSource() instanceof Player player) ? player.getUniqueId() : UUID.fromString("00000000-0000-0000-0000-000000000000"),
                             reason,
@@ -85,7 +85,7 @@ public class MuteSubCommand {
                     );
 
                     return this.winterVillage.playerDatabase.modify(punished.uniqueId(), builder -> builder.muteInformation(muteInformation))
-                            .thenApply(_ -> playerPair.first()); // return CombinedPlayer first
+                            .thenApply(_ -> pair.first()); // return CombinedPlayer first
                 })
                 .thenAccept(punished -> {
                     if (punished == null) return;
@@ -93,7 +93,7 @@ public class MuteSubCommand {
                     context.getSource().sendMessage(Component.join(
                             this.winterVillage.prefix,
                             Component.translatable("wintervillage.command.punish.punished-mute",
-                                    MiniMessage.miniMessage().deserialize(punished.user().getCachedData().getMetaData().getMetaValue("color") + playerName)
+                                    MiniMessage.miniMessage().deserialize(punished.first().getCachedData().getMetaData().getMetaValue("color") + playerName)
                             )
                     ));
                 })
@@ -106,13 +106,12 @@ public class MuteSubCommand {
                 });
     }
 
-    private boolean isPunishable(CommandSource context, PlayerPair playerPair, String playerName) {
-        CombinedPlayer punishedPlayer = playerPair.first();
-        Group punishedGroup = this.winterVillage.playerHandler.highestGroup(punishedPlayer.user());
+    private boolean isPunishable(CommandSource context, Pair<Pair<User, WinterVillagePlayer>, ?> pair, String playerName) {
+        Group punishedGroup = this.winterVillage.playerHandler.highestGroup(pair.first().first());
 
-        if (playerPair.second() != null) {
-            CombinedPlayer punisher = playerPair.second();
-            Group punisherGroup = this.winterVillage.playerHandler.highestGroup(punisher.user());
+        if (pair.second() != null) {
+            Pair<User, WinterVillagePlayer> punisher = (Pair<User, WinterVillagePlayer>) pair.second();
+            Group punisherGroup = this.winterVillage.playerHandler.highestGroup(punisher.first());
 
             if (punishedGroup.getWeight().getAsInt() > punisherGroup.getWeight().getAsInt()) {
                 context.sendMessage(Component.join(

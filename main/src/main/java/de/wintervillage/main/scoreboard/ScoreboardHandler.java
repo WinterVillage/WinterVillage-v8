@@ -56,8 +56,16 @@ public class ScoreboardHandler {
         player.setScoreboard(scoreboard);
     }
 
+    public void playerList() {
+        Bukkit.getOnlinePlayers().forEach(this::playerList);
+    }
+
     public Scoreboard getScoreboard(UUID uniqueId) {
         return this.scoreboards.computeIfAbsent(uniqueId, _ -> Bukkit.getScoreboardManager().getNewScoreboard());
+    }
+
+    public boolean removeScoreboard(UUID uniqueId) {
+        return this.scoreboards.remove(uniqueId) != null;
     }
 
     private String teamName(@NotNull Group group) {

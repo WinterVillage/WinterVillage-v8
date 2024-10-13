@@ -12,7 +12,9 @@ import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
 import de.wintervillage.common.core.translation.MiniMessageTranslator;
-import de.wintervillage.main.listener.PlayerJoinListener;
+import de.wintervillage.main.commands.FarmweltCommand;
+import de.wintervillage.main.commands.home.HomeCommand;
+import de.wintervillage.main.commands.home.SetHomeCommand;
 import de.wintervillage.main.listener.WorldLoadListener;
 import de.wintervillage.main.player.PlayerHandler;
 import de.wintervillage.main.antifreezle.AntiFreezle;
@@ -26,7 +28,6 @@ import de.wintervillage.main.calendar.commands.CalendarCommand;
 import de.wintervillage.main.calendar.database.CalendarDatabase;
 import de.wintervillage.main.commands.FreezeCommand;
 import de.wintervillage.main.commands.InventoryCommand;
-import de.wintervillage.main.commands.TestCommand;
 import de.wintervillage.main.death.DeathManager;
 import de.wintervillage.main.event.EventManager;
 import de.wintervillage.main.listener.AsyncChatListener;
@@ -172,7 +173,6 @@ public final class WinterVillage extends JavaPlugin {
 
         // listener
         new AsyncChatListener();
-        new PlayerJoinListener();
         new PlayerMoveListener();
         new WorldLoadListener();
 
@@ -182,12 +182,15 @@ public final class WinterVillage extends JavaPlugin {
             final Commands command = event.registrar();
 
             //General-System
+            new FarmweltCommand(command);
             new FreezeCommand(command);
             new InventoryCommand(command);
             new PlotCommand(command);
             new ShopCommand(command);
 
-            new TestCommand(command);
+            // home
+            new HomeCommand(command);
+            new SetHomeCommand(command);
 
             //SpecialItems
             new CMD_Disenchant(command);

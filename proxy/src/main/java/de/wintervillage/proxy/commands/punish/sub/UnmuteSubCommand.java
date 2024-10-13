@@ -7,14 +7,15 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import de.wintervillage.common.core.player.combined.CombinedPlayer;
+import de.wintervillage.common.core.player.WinterVillagePlayer;
+import de.wintervillage.common.core.type.Pair;
 import de.wintervillage.proxy.WinterVillage;
-import de.wintervillage.proxy.combined.PlayerPair;
 import eu.cloudnetservice.driver.inject.InjectionLayer;
 import eu.cloudnetservice.driver.registry.ServiceRegistry;
 import eu.cloudnetservice.modules.bridge.player.PlayerManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.luckperms.api.model.user.User;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -54,8 +55,8 @@ public class UnmuteSubCommand {
                 .thenCompose(punishedPlayer -> {
                     if (context.getSource() instanceof Player player) {
                         return this.winterVillage.playerHandler.combinedPlayer(player.getUniqueId(), player.getUsername())
-                                .thenApply(punisher -> new PlayerPair(punishedPlayer, punisher));
-                    } else return CompletableFuture.completedFuture(new PlayerPair(punishedPlayer, null));
+                                .thenApply(punisher -> Pair.of(punishedPlayer, punisher));
+                    } else return CompletableFuture.completedFuture(Pair.of(punishedPlayer, null));
                 })
                 .exceptionally(throwable -> {
                     context.getSource().sendMessage(Component.join(
@@ -64,21 +65,21 @@ public class UnmuteSubCommand {
                     ));
                     return null;
                 })
-                .thenCompose(playerPair -> {
-                    CombinedPlayer punished = playerPair.first();
+                .thenCompose(pair -> {
+                    Pair<User, WinterVillagePlayer> punished = pair.first();
 
-                    if (punished.winterVillagePlayer().muteInformation() == null) {
+                    if (punished.second().muteInformation() == null) {
                         context.getSource().sendMessage(Component.join(
                                 this.winterVillage.prefix,
                             Component.translatable("wintervillage.command.punish.error.removal-failed",
-                                    MiniMessage.miniMessage().deserialize(punished.user().getCachedData().getMetaData().getMetaValue("color") + playerName)
+                                    MiniMessage.miniMessage().deserialize(punished.first().getCachedData().getMetaData().getMetaValue("color") + playerName)
                             )
                         ));
                         return CompletableFuture.completedFuture(null);
                     }
 
-                    return this.winterVillage.playerDatabase.modify(punished.winterVillagePlayer().uniqueId(), builder -> builder.muteInformation(null))
-                            .thenApply(_ -> playerPair.first()); // return CombinedPlayer first
+                    return this.winterVillage.playerDatabase.modify(punished.second().uniqueId(), builder -> builder.muteInformation(null))
+                            .thenApply(_ -> pair.first().first()); // return User
                 })
                 .thenAccept(punished -> {
                     if (punished == null) return;
@@ -86,7 +87,7 @@ public class UnmuteSubCommand {
                     context.getSource().sendMessage(Component.join(
                             this.winterVillage.prefix,
                             Component.translatable("wintervillage.command.punish.punished-unmute",
-                                    MiniMessage.miniMessage().deserialize(punished.user().getCachedData().getMetaData().getMetaValue("color") + playerName)
+                                    MiniMessage.miniMessage().deserialize(punished.getCachedData().getMetaData().getMetaValue("color") + playerName)
                             )
                     ));
                 });

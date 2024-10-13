@@ -230,7 +230,7 @@ public final class InventoryModifications {
         boolean isDraggingInTopInventory = event.getRawSlots().stream().anyMatch(slot -> slot < topSlots);
         if (!isDraggingInTopInventory) return false;
 
-        return !compare || draggedItem == null || !draggedItem.isSimilar(itemStack);
+        return !compare || !draggedItem.isSimilar(itemStack);
     }
 
     public static boolean dragsWrong(final InventoryDragEvent event, final NamespacedKey key) {

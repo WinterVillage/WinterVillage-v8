@@ -3,14 +3,15 @@ package de.wintervillage.main.plot.commands.sub;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import de.wintervillage.common.core.type.Pair;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.Plot;
-import de.wintervillage.main.plot.combined.CombinedUserPlot;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.model.group.Group;
+import net.luckperms.api.model.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -74,19 +75,21 @@ public class OwnerSubCommand {
                                                                     MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + user.getUsername())
                                                             )
                                                     ));
-                                                    return CompletableFuture.completedFuture(Optional.<CombinedUserPlot>empty());
+                                                    return CompletableFuture.completedFuture(Optional.<Pair<User, Plot>>empty());
                                                 }
 
                                                 return this.winterVillage.plotDatabase.modify(plot.uniqueId(), updated -> updated.owner(user.getUniqueId()))
-                                                        .thenApply(updatedPlot -> Optional.of(new CombinedUserPlot(user, updatedPlot)));
+                                                        .thenApply(updatedPlot -> Optional.of(Pair.of(user, updatedPlot)));
                                             })
                                             .orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()))
                                     )
-                                    .thenAccept(combinedUserPlot -> combinedUserPlot.ifPresent(combined -> {
-                                        Group highestGroup = this.winterVillage.playerHandler.highestGroup(combined.user());
+                                    .thenAccept(optional -> optional.ifPresent(pair -> {
+                                        User user = (User) pair.first();
+
+                                        Group highestGroup = this.winterVillage.playerHandler.highestGroup(user);
                                         player.sendMessage(Component.join(this.winterVillage.prefix,
                                                 Component.translatable("wintervillage.commands.plot.updated-owner",
-                                                        MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + combined.user().getUsername())
+                                                        MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + user.getUsername())
                                                 )
                                         ));
                                         this.winterVillage.plotHandler.forceUpdate();
