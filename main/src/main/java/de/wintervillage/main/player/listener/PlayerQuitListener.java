@@ -1,6 +1,9 @@
 package de.wintervillage.main.player.listener;
 
 import de.wintervillage.main.WinterVillage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.luckperms.api.model.group.Group;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -20,6 +23,11 @@ public class PlayerQuitListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST) // HIGHEST, so every listener can modify the player before he's being saved
     public void execute(PlayerQuitEvent event) {
         final Player player = event.getPlayer();
+
+        Group highestGroup = this.winterVillage.playerHandler.highestGroup(player);
+        event.quitMessage(Component.translatable("wintervillage.player-quit",
+                MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())
+        ));
 
         // delete scoreboard data
         this.winterVillage.scoreboardHandler.removeScoreboard(player.getUniqueId());
