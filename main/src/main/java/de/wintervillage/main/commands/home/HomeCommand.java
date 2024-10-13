@@ -66,7 +66,9 @@ public class HomeCommand {
                                                     Bukkit.getWorld(homeInformation.world()),
                                                     homeInformation.x(),
                                                     homeInformation.y(),
-                                                    homeInformation.z()),
+                                                    homeInformation.z(),
+                                                    homeInformation.yaw(),
+                                                    homeInformation.pitch()),
                                             PlayerTeleportEvent.TeleportCause.PLUGIN
                                     );
                                     player.sendMessage(Component.join(
