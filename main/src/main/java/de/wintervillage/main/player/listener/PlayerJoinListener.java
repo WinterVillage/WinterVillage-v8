@@ -1,7 +1,6 @@
 package de.wintervillage.main.player.listener;
 
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.player.PlayerHandler;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -18,12 +17,9 @@ import static de.wintervillage.main.player.listener.HomeRequest.PENDING_HOME_REQ
 public class PlayerJoinListener implements Listener {
 
     private final WinterVillage winterVillage;
-    private final PlayerHandler playerHandler;
 
-    public PlayerJoinListener(PlayerHandler playerHandler) {
+    public PlayerJoinListener() {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
-        this.playerHandler = playerHandler;
-
         this.winterVillage.getServer().getPluginManager().registerEvents(this, winterVillage);
     }
 
@@ -32,7 +28,7 @@ public class PlayerJoinListener implements Listener {
         final Player player = event.getPlayer();
 
         // player data being loaded
-        this.playerHandler.apply(player, player.getUniqueId());
+        this.winterVillage.playerHandler.apply(player, player.getUniqueId());
 
         // scoreboard
         this.winterVillage.scoreboardHandler.playerList();

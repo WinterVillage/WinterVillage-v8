@@ -1,7 +1,6 @@
 package de.wintervillage.main.player.listener;
 
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.player.PlayerHandler;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -12,12 +11,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class PlayerQuitListener implements Listener {
 
     private final WinterVillage winterVillage;
-    private final PlayerHandler playerHandler;
 
-    public PlayerQuitListener(PlayerHandler playerHandler) {
+    public PlayerQuitListener() {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
-        this.playerHandler = playerHandler;
-
         this.winterVillage.getServer().getPluginManager().registerEvents(this, winterVillage);
     }
 
@@ -29,12 +25,12 @@ public class PlayerQuitListener implements Listener {
         this.winterVillage.scoreboardHandler.removeScoreboard(player.getUniqueId());
 
         // Skipping saving the player because he's still being loaded
-        if (player.getPersistentDataContainer().has(this.playerHandler.applyingKey)) {
-            player.getPersistentDataContainer().remove(this.playerHandler.applyingKey);
+        if (player.getPersistentDataContainer().has(this.winterVillage.playerHandler.applyingKey)) {
+            player.getPersistentDataContainer().remove(this.winterVillage.playerHandler.applyingKey);
             return;
         }
 
         // save player
-        this.playerHandler.save(player);
+        this.winterVillage.playerHandler.save(player);
     }
 }

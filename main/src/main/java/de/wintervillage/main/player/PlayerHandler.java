@@ -69,8 +69,8 @@ public class PlayerHandler {
         new HomeRequest();
 
         // bukkit
-        new PlayerJoinListener(this);
-        new PlayerQuitListener(this);
+        new PlayerJoinListener();
+        new PlayerQuitListener();
     }
 
     /**
