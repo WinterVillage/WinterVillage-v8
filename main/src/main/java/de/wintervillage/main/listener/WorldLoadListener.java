@@ -21,9 +21,11 @@ public class WorldLoadListener implements Listener {
         if (!event.getWorld().getName().equalsIgnoreCase("world")) return;
 
         // load shops after world has been loaded successfully
-        this.winterVillage.shopHandler.forceUpdate((success, message) -> {
-            if (success) return;
-            this.winterVillage.getLogger().warning("Shops could not be loaded: " + message);
-        });
+        if (this.winterVillage.configDocument.getDocument("enabled").getBoolean("shop_handler")) {
+            this.winterVillage.shopHandler.forceUpdate((success, message) -> {
+                if (success) return;
+                this.winterVillage.getLogger().warning("Shops could not be loaded: " + message);
+            });
+        }
     }
 }

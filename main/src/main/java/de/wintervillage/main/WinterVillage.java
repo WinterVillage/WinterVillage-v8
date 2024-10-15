@@ -187,7 +187,7 @@ public final class WinterVillage extends JavaPlugin {
         new AsyncChatListener();
         new PlayerMoveListener();
         if (!this.configDocument.getDocument("enabled").getBoolean("teleportation_between_worlds")) new PlayerTeleportListener();
-        if (this.configDocument.getDocument("enabled").getBoolean("shop_handler")) new WorldLoadListener();
+        new WorldLoadListener();
 
         // commands
         final LifecycleEventManager<Plugin> lifecycleEventManager = this.getLifecycleManager();
