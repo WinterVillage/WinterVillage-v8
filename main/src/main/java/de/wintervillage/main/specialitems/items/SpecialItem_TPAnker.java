@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -22,8 +23,10 @@ public class SpecialItem_TPAnker extends SpecialItem {
         this.setNameStr("tp_anker");
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event){
+        if (event.isCancelled()) return;
+
         if(isSpecialitem(event.getItemInHand())){
             event.setCancelled(true);
         }

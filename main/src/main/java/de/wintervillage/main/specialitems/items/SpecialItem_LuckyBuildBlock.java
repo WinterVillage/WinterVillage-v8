@@ -1,15 +1,13 @@
 package de.wintervillage.main.specialitems.items;
 
-import de.wintervillage.common.paper.models.Item;
 import de.wintervillage.main.specialitems.SpecialItem;
 import de.wintervillage.main.specialitems.SpecialItems;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.block.Action;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -48,7 +46,7 @@ public class SpecialItem_LuckyBuildBlock extends SpecialItem {
         items.add(new ItemStack(Material.MOSS_BLOCK));
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event){
         if(event.isCancelled()) return;
 
@@ -57,7 +55,7 @@ public class SpecialItem_LuckyBuildBlock extends SpecialItem {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event){
         if(event.isCancelled()) return;
 

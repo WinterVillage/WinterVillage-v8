@@ -5,10 +5,9 @@ import de.wintervillage.main.specialitems.SpecialItems;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.block.Action;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -41,7 +40,7 @@ public class SpecialItem_LuckyItemBlock extends SpecialItem {
         items.add(new ItemStack(Material.MACE, 1));
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event){
         if(event.isCancelled()) return;
 
@@ -50,7 +49,7 @@ public class SpecialItem_LuckyItemBlock extends SpecialItem {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event){
         if(event.isCancelled()) return;
 
