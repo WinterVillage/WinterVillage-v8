@@ -38,6 +38,13 @@ dependencies {
 
     // triumphgui
     implementation("dev.triumphteam:triumph-gui:3.1.10")
+
+    // custom block data
+    implementation("com.jeff-media:custom-block-data:2.2.3")
+
+    // cloudnet
+    compileOnly("eu.cloudnetservice.cloudnet:bridge:4.0.0-RC10")
+    compileOnly("eu.cloudnetservice.cloudnet:platform-inject-api:4.0.0-RC10")
 }
 
 tasks {
@@ -51,6 +58,7 @@ tasks {
         archiveClassifier.set("")
 
         relocate("dev.triumphteam.gui", "de.wintervillage.main.gui")
+        relocate("com.jeff_media.customblockdata", "de.wintervillage.main.customblockdata")
 
         manifest {
             attributes["paperweight-mappings-namespace"] = "mojang"

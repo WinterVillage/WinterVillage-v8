@@ -10,24 +10,24 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class Listener_PlayerDeath implements Listener {
 
-    private WinterVillage winterVillage;
+    private final WinterVillage winterVillage;
 
     public Listener_PlayerDeath(WinterVillage winterVillage){
         this.winterVillage = winterVillage;
         this.winterVillage.getServer().getPluginManager().registerEvents(this, this.winterVillage);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDeath(PlayerDeathEvent event){
         Player player = event.getPlayer();
 
@@ -36,6 +36,12 @@ public class Listener_PlayerDeath implements Listener {
         } else {
             event.deathMessage(this.winterVillage.PREFIX.append(MiniMessage.miniMessage().deserialize("Der Spieler <color:red>" + PlainTextComponentSerializer.plainText().serialize(player.displayName()) + "<color:white> ist gestorben.")).decoration(TextDecoration.ITALIC, false));
         }
+
+        this.winterVillage.playerDatabase.modify(player.getUniqueId(), builder -> builder.deaths(builder.deaths() + 1))
+                .exceptionally(throwable -> {
+                    this.winterVillage.getLogger().warning("Could not update deaths for player " + player.getName() + " (" + player.getUniqueId() + ")");
+                    return null;
+                });
 
         Block block_chest = player.getLocation().getBlock();
         block_chest.setType(Material.CHEST);

@@ -29,7 +29,7 @@ public class FreezeCommand {
                         .executes((source) -> {
                             this.winterVillage.PLAYERS_FROZEN = !this.winterVillage.PLAYERS_FROZEN;
 
-                            String key = this.winterVillage.PLAYERS_FROZEN ? "wintervillage.commands.freeze.everyone-frozen" : "wintervillage.commands.freeze.everyone-unfrozen";
+                            String key = this.winterVillage.PLAYERS_FROZEN ? "wintervillage.command.freeze.everyone-frozen" : "wintervillage.command.freeze.everyone-unfrozen";
                             source.getSource().getSender().sendMessage(Component.join(
                                     this.winterVillage.prefix,
                                     Component.translatable(key)
@@ -47,13 +47,13 @@ public class FreezeCommand {
                                 player.getPersistentDataContainer().remove(this.winterVillage.frozenKey);
                                 source.getSource().getSender().sendMessage(Component.join(
                                         this.winterVillage.prefix,
-                                        Component.translatable("wintervillage.commands.freeze.player-unfrozen", MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())))
+                                        Component.translatable("wintervillage.command.freeze.player-unfrozen", MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())))
                                 );
                             } else {
                                 player.getPersistentDataContainer().set(this.winterVillage.frozenKey, PersistentDataType.BOOLEAN, true);
                                 source.getSource().getSender().sendMessage(Component.join(
                                         this.winterVillage.prefix,
-                                        Component.translatable("wintervillage.commands.freeze.player-frozen", MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())))
+                                        Component.translatable("wintervillage.command.freeze.player-frozen", MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())))
                                 );
                             }
                             return 1;

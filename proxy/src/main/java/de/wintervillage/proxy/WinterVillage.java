@@ -9,6 +9,7 @@ import com.mongodb.ServerAddress;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
+import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Dependency;
@@ -18,10 +19,18 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import de.wintervillage.common.core.config.Document;
 import de.wintervillage.common.core.player.codec.PlayerCodecProvider;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
-import de.wintervillage.proxy.player.PlayerChatListener;
-import de.wintervillage.proxy.player.PreLoginListener;
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.LuckPermsProvider;
+import de.wintervillage.common.core.translation.MiniMessageTranslator;
+import de.wintervillage.proxy.commands.TransferCommand;
+import de.wintervillage.proxy.commands.punish.PunishCommand;
+import de.wintervillage.proxy.listener.PlayerChatListener;
+import de.wintervillage.proxy.listener.PreLoginListener;
+import de.wintervillage.proxy.player.PlayerHandler;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.translation.GlobalTranslator;
+import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.slf4j.Logger;
@@ -30,6 +39,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
 @Plugin(
@@ -38,18 +49,20 @@ import java.util.concurrent.TimeUnit;
         version = "8-SNAPSHOT",
         authors = {"Voldechse"},
         dependencies = {
-                @Dependency(id = "luckperms", optional = false)
+                @Dependency(id = "luckperms", optional = false),
+                @Dependency(id = "cloudnet-bridge", optional = false)
         }
 )
 public final class WinterVillage {
 
-    private @Inject final ProxyServer proxyServer;
-    private @Inject final Logger logger;
+    private @Inject
+    final ProxyServer proxyServer;
+    private @Inject
+    final Logger logger;
     private final Path dataDirectory;
 
     public PlayerDatabase playerDatabase;
-
-    public LuckPerms luckPerms;
+    public PlayerHandler playerHandler;
 
     // configs
     public Document databaseDocument;
@@ -57,6 +70,14 @@ public final class WinterVillage {
     // databases
     public MongoClient mongoClient;
     public MongoDatabase mongoDatabase;
+
+    /**
+     * Usage: {@link Component#join(JoinConfiguration.Builder, ComponentLike...)} to send a message with prefix
+     */
+    public final JoinConfiguration prefix = JoinConfiguration.builder()
+            .prefix(Component.translatable("wintervillage.prefix"))
+            .separator(Component.empty())
+            .build();
 
     @Inject
     public WinterVillage(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory) {
@@ -72,11 +93,36 @@ public final class WinterVillage {
     public void onProxyInitialization(final ProxyInitializeEvent event) {
         this.luckpermsSupport();
 
-        Injector injector = Guice.createInjector(new WinterVillageModule(this.mongoDatabase));
-        this.playerDatabase = injector.getInstance(PlayerDatabase.class);
+        Injector moduleInjector = Guice.createInjector(new WinterVillageModule(this, this.mongoDatabase));
+        this.playerDatabase = moduleInjector.getInstance(PlayerDatabase.class);
+        this.playerHandler = moduleInjector.getInstance(PlayerHandler.class);
 
+        // listener
         this.proxyServer.getEventManager().register(this, new PlayerChatListener(this));
         this.proxyServer.getEventManager().register(this, new PreLoginListener(this));
+
+        // commands
+        CommandManager commandManager = this.proxyServer.getCommandManager();
+        commandManager.register(
+                commandManager.metaBuilder("punish").plugin(this).build(),
+                new PunishCommand(this).create()
+        );
+        commandManager.register(
+                commandManager.metaBuilder("transfer").plugin(this).build(),
+                new TransferCommand(this).create()
+        );
+
+        // translations
+        MiniMessageTranslator translator = new MiniMessageTranslator(Key.key("wintervillage", "translations"));
+
+        ResourceBundle bundleGerman = ResourceBundle.getBundle("Bundle", Locale.GERMANY, UTF8ResourceBundleControl.get());
+        ResourceBundle bundleEnglish = ResourceBundle.getBundle("Bundle", Locale.US, UTF8ResourceBundleControl.get());
+
+        translator.registerAll(Locale.US, bundleEnglish, true);
+        translator.registerAll(Locale.GERMANY, bundleGerman, true);
+        translator.defaultLocale(Locale.GERMANY);
+
+        GlobalTranslator.translator().addSource(translator);
     }
 
     private void resolveConfig() {
@@ -131,7 +177,7 @@ public final class WinterVillage {
         if (!this.proxyServer.getPluginManager().getPlugin("luckperms").isPresent()) return;
 
         try {
-            this.luckPerms = LuckPermsProvider.get();
+
         } catch (Exception e) {
             this.logger.error("Failed to load LuckPerms service", e);
         }

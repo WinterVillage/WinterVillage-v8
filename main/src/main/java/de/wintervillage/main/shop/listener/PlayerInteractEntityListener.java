@@ -93,11 +93,14 @@ public class PlayerInteractEntityListener implements Listener {
                 return;
             }
 
+            ItemStack clone = itemInHand.clone();
+            clone.setAmount(1);
+
             // set item
-            this.winterVillage.shopDatabase.modify(shop.uniqueId(), builder -> builder.item(itemInHand))
+            this.winterVillage.shopDatabase.modify(shop.uniqueId(), builder -> builder.item(clone))
                     .thenAccept(updatedShop -> {
                         Bukkit.getScheduler().runTask(this.winterVillage, () -> {
-                            shop.item(updatedShop.item());
+                            shop.item(clone);
                             shop.updateInformation();
                         });
 

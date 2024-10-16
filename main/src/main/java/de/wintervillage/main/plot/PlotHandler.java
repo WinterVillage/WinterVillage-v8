@@ -8,6 +8,7 @@ import de.wintervillage.main.plot.listener.entity.*;
 import de.wintervillage.main.plot.listener.misc.InventoryMoveItemListener;
 import de.wintervillage.main.plot.listener.misc.InventoryOpenListener;
 import de.wintervillage.main.plot.listener.player.*;
+import de.wintervillage.main.plot.listener.setup.CancelSetupListener;
 import de.wintervillage.main.plot.task.BoundariesTask;
 import de.wintervillage.main.plot.task.SetupTask;
 import net.kyori.adventure.text.Component;
@@ -95,9 +96,10 @@ public class PlotHandler {
         new PlayerBucketFillListener();
         new PlayerInteractAtEntityListener(); // the client may send PlayerInteractEntityEvent in addition, thanks mojang
         new PlayerInteractEntityListener();
-        new PlayerQuitListener();
+        new PlayerTNTListener();
 
         // setup
+        new CancelSetupListener();
         new de.wintervillage.main.plot.listener.setup.PlayerInteractListener();
     }
 
@@ -144,10 +146,15 @@ public class PlotHandler {
         Bukkit.getOnlinePlayers().forEach(this::stopTasks);
     }
 
-    public void stopTasks(Player player) {
+    public boolean stopTasks(Player player) {
+        boolean successful = false;
+
         PersistentDataContainer container = player.getPersistentDataContainer();
         // contains BoundingBox2D
-        if (container.has(this.plotSetupKey)) container.remove(this.plotSetupKey);
+        if (container.has(this.plotSetupKey)) {
+            container.remove(this.plotSetupKey);
+            successful = true;
+        }
 
         // contains SetupTask taskId
         if (container.has(this.plotRectangleKey)) {
@@ -157,6 +164,7 @@ public class PlotHandler {
             if (task != null) task.stop();
 
             container.remove(this.plotRectangleKey);
+            successful = true;
         }
 
         // contains BoundariesTask taskId
@@ -167,12 +175,17 @@ public class PlotHandler {
             if (task != null) task.stop();
 
             container.remove(this.plotBoundariesKey);
+            successful = true;
         }
 
         // remove setup item
-        Arrays.stream(player.getInventory().getContents())
+        boolean removedItem = Arrays.stream(player.getInventory().getContents())
                 .filter(item -> item != null && item.hasItemMeta() && item.getPersistentDataContainer().has(this.plotSetupKey))
-                .forEach(item -> player.getInventory().remove(item));
+                .peek(itemStack -> player.getInventory().remove(itemStack))
+                .count() > 0;
+        if (removedItem) successful = true;
+
+        return successful;
     }
 
     public void deny(Player player, Location location) {
@@ -213,7 +226,7 @@ public class PlotHandler {
 
     /**
      * Format the user with the highest group color
-     *
+     * <p>
      * Note: User will be null if the user never joined the server
      *
      * @param user {@link User} to format

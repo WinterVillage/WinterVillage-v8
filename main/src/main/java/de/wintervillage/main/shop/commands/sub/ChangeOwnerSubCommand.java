@@ -3,14 +3,15 @@ package de.wintervillage.main.shop.commands.sub;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import de.wintervillage.common.core.type.Pair;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.shop.Shop;
-import de.wintervillage.main.shop.combined.CombinedUserShop;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.model.group.Group;
+import net.luckperms.api.model.user.User;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -62,8 +63,7 @@ public class ChangeOwnerSubCommand {
                                                 return CompletableFuture.completedFuture(Optional.empty());
                                             })
                                     )
-                                    .thenCompose(userOptional -> userOptional
-                                            .map(user -> {
+                                    .thenCompose(userOptional -> userOptional.map(user -> {
                                                 Group highestGroup = this.winterVillage.playerHandler.highestGroup(user);
 
                                                 if (shop.owner().equals(user.getUniqueId())) {
@@ -72,23 +72,26 @@ public class ChangeOwnerSubCommand {
                                                             Component.translatable("wintervillage.commands.shop.player-is-owner",
                                                                     MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + user.getUsername()))
                                                     ));
-                                                    return CompletableFuture.completedFuture(Optional.<CombinedUserShop>empty());
+                                                    return CompletableFuture.completedFuture(Optional.<Pair<User, Shop>>empty());
                                                 }
 
                                                 return this.winterVillage.shopDatabase.modify(shop.uniqueId(), updated -> updated.owner(user.getUniqueId()))
-                                                        .thenApply(updatedShop -> Optional.of(new CombinedUserShop(user, updatedShop)));
-                                            })
-                                            .orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()))
+                                                        .thenApply(updatedShop -> Optional.of(Pair.of(user, updatedShop)));
+                                            }).orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()))
                                     )
-                                    .thenAccept(updatedShop -> updatedShop.ifPresent(combined -> {
-                                                Group highestGroup = this.winterVillage.playerHandler.highestGroup(combined.owner());
+                                    .thenAccept(opt -> opt.ifPresent(pair -> {
+                                                User owner = (User) pair.first();
+                                                Shop updatedShop = (Shop) pair.second();
+
+                                                Group highestGroup = this.winterVillage.playerHandler.highestGroup(owner);
                                                 player.sendMessage(Component.join(
                                                         this.winterVillage.prefix,
                                                         Component.translatable("wintervillage.commands.shop.updated-owner",
-                                                                MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + combined.owner().getUsername())
+                                                                MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + owner.getUsername())
                                                         )
                                                 ));
-                                                this.winterVillage.shopHandler.forceUpdate();
+
+                                                shop.owner(updatedShop.owner());
                                             })
                                     )
                                     .exceptionally(throwable -> {

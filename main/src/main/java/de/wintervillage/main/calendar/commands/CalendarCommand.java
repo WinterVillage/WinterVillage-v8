@@ -43,14 +43,14 @@ public class CalendarCommand {
                                             .thenAccept(_ -> {
                                                 player.sendMessage(Component.join(
                                                         this.winterVillage.prefix,
-                                                        Component.translatable("wintervillage.commands.calendar.set-day", Component.text(day))
+                                                        Component.translatable("wintervillage.command.calendar.set-day", Component.text(day))
                                                 ));
                                                 this.winterVillage.calendarHandler.forceUpdate();
                                             })
                                             .exceptionally((t) -> {
                                                 player.sendMessage(Component.join(
                                                         this.winterVillage.prefix,
-                                                        Component.translatable("wintervillage.commands.calendar.set-day-error", Component.text(t.getMessage()))
+                                                        Component.translatable("wintervillage.command.calendar.set-day-error", Component.text(t.getMessage()))
                                                 ));
                                                 return null;
                                             });
@@ -70,7 +70,7 @@ public class CalendarCommand {
                                     if (!optional.isPresent()) {
                                         player.sendMessage(Component.join(
                                                 this.winterVillage.prefix,
-                                                Component.translatable("wintervillage.commands.calendar.get-not-found")
+                                                Component.translatable("wintervillage.command.calendar.get-not-found")
                                         ));
                                         return 0;
                                     }

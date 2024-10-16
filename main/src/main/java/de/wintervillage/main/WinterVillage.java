@@ -11,30 +11,32 @@ import com.mongodb.ServerAddress;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
-import de.wintervillage.common.core.translation.MiniMessageTranslator;
-import de.wintervillage.main.listener.PlayerJoinListener;
-import de.wintervillage.main.listener.WorldLoadListener;
-import de.wintervillage.main.player.PlayerHandler;
-import de.wintervillage.main.antifreezle.AntiFreezle;
 import de.wintervillage.common.core.config.Document;
 import de.wintervillage.common.core.player.codec.PlayerCodecProvider;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
+import de.wintervillage.common.core.translation.MiniMessageTranslator;
+import de.wintervillage.main.antifreezle.AntiFreezle;
 import de.wintervillage.main.antifreezle.commands.CMD_AntiFreezle;
 import de.wintervillage.main.calendar.CalendarHandler;
 import de.wintervillage.main.calendar.codec.CalenderDayCodecProvider;
 import de.wintervillage.main.calendar.commands.CalendarCommand;
 import de.wintervillage.main.calendar.database.CalendarDatabase;
+import de.wintervillage.main.commands.FarmweltCommand;
 import de.wintervillage.main.commands.FreezeCommand;
 import de.wintervillage.main.commands.InventoryCommand;
-import de.wintervillage.main.commands.TestCommand;
+import de.wintervillage.main.commands.home.HomeCommand;
+import de.wintervillage.main.commands.home.SetHomeCommand;
 import de.wintervillage.main.death.DeathManager;
 import de.wintervillage.main.event.EventManager;
 import de.wintervillage.main.listener.AsyncChatListener;
 import de.wintervillage.main.listener.PlayerMoveListener;
-import de.wintervillage.main.plot.commands.PlotCommand;
+import de.wintervillage.main.listener.PlayerTeleportListener;
+import de.wintervillage.main.listener.WorldLoadListener;
+import de.wintervillage.main.player.PlayerHandler;
 import de.wintervillage.main.plot.PlotHandler;
-import de.wintervillage.main.plot.database.PlotDatabase;
 import de.wintervillage.main.plot.codec.PlotCodecProvider;
+import de.wintervillage.main.plot.commands.PlotCommand;
+import de.wintervillage.main.plot.database.PlotDatabase;
 import de.wintervillage.main.scoreboard.ScoreboardHandler;
 import de.wintervillage.main.shop.ShopHandler;
 import de.wintervillage.main.shop.codec.ShopCodecProvider;
@@ -61,6 +63,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -73,16 +76,20 @@ import java.util.concurrent.TimeUnit;
 public final class WinterVillage extends JavaPlugin {
 
     // databases
-    public @Inject PlotDatabase plotDatabase;
+    public @Inject
+    @Nullable PlotDatabase plotDatabase;
+    public @Inject
+    @Nullable ShopDatabase shopDatabase;
     public @Inject CalendarDatabase calendarDatabase;
     public @Inject PlayerDatabase playerDatabase;
-    public @Inject ShopDatabase shopDatabase;
 
     // handlers
-    public @Inject PlotHandler plotHandler;
+    public @Inject
+    @Nullable PlotHandler plotHandler;
+    public @Inject
+    @Nullable ShopHandler shopHandler;
     public @Inject CalendarHandler calendarHandler;
     public @Inject PlayerHandler playerHandler;
-    public @Inject ShopHandler shopHandler;
     public @Inject SpecialItems specialItems;
     public @Inject EventManager eventManager;
     public @Inject DeathManager deathManager;
@@ -105,9 +112,9 @@ public final class WinterVillage extends JavaPlugin {
     public final Component PREFIX = Component.translatable("wintervillage.prefix");
 
     // configs
-    public Document databaseDocument;
+    public Document databaseDocument, configDocument;
 
-    // databases
+    // database
     public MongoClient mongoClient;
     public MongoDatabase mongoDatabase;
 
@@ -126,7 +133,13 @@ public final class WinterVillage extends JavaPlugin {
                     .append("user", "user")
                     .append("password", "password")
                     .save(Paths.get(this.getDataFolder().getAbsolutePath(), "database.json"));
+        if (!Files.exists(Paths.get(this.getDataFolder().getAbsolutePath(), "config.json")))
+            new Document("enabled", new Document("plot_handler", false)
+                    .append("shop_handler", false)
+                    .append("teleportation_between_worlds", true))
+                    .save(Paths.get(this.getDataFolder().getAbsolutePath(), "config.json"));
         this.databaseDocument = Document.load(Paths.get(this.getDataFolder().getAbsolutePath(), "database.json"));
+        this.configDocument = Document.load(Paths.get(this.getDataFolder().getAbsolutePath(), "config.json"));
 
         this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
@@ -167,13 +180,13 @@ public final class WinterVillage extends JavaPlugin {
         if (luckPermsProvider != null) this.luckPerms = luckPermsProvider.getProvider();
 
         // inject handlers
-        Injector injector = Guice.createInjector(new WinterVillageModule(this.protocolManager, this.mongoDatabase, this.luckPerms));
+        Injector injector = Guice.createInjector(new WinterVillageModule(this.configDocument, this.protocolManager, this.mongoDatabase, this.luckPerms));
         injector.injectMembers(this);
 
         // listener
         new AsyncChatListener();
-        new PlayerJoinListener();
         new PlayerMoveListener();
+        if (!this.configDocument.getDocument("enabled").getBoolean("teleportation_between_worlds")) new PlayerTeleportListener();
         new WorldLoadListener();
 
         // commands
@@ -182,12 +195,15 @@ public final class WinterVillage extends JavaPlugin {
             final Commands command = event.registrar();
 
             //General-System
+            new FarmweltCommand(command);
             new FreezeCommand(command);
             new InventoryCommand(command);
-            new PlotCommand(command);
-            new ShopCommand(command);
+            if (this.configDocument.getDocument("enabled").getBoolean("plot_handler")) new PlotCommand(command);
+            if (this.configDocument.getDocument("enabled").getBoolean("shop_handler")) new ShopCommand(command);
 
-            new TestCommand(command);
+            // home
+            new HomeCommand(command);
+            new SetHomeCommand(command);
 
             //SpecialItems
             new CMD_Disenchant(command);
@@ -228,7 +244,7 @@ public final class WinterVillage extends JavaPlugin {
 
         if (this.mongoClient != null) this.mongoClient.close();
         if (this.playerHandler != null) this.playerHandler.terminate();
-        if (this.shopHandler != null) this.shopHandler.terminate();
+        if (this.shopHandler != null) this.shopHandler.clearShops();
 
         this.eventManager.stop();
     }
