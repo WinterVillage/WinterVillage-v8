@@ -95,6 +95,7 @@ public class SpecialItems {
         this.list_specialItems.add(new SpecialItemWVE_3x3());
         this.list_specialItems.add(new SpecialItemWVE_Unbreakable());
         this.list_specialItems.add(new SpecialItem_SantasShield());
+        this.list_specialItems.add(new SpecialItem_TPAnker());
     }
 
     private void registerListener(){
