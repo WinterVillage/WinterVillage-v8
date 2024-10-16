@@ -83,6 +83,18 @@ public class SpecialItems {
         this.list_specialItems.add(new SpecialItem_TimberAxt());
         this.list_specialItems.add(new SpecialItem_WVETable());
         this.list_specialItems.add(new SpecialItemWVE_AutoSmelt());
+        this.list_specialItems.add(new SpecialItem_SantasBoots());
+        this.list_specialItems.add(new SpecialItem_SantasHelmet());
+        this.list_specialItems.add(new SpecialItem_SantasKeks());
+        this.list_specialItems.add(new SpecialItem_SantasSword());
+        this.list_specialItems.add(new SpecialItemWVE_Freeze());
+        this.list_specialItems.add(new SpecialItem_SantasBow());
+        this.list_specialItems.add(new SpecialItem_LuckyBuildBlock());
+        this.list_specialItems.add(new SpecialItem_LuckyItemBlock());
+        this.list_specialItems.add(new SpecialItemWVE_XPBoost());
+        this.list_specialItems.add(new SpecialItemWVE_3x3());
+        this.list_specialItems.add(new SpecialItemWVE_Unbreakable());
+        this.list_specialItems.add(new SpecialItem_SantasShield());
     }
 
     private void registerListener(){
