@@ -29,7 +29,7 @@ public class SpecialItem_SantasBow extends SpecialItem {
         this.setItem(item);
         this.setNameStr("santas_bow");
 
-        this.key = new NamespacedKey("wintervillage:specialitems", "santas_bow");
+        this.key = new NamespacedKey("wintervillage", "specialitems/santas_bow");
     }
 
     @EventHandler
