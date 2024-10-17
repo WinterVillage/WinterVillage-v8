@@ -23,6 +23,6 @@ public class UserRecalculation {
 
     private void recalculating(UserDataRecalculateEvent event) {
         if (Bukkit.getPlayer(event.getUser().getUniqueId()) == null) return;
-        this.winterVillage.scoreboardHandler.playerList();
+        Bukkit.getScheduler().runTask(this.winterVillage, () -> this.winterVillage.scoreboardHandler.playerList());
     }
 }
