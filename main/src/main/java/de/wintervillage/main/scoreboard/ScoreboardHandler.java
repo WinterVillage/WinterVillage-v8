@@ -12,6 +12,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,16 +23,29 @@ public class ScoreboardHandler {
 
     private final Map<UUID, Scoreboard> scoreboards;
 
+    private final List<Group> sortedGroups;
+    private final Map<String, Integer> groupOrder;
+
     @Inject
     public ScoreboardHandler() {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.scoreboards = new ConcurrentHashMap<>();
+
+        this.sortedGroups = this.winterVillage.luckPerms.getGroupManager().getLoadedGroups()
+                .stream()
+                .sorted((group1, group2) -> Integer.compare(group2.getWeight().getAsInt(), group1.getWeight().getAsInt()))
+                .toList();
+
+        this.groupOrder = new ConcurrentHashMap<>();
+        for (int i = 0; i < this.sortedGroups.size(); i++) {
+            this.groupOrder.put(this.sortedGroups.get(i).getName().toLowerCase(), i);
+        }
     }
 
     public void playerList(Player player) {
         Scoreboard scoreboard = this.getScoreboard(player.getUniqueId());
 
-        this.winterVillage.luckPerms.getGroupManager().getLoadedGroups().forEach(group -> {
+        this.sortedGroups.forEach(group -> {
             String teamName = this.teamName(group);
 
             Team team = scoreboard.getTeam(teamName);
@@ -69,7 +83,8 @@ public class ScoreboardHandler {
     }
 
     private String teamName(@NotNull Group group) {
-        if (group == null) return "0_default";
-        return group.getWeight().getAsInt() + "_" + group.getName().toLowerCase();
+        if (group == null) return "99_default";
+        int index = this.groupOrder.getOrDefault(group.getName().toLowerCase(), 99);
+        return String.format("%02d_%s", index, group.getName().toLowerCase());
     }
 }
