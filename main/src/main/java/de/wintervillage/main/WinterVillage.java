@@ -24,6 +24,7 @@ import de.wintervillage.main.calendar.database.CalendarDatabase;
 import de.wintervillage.main.commands.FarmweltCommand;
 import de.wintervillage.main.commands.FreezeCommand;
 import de.wintervillage.main.commands.InventoryCommand;
+import de.wintervillage.main.commands.SpawnCommand;
 import de.wintervillage.main.commands.home.HomeCommand;
 import de.wintervillage.main.commands.home.SetHomeCommand;
 import de.wintervillage.main.death.DeathManager;
@@ -198,6 +199,7 @@ public final class WinterVillage extends JavaPlugin {
             new FarmweltCommand(command);
             new FreezeCommand(command);
             new InventoryCommand(command);
+            new SpawnCommand(command);
             if (this.configDocument.getDocument("enabled").getBoolean("plot_handler")) new PlotCommand(command);
             if (this.configDocument.getDocument("enabled").getBoolean("shop_handler")) new ShopCommand(command);
 

@@ -61,6 +61,12 @@ public class CloudNetChannelMessageListener {
                         Bukkit.getWorld("world").getSpawnLocation()
                 ));
 
+            if ("wintervillage:bauwelt".equals(event.message()))
+                PENDING_REQUESTS.put(uniqueId, Pair.of(
+                        Component.translatable("wintervillage.command.bauwelt.teleported"),
+                        Bukkit.getWorld("world").getSpawnLocation()
+                ));
+
             event.content().release();
         }
     }
