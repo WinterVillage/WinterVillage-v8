@@ -10,37 +10,71 @@ import de.wintervillage.common.core.player.WinterVillagePlayer;
 import de.wintervillage.common.core.player.data.WhitelistInformation;
 import de.wintervillage.common.core.type.Pair;
 import de.wintervillage.proxy.WinterVillage;
-import eu.cloudnetservice.driver.inject.InjectionLayer;
-import eu.cloudnetservice.driver.registry.ServiceRegistry;
-import eu.cloudnetservice.modules.bridge.player.PlayerManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.model.user.User;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class WhitelistCommand {
 
     /**
      * /whitelist add <name>
      * /whitelist remove <name>
-     * TODO: /whitelist list
+     * /whitelist list
      */
 
     private final WinterVillage winterVillage;
 
-    private final PlayerManager playerManager;
-
     public WhitelistCommand(WinterVillage winterVillage) {
         this.winterVillage = winterVillage;
-
-        ServiceRegistry serviceRegistry = InjectionLayer.ext().instance(ServiceRegistry.class);
-        this.playerManager = serviceRegistry.firstProvider(PlayerManager.class);
     }
 
     public BrigadierCommand create() {
         LiteralCommandNode<CommandSource> node = BrigadierCommand.literalArgumentBuilder("whitelist")
+                .then(BrigadierCommand.literalArgumentBuilder("list")
+                        .requires(context -> context.hasPermission("wintervillage.command.whitelist.list"))
+                        .executes(context -> {
+                            this.winterVillage.playerDatabase.players()
+                                    .thenCompose(collection -> {
+                                        Collection<CompletableFuture<Pair<User, WinterVillagePlayer>>> futures = collection.stream()
+                                                .map(player -> this.winterVillage.playerHandler.combinedPlayer(player.uniqueId(), null))
+                                                .toList();
+
+                                        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                                                .thenApply(v -> futures.stream()
+                                                        .map(CompletableFuture::join)
+                                                        .collect(Collectors.toList())
+                                                );
+                                    })
+                                    .thenAccept(test -> {
+                                        List<Pair<User, WinterVillagePlayer>> players = test.stream()
+                                                .filter(pair -> pair.second().whitelistInformation() != null)
+                                                .toList();
+
+                                        context.getSource().sendMessage(Component.translatable("wintervillage.command.whitelist.list-header", Component.text(players.size())));
+
+                                        List<Component> components = players.stream()
+                                                .map(pair -> MiniMessage.miniMessage().deserialize(pair.first().getCachedData().getMetaData().getMetaValue("color") + pair.first().getUsername()))
+                                                .toList();
+                                        context.getSource().sendMessage(Component.join(
+                                                JoinConfiguration.separator(Component.text(", ", NamedTextColor.DARK_GRAY)),
+                                                components
+                                        ));
+                                    })
+                                    .exceptionally(throwable -> {
+                                        context.getSource().sendMessage(Component.text("Failed: " + throwable.getMessage()));
+                                        return null;
+                                    });
+                            return Command.SINGLE_SUCCESS;
+                        })
+                )
                 .then(BrigadierCommand.literalArgumentBuilder("remove")
                         .requires(context -> context.hasPermission("wintervillage.command.whitelist.remove"))
                         .then(BrigadierCommand.requiredArgumentBuilder("player", StringArgumentType.word())
