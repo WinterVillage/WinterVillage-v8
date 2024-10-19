@@ -1,9 +1,8 @@
 package de.wintervillage.restart.paper;
 
-import com.google.gson.JsonArray;
-import de.wintervillage.common.core.config.Document;
 import de.wintervillage.common.core.translation.MiniMessageTranslator;
 import de.wintervillage.restart.core.RestartManagement;
+import de.wintervillage.restart.core.config.ConfigHandler;
 import eu.cloudnetservice.driver.inject.InjectionLayer;
 import eu.cloudnetservice.driver.provider.SpecificCloudServiceProvider;
 import eu.cloudnetservice.wrapper.configuration.WrapperConfiguration;
@@ -16,7 +15,6 @@ import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Locale;
@@ -28,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 public final class WinterVillagePaper extends JavaPlugin {
 
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+    private ConfigHandler configHandler;
     private RestartManagement restartManagement;
 
     private SpecificCloudServiceProvider serviceProvider;
@@ -42,14 +41,12 @@ public final class WinterVillagePaper extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        if (!this.getDataFolder().exists()) this.getDataFolder().mkdir();
-        if (!Files.exists(Paths.get(this.getDataFolder().getAbsolutePath(), "config.json")))
-            this.defaultConfig().save(Paths.get(this.getDataFolder().getAbsolutePath(), "config.json"));
+        this.configHandler = new ConfigHandler(Paths.get(this.getDataFolder().getAbsolutePath(), "config.json"));
     }
 
     @Override
     public void onEnable() {
-        this.restartManagement = new RestartManagement(Paths.get(this.getDataFolder().getAbsolutePath(), "config.json"));
+        this.restartManagement = new RestartManagement(this.configHandler);
         this.start();
 
         // cloudnet
@@ -71,12 +68,6 @@ public final class WinterVillagePaper extends JavaPlugin {
     @Override
     public void onDisable() {
         if (this.executorService != null && !this.executorService.isShutdown()) this.executorService.shutdown();
-    }
-
-    private Document defaultConfig() {
-        Document defaultConfig = new Document();
-        defaultConfig.append("scheduled", new JsonArray());
-        return defaultConfig;
     }
 
     private void start() {

@@ -1,8 +1,8 @@
 package de.wintervillage.restart.core;
 
 import de.wintervillage.common.core.config.Document;
+import de.wintervillage.restart.core.config.ConfigHandler;
 
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,19 +10,19 @@ import java.util.List;
 
 public class RestartManagement {
 
-    private final Document document;
     private final Collection<ScheduledRestart> scheduled = new ArrayList<>();
+    private final ConfigHandler configHandler;
 
-    public RestartManagement(Path path) {
-        this.document = Document.load(path);
+    public RestartManagement(ConfigHandler configHandler) {
+        this.configHandler = configHandler;
         this.register();
     }
 
     private void register() {
-        if (!this.document.contains("scheduled")) return;
-        if (this.document.getArray("scheduled").isEmpty()) return;
+        if (!this.configHandler.getConfig().contains("scheduled")) return;
+        if (this.configHandler.getConfig().getArray("scheduled").isEmpty()) return;
 
-        this.document.getArray("scheduled").forEach(entry -> {
+        this.configHandler.getConfig().getArray("scheduled").forEach(entry -> {
             Document scheduledDocument = new Document(entry.getAsJsonObject());
 
             String dayOfWeek = scheduledDocument.getString("dayOfWeek");
