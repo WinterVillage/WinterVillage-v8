@@ -154,7 +154,8 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
         document.put("playerInformation", this.playerInformation.toDocument());
 
-        document.put("wildcardInformation", this.wildcardInformation.toDocument());
+        if (this.wildcardInformation != null)
+            document.put("wildcardInformation", this.wildcardInformation.toDocument());
 
         if (this.whitelistInformation != null)
             document.put("whitelistInformation", this.whitelistInformation.toDocument());
@@ -184,7 +185,10 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
                 .filter(doc -> !doc.isEmpty())
                 .map(WildcardInformation::fromDocument)
                 .orElse(null));
-        player.wildcardInformation(WildcardInformation.fromDocument(document.get("wildcardInformation", Document.class)));
+        player.whitelistInformation(Optional.ofNullable(document.get("whitelistInformation", Document.class))
+                .filter(doc -> !doc.isEmpty())
+                .map(WhitelistInformation::fromDocument)
+                .orElse(null));
         player.homeInformation(Optional.ofNullable(document.get("homeInformation", Document.class))
                 .filter(doc -> !doc.isEmpty())
                 .map(HomeInformation::fromDocument)
