@@ -25,10 +25,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -121,7 +118,7 @@ public class PlotHandler {
         return this.plotCache.stream().anyMatch(plot -> plot.uniqueId().equals(uniqueId));
     }
 
-    public List<Plot> byOwner(UUID owner) {
+    public Collection<Plot> byOwner(UUID owner) {
         return this.plotCache.stream()
                 .filter(plot -> plot.owner().equals(owner))
                 .toList();
