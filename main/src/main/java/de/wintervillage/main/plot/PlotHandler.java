@@ -1,6 +1,7 @@
 package de.wintervillage.main.plot;
 
 import de.wintervillage.common.paper.item.ItemBuilder;
+import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.combined.PlotUsers;
 import de.wintervillage.main.plot.listener.block.*;
@@ -25,10 +26,8 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -43,25 +42,26 @@ public class PlotHandler {
     private final ScheduledExecutorService executorService;
 
     /**
-     * Area of the plot will be MAX_PLOT_WIDTH x MAX_PLOT_WIDTH
+     * Area of the 1st plot will be MAX_PLOT_WIDTH x MAX_PLOT_WIDTH
      */
     public final int MAX_PLOT_WIDTH = 50;
 
     public final ItemStack SETUP_ITEM;
 
-    public NamespacedKey plotSetupKey, plotRectangleKey, plotBoundariesKey;
+    public final NamespacedKey setupBoundingsKey, setupTaskId, showBoundingsKey, confirmCreationKey;
 
     public PlotHandler() {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
         this.plotCache = new ArrayList<>();
 
-        this.plotSetupKey = new NamespacedKey("wintervillage", "plot/setup");
-        this.plotRectangleKey = new NamespacedKey("wintervillage", "plot/setup_rectangle_task");
-        this.plotBoundariesKey = new NamespacedKey("wintervillage", "plot/setup_boundaries_task");
+        this.setupBoundingsKey = new NamespacedKey("wintervillage", "plot/setup");
+        this.setupTaskId = new NamespacedKey("wintervillage", "plot/setup_rectangle_task");
+        this.showBoundingsKey = new NamespacedKey("wintervillage", "plot/setup_boundaries_task");
+        this.confirmCreationKey = new NamespacedKey("wintervillage", "plot/confirm_creation");
 
         this.SETUP_ITEM = ItemBuilder.from(Material.WOODEN_AXE)
                 .name(Component.text("Mark your plot corners", NamedTextColor.GREEN))
-                .persistentDataContainer(persistent -> persistent.set(this.plotSetupKey, PersistentDataType.BOOLEAN, true))
+                .persistentDataContainer(persistent -> persistent.set(this.setupBoundingsKey, PersistentDataType.BOOLEAN, true))
                 .build();
 
         this.executorService = Executors.newSingleThreadScheduledExecutor();
@@ -117,11 +117,24 @@ public class PlotHandler {
                 });
     }
 
+    public BigDecimal calculatePrice(Player player, BoundingBox2D boundingBox) {
+        BigDecimal cost = BigDecimal.ZERO;
+        if (this.byOwner(player.getUniqueId()).isEmpty()) return cost;
+
+        BigDecimal area = BigDecimal.valueOf(boundingBox.getArea());
+        if (this.byOwner(player.getUniqueId()).size() == 1) cost = area;
+        else {
+            BigDecimal multiplier = BigDecimal.valueOf(3).pow(this.byOwner(player.getUniqueId()).size() - 1);
+            cost = area.multiply(multiplier);
+        }
+        return cost;
+    }
+
     public boolean exists(UUID uniqueId) {
         return this.plotCache.stream().anyMatch(plot -> plot.uniqueId().equals(uniqueId));
     }
 
-    public List<Plot> byOwner(UUID owner) {
+    public Collection<Plot> byOwner(UUID owner) {
         return this.plotCache.stream()
                 .filter(plot -> plot.owner().equals(owner))
                 .toList();
@@ -151,36 +164,36 @@ public class PlotHandler {
 
         PersistentDataContainer container = player.getPersistentDataContainer();
         // contains BoundingBox2D
-        if (container.has(this.plotSetupKey)) {
-            container.remove(this.plotSetupKey);
+        if (container.has(this.setupBoundingsKey)) {
+            container.remove(this.setupBoundingsKey);
             successful = true;
         }
 
         // contains SetupTask taskId
-        if (container.has(this.plotRectangleKey)) {
-            int taskId = container.get(this.plotRectangleKey, PersistentDataType.INTEGER);
+        if (container.has(this.setupTaskId)) {
+            int taskId = container.get(this.setupTaskId, PersistentDataType.INTEGER);
 
             SetupTask task = SetupTask.task(taskId);
             if (task != null) task.stop();
 
-            container.remove(this.plotRectangleKey);
+            container.remove(this.setupTaskId);
             successful = true;
         }
 
         // contains BoundariesTask taskId
-        if (container.has(this.plotBoundariesKey)) {
-            int taskId = container.get(this.plotBoundariesKey, PersistentDataType.INTEGER);
+        if (container.has(this.showBoundingsKey)) {
+            int taskId = container.get(this.showBoundingsKey, PersistentDataType.INTEGER);
 
             BoundariesTask task = BoundariesTask.task(taskId);
             if (task != null) task.stop();
 
-            container.remove(this.plotBoundariesKey);
+            container.remove(this.showBoundingsKey);
             successful = true;
         }
 
         // remove setup item
         boolean removedItem = Arrays.stream(player.getInventory().getContents())
-                .filter(item -> item != null && item.hasItemMeta() && item.getPersistentDataContainer().has(this.plotSetupKey))
+                .filter(item -> item != null && item.hasItemMeta() && item.getPersistentDataContainer().has(this.setupBoundingsKey))
                 .peek(itemStack -> player.getInventory().remove(itemStack))
                 .count() > 0;
         if (removedItem) successful = true;

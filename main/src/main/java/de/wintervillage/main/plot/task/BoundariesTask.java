@@ -46,7 +46,7 @@ public class BoundariesTask implements Runnable {
      */
     @Override
     public void run() {
-        if (!this.player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotBoundariesKey)) return;
+        if (!this.player.getPersistentDataContainer().has(this.winterVillage.plotHandler.showBoundingsKey)) return;
         this.winterVillage.plotHandler.getPlotCache().forEach(plot -> this.render(plot.boundingBox()));
     }
 

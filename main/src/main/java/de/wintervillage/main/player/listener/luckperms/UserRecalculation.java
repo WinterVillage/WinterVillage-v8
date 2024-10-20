@@ -1,9 +1,13 @@
 package de.wintervillage.main.player.listener.luckperms;
 
 import de.wintervillage.main.WinterVillage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
+import net.luckperms.api.model.group.Group;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -22,7 +26,18 @@ public class UserRecalculation {
     }
 
     private void recalculating(UserDataRecalculateEvent event) {
-        if (Bukkit.getPlayer(event.getUser().getUniqueId()) == null) return;
-        this.winterVillage.scoreboardHandler.playerList();
+        Player player = Bukkit.getPlayer(event.getUser().getUniqueId());
+        if (player == null) return;
+
+        Group highestGroup = this.winterVillage.playerHandler.highestGroup(player);
+        Bukkit.getScheduler().runTask(this.winterVillage, () -> {
+            this.winterVillage.scoreboardHandler.playerList();
+
+            this.winterVillage.scoreboardHandler.updateScore(
+                    player,
+                    "10_highestgroup-value",
+                    Component.space().append(MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getPrefix()))
+            );
+        });
     }
 }

@@ -39,10 +39,9 @@ public interface WinterVillagePlayer {
 
     void playerInformation(@NotNull PlayerInformation playerInformation);
 
-    @Nullable
     WildcardInformation wildcardInformation();
 
-    void wildcardInformation(@Nullable WildcardInformation wildcardInformation);
+    void wildcardInformation(WildcardInformation wildcardInformation);
 
     @Nullable
     WhitelistInformation whitelistInformation();

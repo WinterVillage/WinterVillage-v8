@@ -45,8 +45,8 @@ public class SetupTask implements Runnable {
      */
     @Override
     public void run() {
-        if (!this.player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)) return;
-        BoundingBox2D boundingBox = this.player.getPersistentDataContainer().get(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType());
+        if (!this.player.getPersistentDataContainer().has(this.winterVillage.plotHandler.setupBoundingsKey)) return;
+        BoundingBox2D boundingBox = this.player.getPersistentDataContainer().get(this.winterVillage.plotHandler.setupBoundingsKey, new BoundingBoxDataType());
 
         if (boundingBox.getMinX() == 0 || boundingBox.getMinZ() == 0 || boundingBox.getMaxX() == 0 || boundingBox.getMaxZ() == 0)
             return;
@@ -62,7 +62,7 @@ public class SetupTask implements Runnable {
                 || boundingBox.getWidthZ() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH));
 
         Particle.DustOptions dustOptions = new Particle.DustOptions(
-                tooLarge ? Color.RED : Color.GREEN, 4f
+                tooLarge && this.winterVillage.plotHandler.byOwner(player.getUniqueId()).isEmpty() ? Color.RED : Color.GREEN, 4f
         );
 
         this.spawnAlongLine(minX, minZ, maxX, minZ, dustOptions); // TOP
@@ -70,7 +70,7 @@ public class SetupTask implements Runnable {
         this.spawnAlongLine(minX, minZ, minX, maxZ, dustOptions); // LEFT
         this.spawnAlongLine(maxX, minZ, maxX, maxZ, dustOptions); // RIGHT
 
-        Component component = tooLarge
+        Component component = tooLarge && this.winterVillage.plotHandler.byOwner(player.getUniqueId()).isEmpty()
                 ? Component.translatable("wintervillage.plot.too-big")
                 : Component.translatable("wintervillage.plot.selected-area", Component.text(boundingBox.getWidthX()), Component.text(boundingBox.getWidthZ()));
 

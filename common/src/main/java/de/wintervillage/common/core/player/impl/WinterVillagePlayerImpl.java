@@ -39,7 +39,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     private @NotNull PlayerInformation playerInformation;
 
     @BsonProperty("wildcardInformation")
-    private @Nullable WildcardInformation wildcardInformation;
+    private WildcardInformation wildcardInformation;
 
     @BsonProperty("whitelistInformation")
     private @Nullable WhitelistInformation whitelistInformation;
@@ -53,6 +53,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         this.deaths = 0;
 
         this.playerInformation = new PlayerInformation();
+        this.wildcardInformation = new WildcardInformation(0);
     }
 
     @Override
@@ -115,12 +116,12 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     }
 
     @Override
-    public void wildcardInformation(@Nullable WildcardInformation wildcardInformation) {
+    public void wildcardInformation(WildcardInformation wildcardInformation) {
         this.wildcardInformation = wildcardInformation;
     }
 
     @Override
-    public @Nullable WhitelistInformation whitelistInformation() {
+    public WhitelistInformation whitelistInformation() {
         return this.whitelistInformation;
     }
 

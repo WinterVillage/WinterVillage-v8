@@ -3,6 +3,7 @@ package de.wintervillage.main.plot.listener.player;
 import com.jeff_media.customblockdata.CustomBlockData;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.Plot;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -52,7 +53,8 @@ public class PlayerTNTListener implements Listener {
 
         UUID creator = UUID.fromString(blockContainer.get(this.creatorKey, PersistentDataType.STRING));
 
-        event.getBlock().getWorld().spawn(event.getBlock().getLocation(), TNTPrimed.class, tntPrimed -> {
+        Location blockLocation = event.getBlock().getLocation().clone().add(0.5, 0, 0.5);
+        event.getBlock().getWorld().spawn(blockLocation, TNTPrimed.class, tntPrimed -> {
             PersistentDataContainer entityContainer = tntPrimed.getPersistentDataContainer();
             entityContainer.set(this.creatorKey, PersistentDataType.STRING, creator.toString());
         });

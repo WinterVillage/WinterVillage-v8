@@ -21,6 +21,7 @@ import de.wintervillage.common.core.player.codec.PlayerCodecProvider;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
 import de.wintervillage.common.core.translation.MiniMessageTranslator;
 import de.wintervillage.proxy.commands.TransferCommand;
+import de.wintervillage.proxy.commands.WhitelistCommand;
 import de.wintervillage.proxy.commands.punish.PunishCommand;
 import de.wintervillage.proxy.listener.PlayerChatListener;
 import de.wintervillage.proxy.listener.PreLoginListener;
@@ -110,6 +111,10 @@ public final class WinterVillage {
         commandManager.register(
                 commandManager.metaBuilder("transfer").plugin(this).build(),
                 new TransferCommand(this).create()
+        );
+        commandManager.register(
+                commandManager.metaBuilder("whitelist").plugin(this).build(),
+                new WhitelistCommand(this).create()
         );
 
         // translations

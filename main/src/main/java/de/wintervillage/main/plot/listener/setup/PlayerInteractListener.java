@@ -26,12 +26,12 @@ public class PlayerInteractListener implements Listener {
         Player player = event.getPlayer();
 
         if (event.getItem() == null || event.getClickedBlock() == null) return;
-        if (!event.getItem().getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)) return;
+        if (!event.getItem().getPersistentDataContainer().has(this.winterVillage.plotHandler.setupBoundingsKey)) return;
 
-        if (!player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)) return;
+        if (!player.getPersistentDataContainer().has(this.winterVillage.plotHandler.setupBoundingsKey)) return;
         event.setUseInteractedBlock(Event.Result.DENY);
 
-        BoundingBox2D boundingBox = player.getPersistentDataContainer().get(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType());
+        BoundingBox2D boundingBox = player.getPersistentDataContainer().get(this.winterVillage.plotHandler.setupBoundingsKey, new BoundingBoxDataType());
 
         if (event.getAction().isLeftClick()) {
             boundingBox.setMinX(event.getClickedBlock().getX());
@@ -62,6 +62,6 @@ public class PlayerInteractListener implements Listener {
                 )
         ));
 
-        player.getPersistentDataContainer().set(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType(), boundingBox);
+        player.getPersistentDataContainer().set(this.winterVillage.plotHandler.setupBoundingsKey, new BoundingBoxDataType(), boundingBox);
     }
 }

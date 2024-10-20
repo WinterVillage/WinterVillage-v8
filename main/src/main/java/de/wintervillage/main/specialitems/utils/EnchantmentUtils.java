@@ -135,6 +135,10 @@ public class EnchantmentUtils {
             meta_item.lore().set(index_lore, component_enchantment_string);
         }
 
+        if(enchantment_string.toLowerCase().contains("unbreakable")){
+            meta_item.setUnbreakable(true);
+        }
+
         item_enchanted.setItemMeta(meta_item);
 
         return item_enchanted;

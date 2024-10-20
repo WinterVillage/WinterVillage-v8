@@ -10,6 +10,8 @@ import de.wintervillage.common.core.database.exception.EntryNotFoundException;
 import de.wintervillage.common.core.player.WinterVillagePlayer;
 import de.wintervillage.common.core.player.impl.WinterVillagePlayerImpl;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -65,6 +67,30 @@ public class PlayerDatabase {
                     public void onComplete() {
                         if (!future.isDone())
                             future.completeExceptionally(new EntryNotFoundException("No result found"));
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+                });
+        return future;
+    }
+
+    public CompletableFuture<Collection<WinterVillagePlayer>> players() {
+        CompletableFuture<Collection<WinterVillagePlayer>> future = new CompletableFuture<>();
+        Collection<WinterVillagePlayer> players = new ArrayList<>();
+
+        this.collection.find()
+                .subscribe(new SubscriberHelpers.OperationSubscriber<WinterVillagePlayerImpl>() {
+                    @Override
+                    public void onNext(WinterVillagePlayerImpl player) {
+                        players.add(player);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        future.complete(players);
                     }
 
                     @Override
