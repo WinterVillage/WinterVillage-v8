@@ -38,6 +38,8 @@ public class PlotCommand {
                 .then(new DeleteSubCommand().build())
                 .then(new TpSubCommand().build())
                 .then(new OwnerSubCommand().build())
+                .then(new ConfirmSubCommand().build())
+                .then(new CancelSubCommand().build())
                 .then(new MemberSubCommand().build());
         commands.register(winterVillage.getPluginMeta(), builder.build(), "Manage your plots", List.of("plot"));
     }

@@ -62,7 +62,7 @@ public class SetupTask implements Runnable {
                 || boundingBox.getWidthZ() > this.winterVillage.plotHandler.MAX_PLOT_WIDTH));
 
         Particle.DustOptions dustOptions = new Particle.DustOptions(
-                tooLarge ? Color.RED : Color.GREEN, 4f
+                tooLarge && this.winterVillage.plotHandler.byOwner(player.getUniqueId()).isEmpty() ? Color.RED : Color.GREEN, 4f
         );
 
         this.spawnAlongLine(minX, minZ, maxX, minZ, dustOptions); // TOP
@@ -70,7 +70,7 @@ public class SetupTask implements Runnable {
         this.spawnAlongLine(minX, minZ, minX, maxZ, dustOptions); // LEFT
         this.spawnAlongLine(maxX, minZ, maxX, maxZ, dustOptions); // RIGHT
 
-        Component component = tooLarge
+        Component component = tooLarge && this.winterVillage.plotHandler.byOwner(player.getUniqueId()).isEmpty()
                 ? Component.translatable("wintervillage.plot.too-big")
                 : Component.translatable("wintervillage.plot.selected-area", Component.text(boundingBox.getWidthX()), Component.text(boundingBox.getWidthZ()));
 

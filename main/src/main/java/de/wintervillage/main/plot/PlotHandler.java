@@ -1,6 +1,7 @@
 package de.wintervillage.main.plot;
 
 import de.wintervillage.common.paper.item.ItemBuilder;
+import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.plot.combined.PlotUsers;
 import de.wintervillage.main.plot.listener.block.*;
@@ -25,6 +26,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -40,13 +42,13 @@ public class PlotHandler {
     private final ScheduledExecutorService executorService;
 
     /**
-     * Area of the plot will be MAX_PLOT_WIDTH x MAX_PLOT_WIDTH
+     * Area of the 1st plot will be MAX_PLOT_WIDTH x MAX_PLOT_WIDTH
      */
     public final int MAX_PLOT_WIDTH = 50;
 
     public final ItemStack SETUP_ITEM;
 
-    public NamespacedKey setupBoundingsKey, setupTaskId, showBoundingsKey;
+    public final NamespacedKey setupBoundingsKey, setupTaskId, showBoundingsKey, confirmCreationKey;
 
     public PlotHandler() {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
@@ -55,6 +57,7 @@ public class PlotHandler {
         this.setupBoundingsKey = new NamespacedKey("wintervillage", "plot/setup");
         this.setupTaskId = new NamespacedKey("wintervillage", "plot/setup_rectangle_task");
         this.showBoundingsKey = new NamespacedKey("wintervillage", "plot/setup_boundaries_task");
+        this.confirmCreationKey = new NamespacedKey("wintervillage", "plot/confirm_creation");
 
         this.SETUP_ITEM = ItemBuilder.from(Material.WOODEN_AXE)
                 .name(Component.text("Mark your plot corners", NamedTextColor.GREEN))
@@ -112,6 +115,19 @@ public class PlotHandler {
                     this.winterVillage.getLogger().warning("Could not load plots: " + t.getMessage());
                     return null;
                 });
+    }
+
+    public BigDecimal calculatePrice(Player player, BoundingBox2D boundingBox) {
+        BigDecimal cost = BigDecimal.ZERO;
+        if (this.byOwner(player.getUniqueId()).isEmpty()) return cost;
+
+        BigDecimal area = BigDecimal.valueOf(boundingBox.getArea());
+        if (this.byOwner(player.getUniqueId()).size() == 1) cost = area;
+        else {
+            BigDecimal multiplier = BigDecimal.valueOf(3).pow(this.byOwner(player.getUniqueId()).size() - 1);
+            cost = area.multiply(multiplier);
+        }
+        return cost;
     }
 
     public boolean exists(UUID uniqueId) {

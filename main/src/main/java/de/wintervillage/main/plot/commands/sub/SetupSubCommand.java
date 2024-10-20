@@ -34,16 +34,6 @@ public class SetupSubCommand {
                         return 0;
                     }
 
-                    boolean hasPlot = !this.winterVillage.plotHandler.byOwner(player.getUniqueId()).isEmpty();
-                    boolean canBypass = player.hasPermission("wintervillage.plot.ignore_limit");
-                    if (hasPlot && !canBypass) {
-                        player.sendMessage(Component.join(
-                                this.winterVillage.prefix,
-                                Component.translatable("wintervillage.commands.plot.limit-reached")
-                        ));
-                        return 0;
-                    }
-
                     SetupTask rectangle = new SetupTask(player);
                     int taskId = rectangle.start();
 
