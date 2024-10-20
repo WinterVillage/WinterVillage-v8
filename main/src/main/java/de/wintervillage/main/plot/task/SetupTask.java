@@ -45,8 +45,8 @@ public class SetupTask implements Runnable {
      */
     @Override
     public void run() {
-        if (!this.player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)) return;
-        BoundingBox2D boundingBox = this.player.getPersistentDataContainer().get(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType());
+        if (!this.player.getPersistentDataContainer().has(this.winterVillage.plotHandler.setupBoundingsKey)) return;
+        BoundingBox2D boundingBox = this.player.getPersistentDataContainer().get(this.winterVillage.plotHandler.setupBoundingsKey, new BoundingBoxDataType());
 
         if (boundingBox.getMinX() == 0 || boundingBox.getMinZ() == 0 || boundingBox.getMaxX() == 0 || boundingBox.getMaxZ() == 0)
             return;

@@ -25,8 +25,8 @@ public class SetupSubCommand {
                 .executes((source) -> {
                     final Player player = (Player) source.getSource().getSender();
 
-                    if (player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotSetupKey)
-                            || player.getPersistentDataContainer().has(this.winterVillage.plotHandler.plotRectangleKey)) {
+                    if (player.getPersistentDataContainer().has(this.winterVillage.plotHandler.setupBoundingsKey)
+                            || player.getPersistentDataContainer().has(this.winterVillage.plotHandler.setupTaskId)) {
                         player.sendMessage(Component.join(
                                 this.winterVillage.prefix,
                                 Component.translatable("wintervillage.commands.plot.already-setting-up")
@@ -47,8 +47,8 @@ public class SetupSubCommand {
                     SetupTask rectangle = new SetupTask(player);
                     int taskId = rectangle.start();
 
-                    player.getPersistentDataContainer().set(this.winterVillage.plotHandler.plotRectangleKey, PersistentDataType.INTEGER, taskId);
-                    player.getPersistentDataContainer().set(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType(), new BoundingBox2D());
+                    player.getPersistentDataContainer().set(this.winterVillage.plotHandler.setupTaskId, PersistentDataType.INTEGER, taskId);
+                    player.getPersistentDataContainer().set(this.winterVillage.plotHandler.setupBoundingsKey, new BoundingBoxDataType(), new BoundingBox2D());
                     player.getInventory().addItem(this.winterVillage.plotHandler.SETUP_ITEM);
 
                     player.sendMessage(Component.join(

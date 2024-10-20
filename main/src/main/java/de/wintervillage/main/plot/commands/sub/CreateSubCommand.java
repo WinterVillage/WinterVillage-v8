@@ -35,9 +35,8 @@ public class CreateSubCommand {
                             final Player player = (Player) source.getSource().getSender();
 
                             PersistentDataContainer container = player.getPersistentDataContainer();
-
-                            if (!container.has(this.winterVillage.plotHandler.plotSetupKey)
-                                    || !container.has(this.winterVillage.plotHandler.plotRectangleKey)) {
+                            if (!container.has(this.winterVillage.plotHandler.setupBoundingsKey)
+                                    || !container.has(this.winterVillage.plotHandler.setupTaskId)) {
                                 player.sendMessage(Component.join(
                                         this.winterVillage.prefix,
                                         Component.translatable("wintervillage.commands.plot.not-setting-up")
@@ -45,7 +44,7 @@ public class CreateSubCommand {
                                 return 0;
                             }
 
-                            BoundingBox2D boundingBox = container.get(this.winterVillage.plotHandler.plotSetupKey, new BoundingBoxDataType());
+                            BoundingBox2D boundingBox = container.get(this.winterVillage.plotHandler.setupBoundingsKey, new BoundingBoxDataType());
                             if (!boundingBox.isDefined()) {
                                 player.sendMessage(Component.join(
                                         this.winterVillage.prefix,

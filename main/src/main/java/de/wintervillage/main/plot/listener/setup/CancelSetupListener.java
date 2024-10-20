@@ -62,10 +62,10 @@ public class CancelSetupListener implements Listener {
         Player player = (Player) event.getWhoClicked();
 
 
-        if (dropsWrongItem(event, this.winterVillage.plotHandler.plotSetupKey)
-                || placesWrongItem(event, this.winterVillage.plotHandler.plotSetupKey)
-                || swapsWrongItem(event, this.winterVillage.plotHandler.plotSetupKey)
-                || otherWrongEvent(event, this.winterVillage.plotHandler.plotSetupKey)) {
+        if (dropsWrongItem(event, this.winterVillage.plotHandler.setupBoundingsKey)
+                || placesWrongItem(event, this.winterVillage.plotHandler.setupBoundingsKey)
+                || swapsWrongItem(event, this.winterVillage.plotHandler.setupBoundingsKey)
+                || otherWrongEvent(event, this.winterVillage.plotHandler.setupBoundingsKey)) {
             if (!this.winterVillage.plotHandler.stopTasks(player)) return;
 
             event.setCurrentItem(null);
