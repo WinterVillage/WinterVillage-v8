@@ -163,7 +163,11 @@ public class BoundingBox2D {
      */
     public double getArea() {
         if (!this.isDefined()) return 0;
-        return (this.maxX - this.minX) * (this.maxZ - this.minZ);
+
+        double widthX = Math.abs(this.maxX - this.minX);
+        double widthZ = Math.abs(this.maxZ - this.minZ);
+
+        return widthX * widthZ;
     }
 
     /**
