@@ -54,5 +54,13 @@ public class PlayerJoinListener implements Listener {
 
         // handle pending home & farmwelt teleportation requests
         this.winterVillage.playerHandler.channelMessageListener.processRequest(player);
+
+        // resource pack
+        player.setResourcePack(
+                "https://voldechse.wtf/wintervillage.zip",
+                "8679cec65670db5b708cabe94568c99a4ffe8650",
+                true,
+                Component.text("In order to play on this server, you must accept the resource pack.", NamedTextColor.YELLOW)
+        );
     }
 }
