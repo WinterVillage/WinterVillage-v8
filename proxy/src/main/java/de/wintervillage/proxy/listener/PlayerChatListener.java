@@ -40,7 +40,6 @@ public class PlayerChatListener {
                             return;
                         }
 
-                        // TODO: sync?
                         event.setResult(PlayerChatEvent.ChatResult.allowed());
                         continuation.resume();
                     });
