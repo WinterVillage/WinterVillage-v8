@@ -63,7 +63,7 @@ public class CloudNetChannelMessageListener {
 
             if ("wintervillage:bauwelt".equals(event.message()))
                 PENDING_REQUESTS.put(uniqueId, Pair.of(
-                        Component.translatable("wintervillage.command.bauwelt.teleported"),
+                        Component.translatable("wintervillage.command.spawn.teleported"),
                         Bukkit.getWorld("world").getSpawnLocation()
                 ));
 
