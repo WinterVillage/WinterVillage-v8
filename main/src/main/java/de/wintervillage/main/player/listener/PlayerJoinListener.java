@@ -2,8 +2,10 @@ package de.wintervillage.main.player.listener;
 
 import de.wintervillage.main.WinterVillage;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.model.group.Group;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -33,7 +35,22 @@ public class PlayerJoinListener implements Listener {
         this.winterVillage.playerHandler.apply(player, player.getUniqueId());
 
         // scoreboard
+        this.winterVillage.scoreboardHandler.sidebar(player);
         this.winterVillage.scoreboardHandler.playerList();
+
+        this.winterVillage.scoreboardHandler.updateScore(
+                player,
+                "10_highestgroup-value",
+                Component.space().append(MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getPrefix()))
+        );
+        this.winterVillage.playerDatabase.player(player.getUniqueId())
+                .thenAccept(winterVillagePlayer -> {
+                    Bukkit.getScheduler().runTask(this.winterVillage, () -> this.winterVillage.scoreboardHandler.updateScore(
+                            player,
+                            "07_balance-value",
+                            Component.space().append(Component.text(this.winterVillage.formatBD(winterVillagePlayer.money(), true) + " $", NamedTextColor.YELLOW)))
+                    );
+                });
 
         // handle pending home & farmwelt teleportation requests
         this.winterVillage.playerHandler.channelMessageListener.processRequest(player);

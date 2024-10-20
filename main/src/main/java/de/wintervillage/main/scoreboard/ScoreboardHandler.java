@@ -2,14 +2,16 @@ package de.wintervillage.main.scoreboard;
 
 import com.google.inject.Inject;
 import de.wintervillage.main.WinterVillage;
+import io.papermc.paper.scoreboard.numbers.NumberFormat;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.model.group.Group;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
+import org.bukkit.scoreboard.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -26,6 +28,13 @@ public class ScoreboardHandler {
     private final List<Group> sortedGroups;
     private final Map<String, Integer> groupOrder;
 
+    private static final Component LOGO = Component.empty()
+            .append(Component.text("A").font(Key.key("wintervillage", "logo")))
+            .append(Component.text("\uF008").font(Key.key("wintervillage", "space")))
+            .append(Component.text("B").font(Key.key("wintervillage", "logo")))
+            .append(Component.text("\uF008").font(Key.key("wintervillage", "space")))
+            .append(Component.text("C").font(Key.key("wintervillage", "logo")));
+
     @Inject
     public ScoreboardHandler() {
         this.winterVillage = JavaPlugin.getPlugin(WinterVillage.class);
@@ -40,6 +49,39 @@ public class ScoreboardHandler {
         for (int i = 0; i < this.sortedGroups.size(); i++) {
             this.groupOrder.put(this.sortedGroups.get(i).getName().toLowerCase(), i);
         }
+    }
+
+    public void sidebar(Player player) {
+        Scoreboard scoreboard = this.getScoreboard(player.getUniqueId());
+        Objective objective = scoreboard.registerNewObjective("wv-sidebar", Criteria.DUMMY, Component.empty());
+        objective.setAutoUpdateDisplay(true);
+        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+        objective.numberFormat(NumberFormat.blank());
+
+        objective.getScore("01_logo").customName(LOGO);
+        objective.getScore("02_empty").customName(Component.empty());
+        objective.getScore("03_online-text").customName(Component.space().append(Component.text("Online")).append(Component.text(":", NamedTextColor.DARK_GRAY)));
+        objective.getScore("04_online_value").customName(Component.space().append(Component.text(Bukkit.getOnlinePlayers().size(), NamedTextColor.GREEN)));
+        objective.getScore("05_empty").customName(Component.empty());
+        objective.getScore("06_balance-text").customName(Component.space().append(Component.text("Kontostand")).append(Component.text(":", NamedTextColor.DARK_GRAY)));
+        objective.getScore("07_balance-value").customName(Component.space().append(Component.text("-- $", NamedTextColor.YELLOW)));
+        objective.getScore("08_empty").customName(Component.empty());
+        objective.getScore("09_highestgroup-text").customName(Component.space().append(Component.text("Rang")).append(Component.text(":", NamedTextColor.DARK_GRAY)));
+        objective.getScore("10_highestgroup-value").customName(Component.space());
+        objective.getScore("11_empty").customName(Component.empty());
+
+        player.setScoreboard(scoreboard);
+    }
+
+    public void updateScore(Player player, String score, Component value) {
+        Scoreboard scoreboard = this.getScoreboard(player.getUniqueId());
+        Objective objective = scoreboard.getObjective("wv-sidebar");
+
+        if (!objective.getScore(score).isScoreSet())
+            throw new IllegalArgumentException("Score not found: " + score);
+
+        objective.getScore(score).customName(value);
     }
 
     public void playerList(Player player) {
@@ -66,8 +108,6 @@ public class ScoreboardHandler {
 
                     team.addPlayer(onlinePlayer);
                 });
-
-        player.setScoreboard(scoreboard);
     }
 
     public void playerList() {
