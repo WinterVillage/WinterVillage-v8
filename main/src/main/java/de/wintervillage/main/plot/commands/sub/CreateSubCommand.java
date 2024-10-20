@@ -71,7 +71,9 @@ public class CreateSubCommand {
                             if (tooLarge) {
                                 player.sendMessage(Component.join(
                                         this.winterVillage.prefix,
-                                        Component.translatable("wintervillage.commands.plot.too-large")
+                                        Component.translatable("wintervillage.commands.plot.too-large",
+                                                Component.text(this.winterVillage.plotHandler.MAX_PLOT_WIDTH)
+                                        )
                                 ));
                                 return 0;
                             }
