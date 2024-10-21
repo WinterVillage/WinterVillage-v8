@@ -158,7 +158,7 @@ public class WhitelistCommand {
                                                 }
 
                                                 Pair<User, WinterVillagePlayer> executor = (Pair<User, WinterVillagePlayer>) pair.second();
-                                                if (executor.second().wildcardInformation().amount() < 1 && !context.getSource().hasPermission("wintervillage.command.bypass-whitelist")) {
+                                                if (executor.second().wildcardInformation().currentAmount() < 1 && !context.getSource().hasPermission("wintervillage.command.bypass-whitelist")) {
                                                     context.getSource().sendMessage(Component.join(
                                                             this.winterVillage.prefix,
                                                             Component.translatable("wintervillage.command.whitelist.not-enough-wildcards")

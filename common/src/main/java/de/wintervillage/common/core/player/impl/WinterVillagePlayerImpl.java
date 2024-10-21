@@ -57,7 +57,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         this.playTime = 0L;
 
         this.playerInformation = new PlayerInformation();
-        this.wildcardInformation = new WildcardInformation(0);
+        this.wildcardInformation = new WildcardInformation(0L, 0, 0, true);
     }
 
     @Override
