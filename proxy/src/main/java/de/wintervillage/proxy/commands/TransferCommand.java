@@ -21,6 +21,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.model.user.User;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.UUID;
@@ -54,7 +55,7 @@ public class TransferCommand {
                                     // goofy velocity can't handle custom arguments
                                     BigDecimal sum;
                                     try {
-                                        sum = new BigDecimal(sumString);
+                                        sum = new BigDecimal(sumString).setScale(2, RoundingMode.HALF_UP);
                                     } catch (NumberFormatException exception) {
                                         context.getSource().sendMessage(Component.join(
                                                 this.winterVillage.prefix,
