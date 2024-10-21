@@ -29,6 +29,9 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     @BsonProperty("deaths")
     private int deaths;
 
+    @BsonProperty("playTime")
+    private long playTime;
+
     @BsonProperty("banInformation")
     private @Nullable BanInformation banInformation;
 
@@ -51,6 +54,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         this.uniqueId = uniqueId;
         this.money = BigDecimal.ZERO;
         this.deaths = 0;
+        this.playTime = 0L;
 
         this.playerInformation = new PlayerInformation();
         this.wildcardInformation = new WildcardInformation(0);
@@ -79,6 +83,16 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     @Override
     public void deaths(@Range(from = 0, to = Integer.MAX_VALUE) int deaths) {
         this.deaths = deaths;
+    }
+
+    @Override
+    public long playTime() {
+        return this.playTime;
+    }
+
+    @Override
+    public void playTime(long playTime) {
+        this.playTime = playTime;
     }
 
     public @Nullable BanInformation banInformation() {
@@ -146,6 +160,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         document.put("_id", toBinary(this.uniqueId));
         document.put("money", this.money);
         document.put("deaths", this.deaths);
+        document.put("playTime", this.playTime);
 
         if (this.banInformation != null)
             document.put("banInformation", this.banInformation.toDocument());
@@ -172,6 +187,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         WinterVillagePlayerImpl player = new WinterVillagePlayerImpl(uniqueId);
         player.money(Optional.ofNullable(document.get("money", Decimal128.class).bigDecimalValue()).orElse(BigDecimal.ZERO));
         player.deaths(Optional.ofNullable(document.get("deaths", Integer.class)).orElse(0));
+        player.playTime(Optional.ofNullable(document.getLong("playTime")).orElse(0L));
         player.banInformation(Optional.ofNullable(document.get("banInformation", Document.class))
                 .filter(doc -> !doc.isEmpty())
                 .map(BanInformation::fromDocument)
@@ -203,6 +219,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
                 "uniqueId=" + this.uniqueId +
                 ", money=" + this.money +
                 ", deaths=" + this.deaths +
+                ", playTime=" + this.playTime +
                 ", banInformation=" + this.banInformation +
                 ", muteInformation=" + this.muteInformation +
                 ", playerInformation=" + this.playerInformation +

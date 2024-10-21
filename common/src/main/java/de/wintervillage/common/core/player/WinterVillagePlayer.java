@@ -24,6 +24,10 @@ public interface WinterVillagePlayer {
 
     void deaths(@Range(from = 0, to = Integer.MAX_VALUE) int deaths);
 
+    long playTime();
+
+    void playTime(long playTime);
+
     @Nullable
     BanInformation banInformation();
 
