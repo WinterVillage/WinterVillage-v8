@@ -2,8 +2,10 @@ package de.wintervillage.main.player.listener;
 
 import de.wintervillage.main.WinterVillage;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.model.group.Group;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -31,6 +33,10 @@ public class PlayerQuitListener implements Listener {
 
         // delete scoreboard data
         this.winterVillage.scoreboardHandler.removeScoreboard(player.getUniqueId());
+        this.winterVillage.scoreboardHandler.updateScore(
+                "04_online-value",
+                Component.space().append(Component.text(Bukkit.getOnlinePlayers().size() - 1, NamedTextColor.GREEN))
+        );
 
         // Skipping saving the player because he's still being loaded
         if (player.getPersistentDataContainer().has(this.winterVillage.playerHandler.applyingKey)) {

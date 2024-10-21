@@ -39,6 +39,10 @@ public class PlayerJoinListener implements Listener {
         this.winterVillage.scoreboardHandler.playerList();
 
         this.winterVillage.scoreboardHandler.updateScore(
+                "04_online-value",
+                Component.space().append(Component.text(Bukkit.getOnlinePlayers().size(), NamedTextColor.GREEN))
+        );
+        this.winterVillage.scoreboardHandler.updateScore(
                 player,
                 "10_highestgroup-value",
                 Component.space().append(MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getPrefix()))

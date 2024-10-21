@@ -62,7 +62,7 @@ public class ScoreboardHandler {
         objective.getScore("01_logo").customName(LOGO);
         objective.getScore("02_empty").customName(Component.empty());
         objective.getScore("03_online-text").customName(Component.space().append(Component.text("Online")).append(Component.text(":", NamedTextColor.DARK_GRAY)));
-        objective.getScore("04_online_value").customName(Component.space().append(Component.text(Bukkit.getOnlinePlayers().size(), NamedTextColor.GREEN)));
+        objective.getScore("04_online-value").customName(Component.space().append(Component.text(Bukkit.getOnlinePlayers().size(), NamedTextColor.GREEN)));
         objective.getScore("05_empty").customName(Component.empty());
         objective.getScore("06_balance-text").customName(Component.space().append(Component.text("Kontostand")).append(Component.text(":", NamedTextColor.DARK_GRAY)));
         objective.getScore("07_balance-value").customName(Component.space().append(Component.text("-- $", NamedTextColor.YELLOW)));
@@ -72,6 +72,10 @@ public class ScoreboardHandler {
         objective.getScore("11_empty").customName(Component.empty());
 
         player.setScoreboard(scoreboard);
+    }
+
+    public void updateScore(String score, Component value) {
+        Bukkit.getOnlinePlayers().forEach(player -> this.updateScore(player, score, value));
     }
 
     public void updateScore(Player player, String score, Component value) {
