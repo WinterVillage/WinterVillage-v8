@@ -78,8 +78,8 @@ public class ScoreboardHandler {
         Scoreboard scoreboard = this.getScoreboard(player.getUniqueId());
         Objective objective = scoreboard.getObjective("wv-sidebar");
 
-        if (!objective.getScore(score).isScoreSet())
-            throw new IllegalArgumentException("Score not found: " + score);
+        if (objective == null || !objective.getScore(score).isScoreSet())
+            return;
 
         objective.getScore(score).customName(value);
     }
