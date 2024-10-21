@@ -8,6 +8,7 @@ import eu.cloudnetservice.driver.event.EventManager;
 import eu.cloudnetservice.driver.event.events.channel.ChannelMessageReceiveEvent;
 import eu.cloudnetservice.driver.inject.InjectionLayer;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -32,6 +33,24 @@ public class CloudNetChannelMessageListener {
 
     @EventListener
     private void handle(ChannelMessageReceiveEvent event) {
+        if (event.channel().equals("update_sidebar") && "wintervillage:scoreboard".equals(event.message())) {
+            var uniqueId = event.content().readUniqueId();
+            Player player = Bukkit.getPlayer(uniqueId);
+            if (player == null) {
+                event.content().release();
+                return;
+            }
+
+            String score = event.content().readString();
+            String value = event.content().readString();
+            System.out.println(value);
+            this.winterVillage.scoreboardHandler.updateScore(
+                    player,
+                    score,
+                    MiniMessage.miniMessage().deserialize(value)
+            );
+        }
+
         if (event.channel().equals("teleport_player")) {
             var uniqueId = event.content().readUniqueId();
 
