@@ -126,6 +126,7 @@ public class WhitelistCommand {
                                     return Command.SINGLE_SUCCESS;
                                 })))
                 .then(BrigadierCommand.literalArgumentBuilder("add")
+                        .requires(context -> context.hasPermission("wintervillage.command.whitelist.add"))
                         .then(BrigadierCommand.requiredArgumentBuilder("player", StringArgumentType.word())
                                 .executes(context -> {
                                     final String playerName = context.getArgument("player", String.class);
