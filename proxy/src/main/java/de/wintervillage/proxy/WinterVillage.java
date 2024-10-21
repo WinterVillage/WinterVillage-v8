@@ -23,6 +23,7 @@ import de.wintervillage.common.core.player.database.PlayerDatabase;
 import de.wintervillage.common.core.translation.MiniMessageTranslator;
 import de.wintervillage.proxy.commands.TransferCommand;
 import de.wintervillage.proxy.commands.WhitelistCommand;
+import de.wintervillage.proxy.commands.WildcardsCommand;
 import de.wintervillage.proxy.commands.punish.PunishCommand;
 import de.wintervillage.proxy.player.listener.PlayerChatListener;
 import de.wintervillage.proxy.player.listener.PlayerTimeCalculation;
@@ -123,6 +124,10 @@ public final class WinterVillage {
         commandManager.register(
                 commandManager.metaBuilder("whitelist").plugin(this).build(),
                 new WhitelistCommand(this).create()
+        );
+        commandManager.register(
+                commandManager.metaBuilder("wildcards").plugin(this).build(),
+                new WildcardsCommand(this).create()
         );
 
         // translations
