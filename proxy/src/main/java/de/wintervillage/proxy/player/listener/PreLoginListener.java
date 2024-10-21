@@ -1,4 +1,4 @@
-package de.wintervillage.proxy.listener;
+package de.wintervillage.proxy.player.listener;
 
 import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.PostOrder;
