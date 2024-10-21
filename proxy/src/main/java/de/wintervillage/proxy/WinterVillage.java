@@ -12,6 +12,7 @@ import com.mongodb.reactivestreams.client.MongoDatabase;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
@@ -23,9 +24,11 @@ import de.wintervillage.common.core.translation.MiniMessageTranslator;
 import de.wintervillage.proxy.commands.TransferCommand;
 import de.wintervillage.proxy.commands.WhitelistCommand;
 import de.wintervillage.proxy.commands.punish.PunishCommand;
-import de.wintervillage.proxy.listener.PlayerChatListener;
-import de.wintervillage.proxy.listener.PreLoginListener;
+import de.wintervillage.proxy.player.listener.PlayerChatListener;
+import de.wintervillage.proxy.player.listener.PlayerTimeCalculation;
+import de.wintervillage.proxy.player.listener.PreLoginListener;
 import de.wintervillage.proxy.player.PlayerHandler;
+import de.wintervillage.proxy.player.task.WildcardTask;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
@@ -65,6 +68,8 @@ public final class WinterVillage {
     public PlayerDatabase playerDatabase;
     public PlayerHandler playerHandler;
 
+    private WildcardTask wildCardTask;
+
     // configs
     public Document databaseDocument;
 
@@ -98,9 +103,12 @@ public final class WinterVillage {
         this.playerDatabase = moduleInjector.getInstance(PlayerDatabase.class);
         this.playerHandler = moduleInjector.getInstance(PlayerHandler.class);
 
+        this.wildCardTask = moduleInjector.getInstance(WildcardTask.class);
+
         // listener
         this.proxyServer.getEventManager().register(this, new PlayerChatListener(this));
         this.proxyServer.getEventManager().register(this, new PreLoginListener(this));
+        this.proxyServer.getEventManager().register(this, new PlayerTimeCalculation(this));
 
         // commands
         CommandManager commandManager = this.proxyServer.getCommandManager();
@@ -128,6 +136,11 @@ public final class WinterVillage {
         translator.defaultLocale(Locale.GERMANY);
 
         GlobalTranslator.translator().addSource(translator);
+    }
+
+    @Subscribe
+    public void onProxyShutdown(final ProxyShutdownEvent event) {
+        this.wildCardTask.terminate();
     }
 
     private void resolveConfig() {

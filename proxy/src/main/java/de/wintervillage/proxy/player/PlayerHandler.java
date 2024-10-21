@@ -15,11 +15,10 @@ import net.luckperms.api.model.user.User;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerHandler {
 
@@ -27,10 +26,14 @@ public class PlayerHandler {
 
     private final LuckPerms luckPerms;
 
+    public final Map<UUID, LocalDateTime> playTime;
+
     @Inject
     public PlayerHandler(WinterVillage winterVillage) {
         this.winterVillage = winterVillage;
         this.luckPerms = LuckPermsProvider.get();
+
+        this.playTime = new ConcurrentHashMap<>();
     }
 
     /**
