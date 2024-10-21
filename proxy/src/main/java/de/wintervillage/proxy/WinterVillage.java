@@ -94,7 +94,7 @@ public final class WinterVillage {
     public void onProxyInitialization(final ProxyInitializeEvent event) {
         this.luckpermsSupport();
 
-        Injector moduleInjector = Guice.createInjector(new WinterVillageModule(this, this.mongoDatabase));
+        Injector moduleInjector = Guice.createInjector(new WinterVillageModule(this, this.proxyServer, this.mongoDatabase));
         this.playerDatabase = moduleInjector.getInstance(PlayerDatabase.class);
         this.playerHandler = moduleInjector.getInstance(PlayerHandler.class);
 
