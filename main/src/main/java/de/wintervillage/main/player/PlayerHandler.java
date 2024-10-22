@@ -5,9 +5,9 @@ import com.google.inject.Inject;
 import de.wintervillage.common.core.player.database.PlayerDatabase;
 import de.wintervillage.common.core.uuid.MojangFetcher;
 import de.wintervillage.main.WinterVillage;
-import de.wintervillage.main.player.listener.cloudnet.CloudNetChannelMessageListener;
 import de.wintervillage.main.player.listener.PlayerJoinListener;
 import de.wintervillage.main.player.listener.PlayerQuitListener;
+import de.wintervillage.main.player.listener.cloudnet.CloudNetChannelMessageListener;
 import de.wintervillage.main.player.listener.luckperms.UserRecalculation;
 import de.wintervillage.main.player.listener.packet.AdvancementPacketListener;
 import net.kyori.adventure.text.Component;
@@ -15,7 +15,10 @@ import net.kyori.adventure.title.Title;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
@@ -140,7 +143,13 @@ public class PlayerHandler {
                             // run on next tick to avoid asynchronously action
                             Bukkit.getScheduler().runTask(winterVillage, () -> {
                                 winterVillagePlayer.playerInformation().apply(player); // append player data
-                                if (winterVillagePlayer.vanished()) hidePlayer(player); // vanish enabled
+                                if (winterVillagePlayer.vanished()) {
+                                    hidePlayer(player); // vanish enabled
+                                    player.sendMessage(Component.join(
+                                            winterVillage.prefix,
+                                            Component.translatable("wintervillage.command.vanish.hidden")
+                                    ));
+                                }
                             });
                             Bukkit.getScheduler().runTaskLater(winterVillage, () -> player.getPersistentDataContainer().remove(applyingKey), 10 * 20L);
 
@@ -198,7 +207,7 @@ public class PlayerHandler {
 
     /**
      * Gets the highest group of the given player
-     *
+     * <p>
      * Note: This method should be used only for online-players
      *
      * @param player {@link Player} to get the group from
