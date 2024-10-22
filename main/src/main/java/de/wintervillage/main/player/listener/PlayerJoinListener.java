@@ -25,11 +25,9 @@ public class PlayerJoinListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void execute(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
+        event.joinMessage(null);
 
         Group highestGroup = this.winterVillage.playerHandler.highestGroup(player);
-        event.joinMessage(Component.translatable("wintervillage.player-join",
-                MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())
-        ));
 
         // load player data
         this.winterVillage.playerHandler.apply(player, player.getUniqueId());
@@ -52,6 +50,11 @@ public class PlayerJoinListener implements Listener {
         );
         this.winterVillage.playerDatabase.player(player.getUniqueId())
                 .thenAccept(winterVillagePlayer -> {
+                    if (!winterVillagePlayer.vanished())
+                        Bukkit.broadcast(Component.translatable("wintervillage.player-join",
+                                MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())
+                        ));
+
                     Bukkit.getScheduler().runTask(this.winterVillage, () -> this.winterVillage.scoreboardHandler.updateScore(
                             player,
                             "07_balance-value",
