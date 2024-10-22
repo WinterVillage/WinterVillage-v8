@@ -77,7 +77,10 @@ public class WildcardsCommand {
 
                                             this.winterVillage.playerHandler.lookupUniqueId(name)
                                                     .thenCompose(uniqueId -> this.winterVillage.playerHandler.combinedPlayer(uniqueId, name))
-                                                    .thenCompose(pair -> this.winterVillage.playerDatabase.modify(pair.second().uniqueId(), builder -> builder.wildcardInformation().currentAmount(builder.wildcardInformation().currentAmount() + amount))
+                                                    .thenCompose(pair -> this.winterVillage.playerDatabase.modify(pair.second().uniqueId(), builder -> {
+                                                                builder.wildcardInformation().currentAmount(builder.wildcardInformation().currentAmount() + amount);
+                                                                builder.wildcardInformation().totalReceived(builder.wildcardInformation().totalReceived() + amount);
+                                                            })
                                                             .thenApply(player -> Pair.of(pair.first(), player)))
                                                     .thenAccept(pair -> context.getSource().sendMessage(Component.join(
                                                             this.winterVillage.prefix,
