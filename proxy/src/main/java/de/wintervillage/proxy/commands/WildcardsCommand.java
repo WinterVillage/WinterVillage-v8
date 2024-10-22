@@ -7,11 +7,16 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import de.wintervillage.common.core.player.WinterVillagePlayer;
 import de.wintervillage.common.core.type.Pair;
 import de.wintervillage.proxy.WinterVillage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.luckperms.api.model.group.Group;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class WildcardsCommand {
 
@@ -38,8 +43,13 @@ public class WildcardsCommand {
                                     this.winterVillage.playerHandler.lookupUniqueId(name)
                                             .thenCompose(uniqueId -> this.winterVillage.playerHandler.combinedPlayer(uniqueId, name))
                                             .thenAccept(pair -> {
+                                                Group highestGroup = this.winterVillage.playerHandler.highestGroup(pair.first());
+                                                int groupWeight = highestGroup.getWeight().orElse(0);
+
                                                 int currentAmount = pair.second().wildcardInformation().currentAmount();
                                                 boolean obtainable = pair.second().wildcardInformation().obtainable();
+
+                                                long remainingTime = this.remainingTimeUntilWildcard(pair.second(), groupWeight);
 
                                                 context.getSource().sendMessage(Component.join(
                                                         this.winterVillage.prefix,
@@ -50,6 +60,10 @@ public class WildcardsCommand {
                                                                 obtainable ? Component.text("✔", NamedTextColor.GREEN) : Component.text("✘", NamedTextColor.RED)
                                                         )
                                                 ));
+                                                if (obtainable)
+                                                    context.getSource().sendMessage(Component.translatable("wintervillage.command.wildcard.time-remaining",
+                                                            Component.text(this.formatMillis(remainingTime))
+                                                    ));
                                             });
                                     return Command.SINGLE_SUCCESS;
                                 })))
@@ -83,8 +97,13 @@ public class WildcardsCommand {
 
                     this.winterVillage.playerHandler.combinedPlayer(player.getUniqueId(), player.getUsername())
                             .thenAccept(pair -> {
+                                Group highestGroup = this.winterVillage.playerHandler.highestGroup(player);
+                                int groupWeight = highestGroup.getWeight().orElse(0);
+
                                 int currentAmount = pair.second().wildcardInformation().currentAmount();
                                 boolean obtainable = pair.second().wildcardInformation().obtainable();
+
+                                long remainingTime = this.remainingTimeUntilWildcard(pair.second(), groupWeight);
 
                                 context.getSource().sendMessage(Component.join(
                                         this.winterVillage.prefix,
@@ -95,10 +114,56 @@ public class WildcardsCommand {
                                                 obtainable ? Component.text("✔", NamedTextColor.GREEN) : Component.text("✘", NamedTextColor.RED)
                                         )
                                 ));
+                                if (obtainable)
+                                    context.getSource().sendMessage(Component.translatable("wintervillage.command.wildcard.time-remaining",
+                                            Component.text(this.formatMillis(remainingTime))
+                                    ));
                             });
                     return Command.SINGLE_SUCCESS;
                 })
                 .build();
         return new BrigadierCommand(node);
+    }
+
+    private String formatMillis(long millis) {
+        if (millis < 0) throw new IllegalArgumentException("Duration must be greater than 0");
+
+        Duration duration = Duration.ofMillis(millis);
+        long hours = duration.toHours();
+        long minutes = duration.toMinutes() % 60;
+        long seconds = duration.getSeconds() % 60;
+
+        StringBuilder result = new StringBuilder();
+        if (hours > 0) result.append(String.format("%02d:%02d:%02d", hours, minutes, seconds));
+        else if (minutes > 0) result.append(String.format("%02d:%02d", minutes, seconds));
+        else if (seconds > 0) result.append(String.format("%02d sec", seconds));
+        else result.append("NaN");
+
+        return result.toString();
+    }
+
+    private long remainingTimeUntilWildcard(WinterVillagePlayer winterVillagePlayer, int groupWeight) {
+        // >= 100 every 8h, < 100 every 20h
+        long obtainableAfter = (groupWeight >= 100 ? 8 : 20) * 60 * 60 * 1000;
+
+        long totalPlaytime = winterVillagePlayer.playTime();
+
+        LocalDateTime joined = this.winterVillage.playerHandler.playTime.get(winterVillagePlayer.uniqueId());
+        if (joined != null) {
+            long onlineTime = Duration.between(joined, LocalDateTime.now()).toMillis();
+            totalPlaytime += onlineTime;
+        }
+
+        // calculation of the time passed since the last wildcard
+        long currentMillis = System.currentTimeMillis();
+        long elapsedSinceLastWildcard = currentMillis - winterVillagePlayer.wildcardInformation().lastWildcardReceived();
+
+        // calculation of the remaining time
+        long remainingTime = Math.max(obtainableAfter - elapsedSinceLastWildcard, 0);
+
+        if (totalPlaytime < obtainableAfter)
+            remainingTime = Math.max(obtainableAfter - totalPlaytime, 0);
+
+        return remainingTime;
     }
 }
