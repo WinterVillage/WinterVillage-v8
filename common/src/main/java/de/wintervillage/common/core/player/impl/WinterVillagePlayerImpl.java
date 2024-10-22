@@ -215,17 +215,6 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
     @Override
     public String toString() {
-        return "WinterVillagePlayerImpl{" +
-                "uniqueId=" + this.uniqueId +
-                ", money=" + this.money +
-                ", deaths=" + this.deaths +
-                ", playTime=" + this.playTime +
-                ", banInformation=" + this.banInformation +
-                ", muteInformation=" + this.muteInformation +
-                ", playerInformation=" + this.playerInformation +
-                ", wildcardInformation=" + this.wildcardInformation +
-                ", whitelistInformation=" + this.whitelistInformation +
-                ", homeInformation=" + this.homeInformation +
-                '}';
+        return String.format("WinterVillagePlayerImpl{uniqueId=%s}", this.uniqueId);
     }
 }
