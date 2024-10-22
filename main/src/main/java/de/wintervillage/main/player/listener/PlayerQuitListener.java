@@ -46,5 +46,6 @@ public class PlayerQuitListener implements Listener {
 
         // save player
         this.winterVillage.playerHandler.save(player);
+        this.winterVillage.playerHandler.vanished.remove(player.getUniqueId());
     }
 }

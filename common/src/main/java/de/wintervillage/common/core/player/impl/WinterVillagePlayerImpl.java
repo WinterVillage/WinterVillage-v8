@@ -23,6 +23,9 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     @BsonId
     private final @NotNull UUID uniqueId;
 
+    @BsonProperty("vanished")
+    private boolean vanished;
+
     @BsonProperty("money")
     private @NotNull BigDecimal money;
 
@@ -52,6 +55,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
     public WinterVillagePlayerImpl(@NotNull UUID uniqueId) {
         this.uniqueId = uniqueId;
+        this.vanished = false;
         this.money = BigDecimal.ZERO;
         this.deaths = 0;
         this.playTime = 0L;
@@ -63,6 +67,16 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     @Override
     public @NotNull UUID uniqueId() {
         return this.uniqueId;
+    }
+
+    @Override
+    public boolean vanished() {
+        return this.vanished;
+    }
+
+    @Override
+    public void vanished(boolean vanished) {
+        this.vanished = vanished;
     }
 
     @Override
@@ -158,6 +172,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         Document document = new Document();
 
         document.put("_id", toBinary(this.uniqueId));
+        document.put("vanished", this.vanished);
         document.put("money", this.money);
         document.put("deaths", this.deaths);
         document.put("playTime", this.playTime);
@@ -185,6 +200,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         UUID uniqueId = fromBytes(document.get("_id", Binary.class).getData());
 
         WinterVillagePlayerImpl player = new WinterVillagePlayerImpl(uniqueId);
+        player.vanished(document.getBoolean("vanished", false));
         player.money(Optional.ofNullable(document.get("money", Decimal128.class).bigDecimalValue()).orElse(BigDecimal.ZERO));
         player.deaths(Optional.ofNullable(document.get("deaths", Integer.class)).orElse(0));
         player.playTime(Optional.ofNullable(document.getLong("playTime")).orElse(0L));

@@ -15,6 +15,10 @@ public interface WinterVillagePlayer {
     @NotNull
     UUID uniqueId();
 
+    boolean vanished();
+
+    void vanished(boolean vanished);
+
     @NotNull
     BigDecimal money();
 

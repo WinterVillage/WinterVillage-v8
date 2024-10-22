@@ -44,6 +44,8 @@ public class PlayerHandler {
 
     public final NamespacedKey applyingKey;
 
+    public final Collection<UUID> vanished = new ArrayList<>();
+
     @Inject
     public PlayerHandler(
             ProtocolManager protocolManager,
@@ -135,7 +137,11 @@ public class PlayerHandler {
             public void run() {
                 playerDatabase.player(applyFrom)
                         .thenAccept(winterVillagePlayer -> {
-                            Bukkit.getScheduler().runTask(winterVillage, () -> winterVillagePlayer.playerInformation().apply(player)); // run on next tick to avoid applying data to the player asynchronously
+                            // run on next tick to avoid asynchronously action
+                            Bukkit.getScheduler().runTask(winterVillage, () -> {
+                                winterVillagePlayer.playerInformation().apply(player); // append player data
+                                if (winterVillagePlayer.vanished()) hidePlayer(player); // vanish enabled
+                            });
                             Bukkit.getScheduler().runTaskLater(winterVillage, () -> player.getPersistentDataContainer().remove(applyingKey), 10 * 20L);
 
                             player.sendMessage(Component.join(
@@ -152,6 +158,25 @@ public class PlayerHandler {
                         });
             }
         }.runTaskLater(this.winterVillage, 60L);
+    }
+
+    public void hidePlayer(Player player) {
+        this.vanished.add(player.getUniqueId());
+        Bukkit.getOnlinePlayers().stream()
+                .filter(onlinePlayer -> !onlinePlayer.hasPermission("wintervillage.vanish.bypass"))
+                .forEach(onlinePlayer -> onlinePlayer.hidePlayer(this.winterVillage, player));
+    }
+
+    public void showPlayer(Player player) {
+        this.vanished.remove(player.getUniqueId());
+        Bukkit.getOnlinePlayers().forEach(onlinePlayer -> onlinePlayer.showPlayer(this.winterVillage, player));
+    }
+
+    public void hideVanished(Player player) {
+        this.vanished.forEach(uuid -> {
+            Player vanished = Bukkit.getPlayer(uuid);
+            if (vanished != null) player.hidePlayer(this.winterVillage, vanished);
+        });
     }
 
     /**

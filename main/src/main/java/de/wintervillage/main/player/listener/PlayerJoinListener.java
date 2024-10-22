@@ -31,8 +31,11 @@ public class PlayerJoinListener implements Listener {
                 MiniMessage.miniMessage().deserialize(highestGroup.getCachedData().getMetaData().getMetaValue("color") + player.getName())
         ));
 
-        // player data being loaded
+        // load player data
         this.winterVillage.playerHandler.apply(player, player.getUniqueId());
+
+        // hide vanished players
+        this.winterVillage.playerHandler.hideVanished(player);
 
         // scoreboard
         this.winterVillage.scoreboardHandler.sidebar(player);
