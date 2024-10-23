@@ -7,6 +7,7 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import de.wintervillage.common.core.player.WinterVillagePlayer;
+import de.wintervillage.common.core.player.data.TransactionInformation;
 import de.wintervillage.common.core.type.Pair;
 import de.wintervillage.proxy.WinterVillage;
 import eu.cloudnetservice.driver.channel.ChannelMessage;
@@ -85,7 +86,15 @@ public class TransferCommand {
                                                 WinterVillagePlayer receiver = pair.first().second();
 
                                                 if (pair.second() == null) {
-                                                    return this.winterVillage.playerDatabase.modify(receiver.uniqueId(), builder -> builder.money(builder.money().add(sum)))
+                                                    return this.winterVillage.playerDatabase.modify(receiver.uniqueId(), builder -> {
+                                                                builder.money(builder.money().add(sum));
+                                                                builder.addTransaction(new TransactionInformation(
+                                                                        new UUID(0, 0),
+                                                                        sum,
+                                                                        "Transfer from Server",
+                                                                        System.currentTimeMillis()
+                                                                ));
+                                                            })
                                                             .thenApply(_ -> Pair.of(pair.first(), null));
                                                 }
 
@@ -98,8 +107,24 @@ public class TransferCommand {
                                                     return CompletableFuture.completedFuture(null);
                                                 }
 
-                                                CompletableFuture<WinterVillagePlayer> executorFuture = this.winterVillage.playerDatabase.modify(executor.first().getUniqueId(), builder -> builder.money(builder.money().subtract(sum)));
-                                                CompletableFuture<WinterVillagePlayer> receiverFuture = this.winterVillage.playerDatabase.modify(receiver.uniqueId(), builder -> builder.money(builder.money().add(sum)));
+                                                CompletableFuture<WinterVillagePlayer> executorFuture = this.winterVillage.playerDatabase.modify(executor.first().getUniqueId(), builder -> {
+                                                    builder.money(builder.money().subtract(sum));
+                                                    builder.addTransaction(new TransactionInformation(
+                                                            receiver.uniqueId(),
+                                                            sum.negate(),
+                                                            "Transfer",
+                                                            System.currentTimeMillis()
+                                                    ));
+                                                });
+                                                CompletableFuture<WinterVillagePlayer> receiverFuture = this.winterVillage.playerDatabase.modify(receiver.uniqueId(), builder -> {
+                                                    builder.money(builder.money().add(sum));
+                                                    builder.addTransaction(new TransactionInformation(
+                                                            executor.second().uniqueId(),
+                                                            sum,
+                                                            "Transfer",
+                                                            System.currentTimeMillis()
+                                                    ));
+                                                });
 
                                                 return executorFuture.thenCombine(receiverFuture, (_, _) -> Pair.of(pair.first(), executor)); // return Pair(Receiver, Executor)
                                             })

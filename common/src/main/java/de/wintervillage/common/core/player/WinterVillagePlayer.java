@@ -6,11 +6,10 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.UUID;
 
 public interface WinterVillagePlayer {
-
-    // TODO: TransactionInformation
 
     @NotNull
     UUID uniqueId();
@@ -31,6 +30,10 @@ public interface WinterVillagePlayer {
     long playTime();
 
     void playTime(long playTime);
+
+    Collection<TransactionInformation> transactions();
+
+    void addTransaction(@NotNull TransactionInformation transactionInformation);
 
     @Nullable
     BanInformation banInformation();

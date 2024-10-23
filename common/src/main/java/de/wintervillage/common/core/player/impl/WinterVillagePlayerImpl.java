@@ -12,8 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import java.math.BigDecimal;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static de.wintervillage.common.core.database.UUIDConverter.fromBytes;
 import static de.wintervillage.common.core.database.UUIDConverter.toBinary;
@@ -34,6 +33,9 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
 
     @BsonProperty("playTime")
     private long playTime;
+
+    @BsonProperty("transactions")
+    private Collection<TransactionInformation> transactions;
 
     @BsonProperty("banInformation")
     private @Nullable BanInformation banInformation;
@@ -60,6 +62,7 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         this.deaths = 0;
         this.playTime = 0L;
 
+        this.transactions = new ArrayList<>();
         this.playerInformation = new PlayerInformation();
         this.wildcardInformation = new WildcardInformation(0L, 0, 0, true);
     }
@@ -107,6 +110,16 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
     @Override
     public void playTime(long playTime) {
         this.playTime = playTime;
+    }
+
+    @Override
+    public Collection<TransactionInformation> transactions() {
+        return List.copyOf(this.transactions);
+    }
+
+    @Override
+    public void addTransaction(@NotNull TransactionInformation transactionInformation) {
+        this.transactions.add(transactionInformation);
     }
 
     public @Nullable BanInformation banInformation() {
@@ -177,21 +190,18 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         document.put("deaths", this.deaths);
         document.put("playTime", this.playTime);
 
-        if (this.banInformation != null)
-            document.put("banInformation", this.banInformation.toDocument());
-        if (this.muteInformation != null)
-            document.put("muteInformation", this.muteInformation.toDocument());
-
+        if (!this.transactions.isEmpty())
+            document.put("transactions", this.transactions.stream()
+                    .map(TransactionInformation::toDocument)
+                    .toList());
+        if (this.banInformation != null) document.put("banInformation", this.banInformation.toDocument());
+        if (this.muteInformation != null) document.put("muteInformation", this.muteInformation.toDocument());
         document.put("playerInformation", this.playerInformation.toDocument());
-
         if (this.wildcardInformation != null)
             document.put("wildcardInformation", this.wildcardInformation.toDocument());
-
         if (this.whitelistInformation != null)
             document.put("whitelistInformation", this.whitelistInformation.toDocument());
-
-        if (this.homeInformation != null)
-            document.put("homeInformation", this.homeInformation.toDocument());
+        if (this.homeInformation != null) document.put("homeInformation", this.homeInformation.toDocument());
 
         return document;
     }
@@ -204,6 +214,11 @@ public class WinterVillagePlayerImpl implements WinterVillagePlayer {
         player.money(Optional.ofNullable(document.get("money", Decimal128.class).bigDecimalValue()).orElse(BigDecimal.ZERO));
         player.deaths(Optional.ofNullable(document.get("deaths", Integer.class)).orElse(0));
         player.playTime(Optional.ofNullable(document.getLong("playTime")).orElse(0L));
+        Optional.ofNullable(document.getList("transactions", Document.class))
+                .stream()
+                .flatMap(List::stream)
+                .map(TransactionInformation::fromDocument)
+                .forEach(player::addTransaction);
         player.banInformation(Optional.ofNullable(document.get("banInformation", Document.class))
                 .filter(doc -> !doc.isEmpty())
                 .map(BanInformation::fromDocument)
