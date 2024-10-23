@@ -8,25 +8,16 @@ import de.wintervillage.common.core.player.WinterVillagePlayer;
 import de.wintervillage.proxy.WinterVillage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
 
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.UUID;
 
 public class PreLoginListener {
 
     private final WinterVillage plugin;
 
-    private final LuckPerms luckPerms;
-
     public PreLoginListener(WinterVillage plugin) {
         this.plugin = plugin;
-
-        this.luckPerms = LuckPermsProvider.get();
     }
 
     @Subscribe(order = PostOrder.LAST)
@@ -39,10 +30,7 @@ public class PreLoginListener {
                         final User user = pair.first();
                         final WinterVillagePlayer player = pair.second();
 
-                        Collection<Group> groups = user.getInheritedGroups(user.getQueryOptions());
-                        Group highestGroup = groups.stream()
-                                .max(Comparator.comparingInt(group -> group.getWeight().orElse(0)))
-                                .orElse(this.luckPerms.getGroupManager().getGroup("default"));
+                        int groupWeight = this.plugin.playerHandler.highestGroup(user).getWeight().orElse(0);
 
                         // Cancelled
                         // | If the player has an active banInformation and is not able to bypass it
@@ -61,7 +49,7 @@ public class PreLoginListener {
 
                         // Allowed
                         // | If the player has a weight of 100 (content-creator) or higher
-                        if (highestGroup.getWeight().orElse(0) >= 100) {
+                        if (groupWeight >= 100) {
                             event.setResult(PreLoginEvent.PreLoginComponentResult.allowed());
                             continuation.resume();
                             return;
