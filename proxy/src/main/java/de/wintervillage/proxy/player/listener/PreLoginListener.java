@@ -7,7 +7,6 @@ import com.velocitypowered.api.event.connection.PreLoginEvent;
 import de.wintervillage.common.core.player.WinterVillagePlayer;
 import de.wintervillage.proxy.WinterVillage;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.model.user.User;
 
 import java.util.UUID;
@@ -36,12 +35,7 @@ public class PreLoginListener {
                         // | If the player has an active banInformation and is not able to bypass it
                         if (player.banInformation() != null && !user.getCachedData().getPermissionData().checkPermission("wintervillage.ban-bypass").asBoolean()) {
                             event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
-                                    Component.text("Du wurdest von WinterVillage gebannt", NamedTextColor.RED)
-                                            .append(Component.newline())
-                                            .append(Component.text("Grund: " + player.banInformation().reason(), NamedTextColor.RED))
-                                            .append(Component.newline())
-                                            .append(Component.newline())
-                                            .append(Component.text("discord.wintervillage.de", NamedTextColor.AQUA))
+                                    Component.translatable("wintervillage.you-are-banned", Component.text(player.banInformation().reason()))
                             ));
                             continuation.resume();
                             return;
@@ -59,9 +53,7 @@ public class PreLoginListener {
                         // | If the player has no whitelistInformation and is not able to bypass it
                         if (player.whitelistInformation() == null && !user.getCachedData().getPermissionData().checkPermission("wintervillage.whitelist-bypass").asBoolean()) {
                             event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
-                                    Component.text("Du bist nicht auf der Whitelist", NamedTextColor.RED)
-                                            .append(Component.newline())
-                                            .append(Component.text("discord.wintervillage.de", NamedTextColor.AQUA))
+                                    Component.translatable("wintervillage.not-whitelisted")
                             ));
                             continuation.resume();
                             return;
