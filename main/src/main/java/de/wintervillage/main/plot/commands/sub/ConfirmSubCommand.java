@@ -83,7 +83,7 @@ public class ConfirmSubCommand {
                             .exceptionally(throwable -> {
                                 player.sendMessage(Component.join(
                                         this.winterVillage.prefix,
-                                        Component.translatable("wintervillage.commands.plot.failed-to-create", throwable.getMessage())
+                                        Component.translatable("wintervillage.commands.plot.failed-to-create", Component.text(throwable.getMessage()))
                                 ));
                                 return null;
                             });
