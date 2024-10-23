@@ -151,7 +151,7 @@ public class PlayerHandler {
                                     ));
                                 }
                             });
-                            Bukkit.getScheduler().runTaskLater(winterVillage, () -> player.getPersistentDataContainer().remove(applyingKey), 10 * 20L);
+                            Bukkit.getScheduler().runTaskLater(winterVillage, () -> player.getPersistentDataContainer().remove(applyingKey), 5 * 20L);
 
                             player.sendMessage(Component.join(
                                     winterVillage.prefix,
