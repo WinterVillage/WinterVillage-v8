@@ -3,6 +3,7 @@ package de.wintervillage.main.plot.commands.sub;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.wintervillage.common.core.player.WinterVillagePlayer;
+import de.wintervillage.common.core.player.data.TransactionInformation;
 import de.wintervillage.common.paper.persistent.BoundingBoxDataType;
 import de.wintervillage.common.paper.util.BoundingBox2D;
 import de.wintervillage.main.WinterVillage;
@@ -68,7 +69,15 @@ public class ConfirmSubCommand {
                                 }
 
                                 CompletableFuture<Void> plotFuture = this.winterVillage.plotDatabase.insert(plot);
-                                CompletableFuture<WinterVillagePlayer> playerFuture = this.winterVillage.playerDatabase.modify(winterVillagePlayer.uniqueId(), builder -> builder.money(winterVillagePlayer.money().subtract(cost)));
+                                CompletableFuture<WinterVillagePlayer> playerFuture = this.winterVillage.playerDatabase.modify(winterVillagePlayer.uniqueId(), builder -> {
+                                    builder.money(winterVillagePlayer.money().subtract(cost));
+                                    builder.addTransaction(new TransactionInformation(
+                                            new UUID(0L, 0L),
+                                            cost,
+                                            "Purchasing plot " + plot.name(),
+                                            System.currentTimeMillis()
+                                    ));
+                                });
                                 return plotFuture.thenCombine(playerFuture, (_, modifiedPlayer) -> modifiedPlayer);
                             })
                             .thenAccept(winterVillagePlayer -> {

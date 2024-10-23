@@ -1,6 +1,7 @@
 package de.wintervillage.main.shop.inventory;
 
 import de.wintervillage.common.core.player.WinterVillagePlayer;
+import de.wintervillage.common.core.player.data.TransactionInformation;
 import de.wintervillage.common.paper.item.ItemBuilder;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.shop.CustomGuiItem;
@@ -159,14 +160,28 @@ public class BuyingInventory {
                         if (money.compareTo(this.price()) < 0) throw new IllegalArgumentException("Not enough money");
 
                         builder.money(money.subtract(this.price()));
+                        builder.addTransaction(new TransactionInformation(
+                                this.shop.owner(),
+                                this.price(),
+                                "Purchasing " + this.buyingAmount + "x " + this.showcaseItem.getType().name(),
+                                System.currentTimeMillis()
+                        ));
                     }
             );
             CompletableFuture<WinterVillagePlayer> sellerFuture = this.winterVillage.playerDatabase.modify(
                     this.shop.owner(),
-                    builder -> builder.money(builder.money().add(this.price()))
+                    builder -> {
+                        builder.money(builder.money().add(this.price()));
+                        builder.addTransaction(new TransactionInformation(
+                                player.getUniqueId(),
+                                this.price(),
+                                "Selling " + this.buyingAmount + "x " + this.showcaseItem.getType().name(),
+                                System.currentTimeMillis()
+                        ));
+                    }
             );
 
-            CompletableFuture<Void> combined = CompletableFuture.allOf(buyerFuture, shopFuture/**, sellerFuture*/);
+            CompletableFuture<Void> combined = CompletableFuture.allOf(buyerFuture, shopFuture, sellerFuture);
             combined.thenAccept(_ -> Bukkit.getScheduler().runTask(this.winterVillage, () -> {
                         BigDecimal amount = this.shop.amount();
                         amount = amount.subtract(BigDecimal.valueOf(this.buyingAmount));
