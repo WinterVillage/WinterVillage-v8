@@ -169,6 +169,12 @@ public class PlotHandler {
             successful = true;
         }
 
+        // contains confirmationCreationKey
+        if (container.has(this.confirmCreationKey)) {
+            container.remove(this.confirmCreationKey);
+            successful = true;
+        }
+
         // contains SetupTask taskId
         if (container.has(this.setupTaskId)) {
             int taskId = container.get(this.setupTaskId, PersistentDataType.INTEGER);
