@@ -90,7 +90,7 @@ public class CreateSubCommand {
                                 ));
                             }
 
-                            player.getPersistentDataContainer().set(this.winterVillage.plotHandler.confirmCreationKey, PersistentDataType.STRING, name);
+                            container.set(this.winterVillage.plotHandler.confirmCreationKey, PersistentDataType.STRING, name);
                             if (this.winterVillage.plotHandler.byOwner(player.getUniqueId()).isEmpty())
                                 player.performCommand("plot confirm");
                             return Command.SINGLE_SUCCESS;
