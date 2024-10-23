@@ -41,19 +41,19 @@ public class PreLoginListener {
                             return;
                         }
 
-                        // Allowed
-                        // | If the player has a weight of 100 (content-creator) or higher
-                        if (groupWeight >= 100) {
-                            event.setResult(PreLoginEvent.PreLoginComponentResult.allowed());
-                            continuation.resume();
-                            return;
-                        }
-
                         // Cancelled
                         // | If the player has no whitelistInformation and is not able to bypass it
                         if (player.whitelistInformation() == null && !user.getCachedData().getPermissionData().checkPermission("wintervillage.whitelist-bypass").asBoolean()) {
                             event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
                                     Component.translatable("wintervillage.not-whitelisted")
+                            ));
+                            continuation.resume();
+                            return;
+                        }
+
+                        if (this.plugin.WHITELIST_PRIORITY && groupWeight < 100) {
+                            event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
+                                    Component.translatable("wintervillage.whitelist-priority-enabled")
                             ));
                             continuation.resume();
                             return;

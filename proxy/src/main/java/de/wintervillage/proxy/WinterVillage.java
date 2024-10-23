@@ -25,11 +25,13 @@ import de.wintervillage.proxy.commands.TransferCommand;
 import de.wintervillage.proxy.commands.WhitelistCommand;
 import de.wintervillage.proxy.commands.WildcardsCommand;
 import de.wintervillage.proxy.commands.punish.PunishCommand;
+import de.wintervillage.proxy.player.PlayerHandler;
 import de.wintervillage.proxy.player.listener.PlayerChatListener;
 import de.wintervillage.proxy.player.listener.PlayerTimeCalculation;
 import de.wintervillage.proxy.player.listener.PreLoginListener;
-import de.wintervillage.proxy.player.PlayerHandler;
 import de.wintervillage.proxy.player.task.WildcardTask;
+import eu.cloudnetservice.driver.inject.InjectionLayer;
+import eu.cloudnetservice.driver.provider.GroupConfigurationProvider;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
@@ -74,9 +76,14 @@ public final class WinterVillage {
     // configs
     public Document databaseDocument;
 
+    public boolean WHITELIST_PRIORITY = false;
+
     // databases
     public MongoClient mongoClient;
     public MongoDatabase mongoDatabase;
+
+    // cloudnet
+    private GroupConfigurationProvider groupConfigurationProvider;
 
     /**
      * Usage: {@link Component#join(JoinConfiguration.Builder, ComponentLike...)} to send a message with prefix
@@ -141,6 +148,12 @@ public final class WinterVillage {
         translator.defaultLocale(Locale.GERMANY);
 
         GlobalTranslator.translator().addSource(translator);
+
+        // cloudnet
+        this.groupConfigurationProvider = InjectionLayer.ext().instance(GroupConfigurationProvider.class);
+        if (this.groupConfigurationProvider.groupConfiguration("Proxy") == null) return;
+
+        this.WHITELIST_PRIORITY = this.groupConfigurationProvider.groupConfiguration("Proxy").propertyHolder().getBoolean("whitelistPriority", false);
     }
 
     @Subscribe

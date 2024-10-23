@@ -10,6 +10,9 @@ import de.wintervillage.common.core.player.WinterVillagePlayer;
 import de.wintervillage.common.core.player.data.WhitelistInformation;
 import de.wintervillage.common.core.type.Pair;
 import de.wintervillage.proxy.WinterVillage;
+import eu.cloudnetservice.driver.inject.InjectionLayer;
+import eu.cloudnetservice.driver.provider.GroupConfigurationProvider;
+import eu.cloudnetservice.driver.service.GroupConfiguration;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -32,12 +35,44 @@ public class WhitelistCommand {
 
     private final WinterVillage winterVillage;
 
+    private GroupConfigurationProvider groupConfigurationProvider;
+
     public WhitelistCommand(WinterVillage winterVillage) {
         this.winterVillage = winterVillage;
+
+        this.groupConfigurationProvider = InjectionLayer.ext().instance(GroupConfigurationProvider.class);
     }
 
     public BrigadierCommand create() {
         LiteralCommandNode<CommandSource> node = BrigadierCommand.literalArgumentBuilder("whitelist")
+                .then(BrigadierCommand.literalArgumentBuilder("priority")
+                        .requires(context -> context.hasPermission("wintervillage.command.whitelist.priority"))
+                        .executes(context -> {
+                            if (this.groupConfigurationProvider.groupConfiguration("Proxy") == null) {
+                                context.getSource().sendMessage(Component.join(
+                                        this.winterVillage.prefix,
+                                        Component.translatable("wintervillage.command.whitelist.cloud-configuration-not-found")
+                                ));
+                                return Command.SINGLE_SUCCESS;
+                            }
+
+                            GroupConfiguration groupConfiguration = this.groupConfigurationProvider.groupConfiguration("Proxy").clone();
+                            this.groupConfigurationProvider.removeGroupConfigurationByName("Proxy");
+
+                            this.winterVillage.WHITELIST_PRIORITY = !this.winterVillage.WHITELIST_PRIORITY;
+                            GroupConfiguration updated = GroupConfiguration.builder(groupConfiguration)
+                                    .properties(groupConfiguration.propertyHolder().mutableCopy().append("whitelistPriority", this.winterVillage.WHITELIST_PRIORITY))
+                                    .build();
+
+                            this.groupConfigurationProvider.addGroupConfiguration(updated);
+                            this.groupConfigurationProvider.reload();
+
+                            context.getSource().sendMessage(Component.join(
+                                    this.winterVillage.prefix,
+                                    this.winterVillage.WHITELIST_PRIORITY ? Component.translatable("wintervillage.command.whitelist.priority-enabled") : Component.translatable("wintervillage.command.whitelist.priority-disabled")
+                            ));
+                            return Command.SINGLE_SUCCESS;
+                        }))
                 .then(BrigadierCommand.literalArgumentBuilder("list")
                         .requires(context -> context.hasPermission("wintervillage.command.whitelist.list"))
                         .executes(context -> {
