@@ -19,7 +19,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.model.user.User;
 
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -28,14 +30,17 @@ import java.util.stream.Collectors;
 public class WhitelistCommand {
 
     /**
+     * /whitelist list
+     * /whitelist priority
      * /whitelist add <name>
      * /whitelist remove <name>
-     * /whitelist list
      */
 
     private final WinterVillage winterVillage;
 
     private GroupConfigurationProvider groupConfigurationProvider;
+
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy, HH:mm:ss");
 
     public WhitelistCommand(WinterVillage winterVillage) {
         this.winterVillage = winterVillage;
@@ -110,6 +115,66 @@ public class WhitelistCommand {
                             return Command.SINGLE_SUCCESS;
                         })
                 )
+                .then(BrigadierCommand.literalArgumentBuilder("player")
+                        .requires(context -> context.hasPermission("wintervillage.command.whitelist.info"))
+                        .then(BrigadierCommand.requiredArgumentBuilder("player", StringArgumentType.word())
+                                .executes(context -> {
+                                    final String playerName = context.getArgument("player", String.class);
+
+                                    this.winterVillage.playerHandler.lookupUniqueId(playerName)
+                                            .thenCompose(uniqueId -> this.winterVillage.playerHandler.combinedPlayer(uniqueId, playerName))// loading the player entered in "playerName"
+                                            .thenCompose(receiver -> {
+                                                WhitelistInformation information = receiver.second().whitelistInformation();
+                                                if (information == null) {
+                                                    context.getSource().sendMessage(Component.join(
+                                                            this.winterVillage.prefix,
+                                                            Component.translatable("wintervillage.command.whitelist.player-not-whitelisted",
+                                                                    MiniMessage.miniMessage().deserialize(receiver.first().getCachedData().getMetaData().getMetaValue("color") + playerName)
+                                                            )
+                                                    ));
+                                                    return CompletableFuture.completedFuture(null);
+                                                }
+
+                                                if (information.from().equals(new UUID(0L, 0L)))
+                                                    return CompletableFuture.completedFuture(Pair.of(receiver, null));
+
+                                                return this.winterVillage.playerHandler.combinedPlayer(information.from(), null)
+                                                        .thenApply(whitelistFrom -> Pair.of(receiver, whitelistFrom));
+                                            })
+                                            .thenAccept(pair -> {
+                                                if (pair == null) return;
+
+                                                if (pair.second() != null) {
+                                                    Pair<User, WinterVillagePlayer> whitelistFrom = (Pair<User, WinterVillagePlayer>) pair.second();
+                                                    context.getSource().sendMessage(Component.join(
+                                                            this.winterVillage.prefix,
+                                                            Component.translatable("wintervillage.command.whitelist.player-information",
+                                                                    MiniMessage.miniMessage().deserialize(pair.first().first().getCachedData().getMetaData().getMetaValue("color") + playerName),
+                                                                    MiniMessage.miniMessage().deserialize(whitelistFrom.first().getCachedData().getMetaData().getMetaValue("color") + whitelistFrom.first().getUsername()),
+                                                                    Component.text(this.dateFormat.format(new Date(pair.first().second().whitelistInformation().whitelisted())))
+                                                            )
+                                                    ));
+                                                    return;
+                                                }
+
+                                                context.getSource().sendMessage(Component.join(
+                                                        this.winterVillage.prefix,
+                                                        Component.translatable("wintervillage.command.whitelist.player-information",
+                                                                MiniMessage.miniMessage().deserialize(pair.first().first().getCachedData().getMetaData().getMetaValue("color") + playerName),
+                                                                Component.text("Server", NamedTextColor.RED),
+                                                                Component.text(this.dateFormat.format(new Date(pair.first().second().whitelistInformation().whitelisted())))
+                                                        )
+                                                ));
+                                            })
+                                            .exceptionally(throwable -> {
+                                                context.getSource().sendMessage(Component.join(
+                                                        this.winterVillage.prefix,
+                                                        Component.translatable("wintervillage.command.whitelist.failed", Component.text(throwable.getMessage()))
+                                                ));
+                                                return null;
+                                            });
+                                    return Command.SINGLE_SUCCESS;
+                                })))
                 .then(BrigadierCommand.literalArgumentBuilder("remove")
                         .requires(context -> context.hasPermission("wintervillage.command.whitelist.remove"))
                         .then(BrigadierCommand.requiredArgumentBuilder("player", StringArgumentType.word())
