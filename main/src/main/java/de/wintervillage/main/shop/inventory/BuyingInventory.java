@@ -2,6 +2,7 @@ package de.wintervillage.main.shop.inventory;
 
 import de.wintervillage.common.core.player.WinterVillagePlayer;
 import de.wintervillage.common.core.player.data.TransactionInformation;
+import de.wintervillage.common.core.type.Pair;
 import de.wintervillage.common.paper.item.ItemBuilder;
 import de.wintervillage.main.WinterVillage;
 import de.wintervillage.main.shop.CustomGuiItem;
@@ -182,7 +183,10 @@ public class BuyingInventory {
             );
 
             CompletableFuture<Void> combined = CompletableFuture.allOf(buyerFuture, shopFuture, sellerFuture);
-            combined.thenAccept(_ -> Bukkit.getScheduler().runTask(this.winterVillage, () -> {
+            CompletableFuture<Pair<WinterVillagePlayer, WinterVillagePlayer>> resultFuture = combined.thenCompose(_ ->
+                    buyerFuture.thenCombine(sellerFuture, Pair::of)
+            );
+            resultFuture.thenAccept(pair -> Bukkit.getScheduler().runTask(this.winterVillage, () -> {
                         BigDecimal amount = this.shop.amount();
                         amount = amount.subtract(BigDecimal.valueOf(this.buyingAmount));
 
@@ -202,6 +206,19 @@ public class BuyingInventory {
 
                         player.playSound(Sound.sound(Key.key("entity.player.levelup"), Sound.Source.PLAYER, 1f, 1f));
 
+                        Bukkit.getScheduler().runTask(this.winterVillage, () -> {
+                            this.winterVillage.scoreboardHandler.updateScore(
+                                    player,
+                                    "07_balance-value",
+                                    Component.space().append(Component.text(this.winterVillage.formatBD(pair.first().money(), true) + " $", NamedTextColor.YELLOW))
+                            );
+                            if (Bukkit.getPlayer(pair.second().uniqueId()) != null)
+                                this.winterVillage.scoreboardHandler.updateScore(
+                                        Bukkit.getPlayer(pair.second().uniqueId()),
+                                        "07_balance-value",
+                                        Component.space().append(Component.text(this.winterVillage.formatBD(pair.second().money(), true) + " $", NamedTextColor.YELLOW))
+                                );
+                        });
                     }))
                     .exceptionally(throwable -> {
                         String errorMessage = throwable.getCause() != null ? throwable.getCause().getMessage() : throwable.getMessage();

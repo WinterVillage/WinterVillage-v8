@@ -11,6 +11,8 @@ import de.wintervillage.main.plot.Plot;
 import de.wintervillage.main.plot.impl.PlotImpl;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -88,6 +90,11 @@ public class ConfirmSubCommand {
                                         Component.translatable("wintervillage.commands.plot.created")
                                 ));
                                 this.winterVillage.plotHandler.plotCache.add(plot);
+                                Bukkit.getScheduler().runTask(this.winterVillage, () -> this.winterVillage.scoreboardHandler.updateScore(
+                                        player,
+                                        "07_balance-value",
+                                        Component.space().append(Component.text(this.winterVillage.formatBD(winterVillagePlayer.money(), true) + " $", NamedTextColor.YELLOW)))
+                                );
                             })
                             .exceptionally(throwable -> {
                                 player.sendMessage(Component.join(
